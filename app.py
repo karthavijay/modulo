@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import hmac
+import json
 import html
 import logging
 import os
@@ -21,6 +22,7 @@ import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import markdown
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
@@ -154,7 +156,8 @@ async def review(request: Request):
     out = jobs.job_dir(jid) / "output"
     parts = [
         f"<p class=muted><a href='{html.escape(dashboard_url())}'>All courses</a> · "
-        f"<a href='/team?key={html.escape(dashboard_key())}&course={jid}'>Talk to the team about this course</a></p>",
+        f"<a href='/team?key={html.escape(dashboard_key())}&course={jid}'>Talk to the team about this course</a> · "
+        f"<a href='/course-files/{jid}?key={html.escape(dashboard_key())}'>Course files</a></p>",
         f"<h1>{html.escape(job.get('title') or 'New course brief')}</h1>",
         f"<p class=muted>Client: {html.escape(job['client_name'])} ({html.escape(job['client_email'])})</p>",
         f"<p>{pill(st)} <span class=muted>{html.escape(job.get('step', ''))}</span></p>",
@@ -230,7 +233,7 @@ async def dashboard(request: Request):
         f"<tr><td><a href='{html.escape(jobs.links(j)['review'])}'>{html.escape(j.get('title') or 'New brief')}</a>"
         f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
         f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td>"
-        f"<td><a href='/team?key={k}&course={j['id']}'>Talk to the team</a></td></tr>"
+        f"<td><a href='/team?key={k}&course={j['id']}'>Talk to the team</a><br><a href='/course-files/{j['id']}?key={k}'>Course files</a></td></tr>"
         for j in jobs.all_jobs()) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
     email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
         "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
@@ -410,6 +413,118 @@ async def team_apply(request: Request):
     return JSONResponse({"message": message})
 
 
+# ---------------------------------------------------------------- course files (everything in a course's folder)
+
+FILE_HELP = {
+    "brief.txt": "The client's brief, exactly as received",
+    "job.json": "The course's status record and history",
+    "1_design.md": "Iris's course design (readable)",
+    "1_design.json": "Iris's course design (raw data)",
+    "1_design_APPROVED.txt": "Marker that you approved the design",
+    "storyboard.docx": "The Word storyboard to send for review",
+    "storyboard.md": "The storyboard as plain text",
+    "storyboard.json": "The storyboard (raw data)",
+    "qa_report.md": "Quinn's QA report",
+    "run_log.json": "Time and cost of each step",
+}
+
+
+def _help(rel: str) -> str:
+    name = rel.rsplit("/", 1)[-1]
+    if name in FILE_HELP:
+        return FILE_HELP[name]
+    m = re.match(r"2_storyboard_draft(\d+)\.json$", name)
+    if m:
+        return f"Theo's storyboard, draft {m.group(1)}"
+    m = re.match(r"3_qa_round(\d+)\.json$", name)
+    if m:
+        return f"Quinn's QA review, round {m.group(1)}"
+    if "_before_" in name:
+        return "Backup made before you saved a change from the team chat"
+    if rel.startswith("proposals/"):
+        return "A change an agent suggested in the team chat" + (" (saved)" if name.endswith(".saved") else " (not saved)")
+    return ""
+
+
+def _course_and_file(request: Request) -> tuple[dict | None, Path | None]:
+    if not dashboard_ok(request):
+        return None, None
+    try:
+        job = jobs.load(request.path_params["job_id"])
+    except KeyError:
+        return None, None
+    root = jobs.job_dir(job["id"]).resolve()
+    rel = request.query_params.get("f", "")
+    if not rel:
+        return job, None
+    f = (root / rel).resolve()
+    if root not in f.parents or not f.is_file():
+        return job, None
+    return job, f
+
+
+def _rel(job: dict, f: Path) -> str:
+    return f.resolve().relative_to(jobs.job_dir(job["id"]).resolve()).as_posix()
+
+
+async def course_files_page(request: Request):
+    job, _ = _course_and_file(request)
+    if not job:
+        return not_found()
+    k = html.escape(dashboard_key())
+    root = jobs.job_dir(job["id"])
+    files = sorted((p for p in root.rglob("*") if p.is_file() and not p.name.endswith(".tmp")),
+                   key=lambda p: (p.parent != root, "proposals" in p.parts, p.parent.name, p.name))
+    rows = []
+    for p in files:
+        rel = _rel(job, p)
+        q = f"?key={k}&f={html.escape(rel)}"
+        size = p.stat().st_size
+        size_txt = f"{size / 1024:.0f} KB" if size >= 1024 else f"{size} bytes"
+        view = "" if p.suffix == ".docx" else f"<a href='/course-files/{job['id']}/view{q}'>Open</a> · "
+        rows.append(
+            f"<tr><td><b>{html.escape(rel)}</b><div class=muted>{html.escape(_help(rel))}</div></td>"
+            f"<td class=muted style='white-space:nowrap'>{size_txt}<br>{time.strftime('%d %b %H:%M', time.gmtime(p.stat().st_mtime))} UTC</td>"
+            f"<td style='white-space:nowrap'>{view}<a href='/course-files/{job['id']}/download{q}'>Download</a></td></tr>")
+    body = (f"<p class=muted><a href='/dashboard?key={k}'>All courses</a> · <a href='{html.escape(jobs.links(job)['review'])}'>Course page</a></p>"
+            f"<h1>Course files</h1><p class=muted>{html.escape(job.get('title') or 'New brief')} · {html.escape(job['client_name'])}</p>"
+            "<p>Everything saved for this course. <b>Open</b> shows a file here in the browser; <b>Download</b> saves it to your computer.</p>"
+            f"<div class=card><table><tr><th>File</th><th>Size and date</th><th></th></tr>{''.join(rows)}</table></div>")
+    return page("Course files", body)
+
+
+async def course_file_view(request: Request):
+    job, f = _course_and_file(request)
+    if not job or not f:
+        return not_found()
+    k = html.escape(dashboard_key())
+    rel = _rel(job, f)
+    text = f.read_text(encoding="utf-8", errors="replace")
+    if f.suffix == ".md":
+        shown = f"<div class='card design'>{markdown.markdown(text, extensions=['tables'])}</div>"
+    elif f.suffix == ".json" or f.name.endswith(".saved"):
+        try:
+            text = json.dumps(json.loads(text), indent=2, ensure_ascii=False)
+        except ValueError:
+            pass
+        if f.name == "job.json":
+            text = text.replace(job["token"], "(private link code hidden)")
+        shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px'>{html.escape(text)}</pre>"
+    else:
+        shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere'>{html.escape(text)}</pre>"
+    body = (f"<p class=muted><a href='/course-files/{job['id']}?key={k}'>Back to course files</a></p>"
+            f"<h1 style='overflow-wrap:anywhere'>{html.escape(rel)}</h1><p class=muted>{html.escape(_help(rel))}</p>"
+            f"<p><a class='btn ghost' href='/course-files/{job['id']}/download?key={k}&f={html.escape(rel)}'>Download</a></p>{shown}")
+    return page(rel, body)
+
+
+async def course_file_download(request: Request):
+    job, f = _course_and_file(request)
+    if not job or not f:
+        return not_found()
+    return FileResponse(f, filename=f.name)
+
+
 # ---------------------------------------------------------------- app
 
 @asynccontextmanager
@@ -452,6 +567,9 @@ app = Starlette(
         Route("/dashboard/new", dashboard_new, methods=["POST"]),
         Route("/dashboard/sample", dashboard_sample, methods=["POST"]),
         Route("/team", team_page),
+        Route("/course-files/{job_id}", course_files_page),
+        Route("/course-files/{job_id}/view", course_file_view),
+        Route("/course-files/{job_id}/download", course_file_download),
         Route("/api/team/chat", team_chat, methods=["POST"]),
         Route("/api/team/apply", team_apply, methods=["POST"]),
         Mount("/", StaticFiles(directory=HERE / "public", html=True)),
