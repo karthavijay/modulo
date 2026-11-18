@@ -285,11 +285,13 @@ function draw(){$('#log').innerHTML='';const h=load();
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.a===agent));
   $('#who').textContent=AG[agent][0]+', '+AG[agent][1];
   const o=$('#course').selectedOptions[0], why=blocked(o);
-  $('#msg').disabled=!!why; $('#send').disabled=!!why; $('#why').hidden=!why; $('#why').textContent=why||'';
+  const note=stageNote(o);
+  $('#msg').disabled=!!why; $('#send').disabled=!!why; $('#why').hidden=!note; $('#why').textContent=note;
   $('#msg').placeholder=why?'':AG[agent][3];}
-function blocked(o){
-  if(['designing','revising','storyboarding'].includes(o.dataset.status)) return 'The team is working on this course right now. You can chat once this step is finished; the course page shows progress.';
-  if(agent!=='iris' && o.dataset.sb!=='1') return AG[agent][0]+' can chat once the storyboard for this course is finished. Iris is available now: press her tab above.';
+function blocked(o){return '';}
+function stageNote(o){
+  if(['designing','revising','storyboarding'].includes(o.dataset.status)) return 'This course is in production right now. You can chat about it; any changes can be saved once the current step has finished.';
+  if(agent==='theo' && o.dataset.sb!=='1') return 'The storyboard is not finished yet, so Theo can answer questions and share ideas, but not change screens yet.';
   return '';}
 async function post(url,body){const r=await fetch(url+'?key='+encodeURIComponent(KEY),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
   let j={};try{j=await r.json()}catch{} if(!r.ok) throw new Error(j.error||'Something went wrong.'); return j;}
@@ -343,14 +345,14 @@ def sample_button(k: str, label: str = "Add the sample forklift course") -> str:
 async def team_page(request: Request):
     if not dashboard_ok(request):
         return not_found()
-    all_jobs = [j for j in jobs.all_jobs() if (jobs.job_dir(j["id"]) / "output" / "1_design.json").exists()]
+    all_jobs = jobs.all_jobs()
     k = html.escape(dashboard_key())
     if not all_jobs:
         return page("Talk to the team", f"<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>"
                     "<div class=card><p style='margin-top:0'><b>There's nothing to talk about yet.</b> The agents chat about a specific course, "
-                    "and you don't have one with a course design yet.</p>"
+                    "and you don't have any courses yet.</p>"
                     "<p>To try it now, add the finished forklift sample course. It's free and takes a second. "
-                    "You can also send a brief from your website, or paste one on the dashboard, and come back once Iris has written the design.</p>"
+                    "Or send a brief from your website, or paste one on the dashboard; you can chat about it straight away.</p>"
                     f"<p>{sample_button(k)}</p></div>")
     want = request.query_params.get("course", "")
     opts = "".join(
@@ -364,7 +366,7 @@ async def team_page(request: Request):
 <p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.links(sel)['review'])}">Open course page</a> {sample_button(k, "Add sample course")}</p>
 <div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button></div>
 <p class=muted id=who></p><div id=log aria-live=polite></div><p class=muted id=wait hidden></p><p id=err></p>
-<p id=why class=card hidden></p>
+<p id=why class=muted hidden></p>
 <form id=form><textarea id=msg aria-label="Your message"></textarea>
 <p class=row><button id=send>Send</button> <button type=button class=ghost id=clear>Clear this chat</button></p></form>
 <script>{TEAM_JS}</script>"""
@@ -398,11 +400,13 @@ async def team_apply(request: Request):
     if not job:
         return JSONResponse({"error": "Course not found."}, 404)
     if job["status"] in jobs.WORKING:
-        return JSONResponse({"error": "The team is still working on this course. Save once it has finished."}, 409)
+        return JSONResponse({"error": "The team is working on this course right now. Press Save again once the current step has finished (the course page shows progress)."}, 409)
     try:
         message = await asyncio.to_thread(agent_chat.apply, job, str(body.get("proposal_id") or ""))
     except KeyError:
         return JSONResponse({"error": "That change was already saved or has expired."}, 404)
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, 409)
     return JSONResponse({"message": message})
 
 

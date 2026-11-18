@@ -68,36 +68,67 @@ def _read(path):
 def course_files(job_id: str) -> dict:
     out = jobs.job_dir(job_id) / "output"
     qa = sorted(out.glob("3_qa_round*.json"), key=lambda p: int(p.stem.rsplit("round", 1)[1]))
+    drafts = sorted(out.glob("2_storyboard_draft*.json"), key=lambda p: int(p.stem.rsplit("draft", 1)[1]))
+    final = _read(out / "storyboard.json")
     return {
         "out": out,
         "brief": (jobs.job_dir(job_id) / "brief.txt").read_text(encoding="utf-8"),
         "design": _read(out / "1_design.json"),
-        "storyboard": _read(out / "storyboard.json"),
+        "storyboard": final,
+        "draft": None if final else (_read(drafts[-1]) if drafts else None),
         "qa_rounds": [_read(p) for p in qa],
     }
 
 
-def context_text(f: dict) -> str:
+STAGE = {
+    "designing": "Iris is writing the first course design right now.",
+    "revising": "Iris is revising the design with the owner's feedback right now.",
+    "awaiting_approval": "The design is waiting for the owner's approval. The storyboard has not been started.",
+    "storyboarding": "Production is running right now: Theo is writing or fixing the storyboard and Quinn is reviewing it. Any storyboard below is a work-in-progress draft.",
+    "done": "Production is finished. The storyboard below is the delivered version.",
+    "failed": "Production stopped with a problem and is waiting for the owner to press Try again.",
+}
+
+
+def editable(job: dict, f: dict, agent: str) -> str | None:
+    """None if this agent's suggested changes can be saved now, else the reason (shown to the agent)."""
+    if agent == "quinn":
+        return "Quinn does not edit."
+    if job["status"] in jobs.WORKING:
+        return ("The team is working on this course right now, so changes can't be saved until the current step finishes. "
+                "You may still suggest changes; the owner can ask again or save them afterwards.")
+    if agent == "iris" and not f["design"]:
+        return "There is no design yet to change."
+    if agent == "theo" and not f["storyboard"]:
+        return "There is no finished storyboard yet, so screens can't be changed. Answer questions and suggest ideas only."
+    return None
+
+
+def context_text(job: dict, f: dict, agent: str) -> str:
     parts = [pipeline.block("client_brief", f["brief"])]
-    if f["design"]:
-        parts.append(pipeline.block("current_design", f["design"]))
+    parts.append(pipeline.block("current_design", f["design"]) if f["design"]
+                 else "<current_design>Not written yet.</current_design>")
     if f["storyboard"]:
         parts.append(pipeline.block("current_storyboard", f["storyboard"]))
-    elif f["design"]:
+    elif f["draft"]:
+        parts.append(pipeline.block("storyboard_work_in_progress_draft", f["draft"]))
+    else:
         parts.append("<current_storyboard>Not written yet.</current_storyboard>")
     if f["qa_rounds"]:
         parts.append(pipeline.block("latest_qa_review", f["qa_rounds"][-1]))
     return "\n\n".join(parts)
 
 
+def status_note(job: dict, f: dict, agent: str) -> str:
+    why = editable(job, f, agent)
+    edit = ("You can propose changes now; they are saved only when the owner presses Save." if why is None
+            else "Do not propose changes in the change fields right now (leave them empty or null). Reason: " + why)
+    return f"<course_status>{STAGE.get(job['status'], job['status'])} {edit}</course_status>"
+
+
 def available(job: dict, agent: str) -> str | None:
-    """Return None if this agent can chat about this course, else why not."""
-    f = course_files(job["id"])
-    if not f["design"]:
-        return "Iris hasn't written the design yet. Try again in a few minutes."
-    if agent in {"theo", "quinn"} and not f["storyboard"]:
-        return f"{AGENTS[agent]['name']} can chat once the storyboard is finished."
-    return None
+    """Every agent can chat as soon as a brief exists."""
+    return None if (jobs.job_dir(job["id"]) / "brief.txt").exists() else "This course has no brief."
 
 
 async def reply(job: dict, agent: str, history: list) -> tuple[dict, int]:
@@ -121,7 +152,9 @@ async def reply(job: dict, agent: str, history: list) -> tuple[dict, int]:
     if not turns or turns[-1]["role"] != "user":
         return {"error": "Type a message first."}, 400
     # The course material goes first and is cached, so follow-up messages are cheap.
-    turns[0]["content"].insert(0, {"type": "text", "text": context_text(f), "cache_control": {"type": "ephemeral"}})
+    turns[0]["content"].insert(0, {"type": "text", "text": context_text(job, f, agent), "cache_control": {"type": "ephemeral"}})
+    # The status can change during a conversation, so it goes with the latest message, after the cached part.
+    turns[-1]["content"].insert(1 if len(turns) == 1 else 0, {"type": "text", "text": status_note(job, f, agent)})
 
     _client = _client or anthropic.AsyncAnthropic()
     try:
@@ -154,7 +187,8 @@ async def reply(job: dict, agent: str, history: list) -> tuple[dict, int]:
     data = json.loads("".join(b.text for b in msg.content if b.type == "text"))
     log.info("Agent chat %s/%s: %s in, %s out, %s cached", job["id"], agent, msg.usage.input_tokens,
              msg.usage.output_tokens, msg.usage.cache_read_input_tokens)
-    return {"reply": data["reply"], "proposal": _save_proposal(job, agent, data)}, 200
+    proposal = _save_proposal(job, agent, data) if editable(job, f, agent) is None else None
+    return {"reply": data["reply"], "proposal": proposal}, 200
 
 
 def _save_proposal(job: dict, agent: str, data: dict) -> dict | None:
@@ -190,6 +224,8 @@ def apply(job: dict, proposal_id: str) -> str:
         raise KeyError(proposal_id)
     p = json.loads(pf.read_text(encoding="utf-8"))
     f = course_files(job["id"])
+    if "design" not in p and not f["storyboard"]:
+        raise ValueError("There is no finished storyboard to change yet.")
     out, stamp = f["out"], time.strftime("%Y%m%d-%H%M%S")
     design, storyboard = f["design"], f["storyboard"]
 
