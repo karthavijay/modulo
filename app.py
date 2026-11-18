@@ -18,6 +18,7 @@ import html
 import logging
 import os
 import re
+from urllib.parse import quote
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -39,6 +40,7 @@ log = logging.getLogger("modulo")
 HERE = Path(__file__).resolve().parent
 MAX_BRIEFS_PER_DAY = int(os.environ.get("MAX_BRIEFS_PER_DAY", "10"))
 DOWNLOADS = {"storyboard.docx", "qa_report.md", "storyboard.md", "1_design.md", "run_log.json", "production_pack.docx"}
+VERSION = (os.environ.get("RENDER_GIT_COMMIT") or "local")[:7]
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -46,8 +48,13 @@ def dashboard_key() -> str:
     return os.environ.get("DASHBOARD_KEY", "")
 
 
+def qkey() -> str:
+    """The dashboard key, safe to put in a link (Render's generated keys can contain + / =)."""
+    return quote(dashboard_key(), safe="")
+
+
 def dashboard_url() -> str:
-    return f"{jobs.public_url()}/dashboard?key={dashboard_key()}"
+    return f"{jobs.public_url()}/dashboard?key={qkey()}"
 
 
 # ---------------------------------------------------------------- API
@@ -122,7 +129,7 @@ def page(title: str, body: str, refresh: bool = False) -> HTMLResponse:
     return HTMLResponse(
         f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
         f"<meta name=robots content=noindex>{meta}<title>{html.escape(title)}</title><style>{CSS}</style></head>"
-        f"<body><main>{body}</main></body></html>",
+        f"<body><main>{body}<p class=muted style='margin-top:40px;font-size:12px'>Version {VERSION}</p></main></body></html>",
         headers={"cache-control": "no-store", "referrer-policy": "no-referrer"},
     )
 
@@ -157,8 +164,8 @@ async def review(request: Request):
     out = jobs.job_dir(jid) / "output"
     parts = [
         f"<p class=muted><a href='{html.escape(dashboard_url())}'>All courses</a> · "
-        f"<a href='/team?key={html.escape(dashboard_key())}&course={jid}'>Talk to the team about this course</a> · "
-        f"<a href='/course-files/{jid}?key={html.escape(dashboard_key())}'>Course files</a></p>",
+        f"<a href='/team?key={qkey()}&course={jid}'>Talk to the team about this course</a> · "
+        f"<a href='/course-files/{jid}?key={qkey()}'>Course files</a></p>",
         f"<h1>{html.escape(job.get('title') or 'New course brief')}</h1>",
         f"<p class=muted>Client: {html.escape(job['client_name'])} ({html.escape(job['client_email'])})</p>",
         f"<p>{pill(st)} <span class=muted>{html.escape(job.get('step', ''))}</span></p>",
@@ -230,15 +237,44 @@ async def files(request: Request):
     return FileResponse(f, filename=f"{slug}_{name}" if name == "storyboard.docx" else name)
 
 
+_key_check: dict = {}
+
+
+async def claude_key_status() -> tuple[bool, str]:
+    """Checks the Claude key at most every 5 minutes. Free: it only looks up a model."""
+    if os.environ.get("MODULO_FAKE"):
+        return True, ""
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not key:
+        return False, "no key has been added"
+    cached = _key_check.get(key)
+    if cached and time.time() - cached[0] < 300:
+        return cached[1], cached[2]
+    import anthropic
+    try:
+        await anthropic.AsyncAnthropic(max_retries=1, timeout=15).models.retrieve("claude-opus-5-5")
+        result = (True, "")
+    except anthropic.AuthenticationError:
+        result = (False, "the key is invalid (it may have been deleted, mistyped, or belong to another account)")
+    except anthropic.PermissionDeniedError as e:
+        result = (False, f"the key is not allowed to use this model ({e.message})")
+    except anthropic.APIError as e:
+        return True, f"could not check right now ({e.__class__.__name__})"
+    _key_check[key] = (time.time(), *result)
+    return result
+
+
 def dashboard_ok(request: Request) -> bool:
     key = dashboard_key()
-    return bool(key) and hmac.compare_digest(request.query_params.get("key", ""), key)
+    given = request.query_params.get("key", "")
+    # A "+" in an old, unencoded link arrives as a space; accept both.
+    return bool(key) and (hmac.compare_digest(given, key) or hmac.compare_digest(given.replace(" ", "+"), key))
 
 
 async def dashboard(request: Request):
     if not dashboard_ok(request):
         return not_found()
-    k = html.escape(dashboard_key())
+    k = qkey()
     rows = "".join(
         f"<tr><td><a href='{html.escape(jobs.links(j)['review'])}'>{html.escape(j.get('title') or 'New brief')}</a>"
         f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
@@ -248,6 +284,11 @@ async def dashboard(request: Request):
     email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
         "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
         "under your service's Environment page, to get approval emails.</div>")
+    ok, why = await claude_key_status()
+    key_note = ("<p class=muted>Claude key: working.</p>" if ok else
+                f"<div class=card style='border-color:var(--bad)'><b>The Claude key is not working</b>, so the agents can't reply. "
+                f"Claude said: {html.escape(why)}. Put a new key in Render (your service, Environment, ANTHROPIC_API_KEY), save, "
+                "wait until it says Live, then reload this page.</div>")
     fake_note = "<div class=card><b>Test mode is on</b> (MODULO_FAKE). Courses use the sample forklift answers and cost nothing.</div>" if os.environ.get("MODULO_FAKE") else ""
     body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Bookmark this page.</p>
 <p><a class=btn href="/team?key={k}">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>
@@ -269,7 +310,7 @@ async def dashboard_new(request: Request):
     if name and email and transcript:
         job = jobs.create(name[:120], email[:200], transcript[:60000], source="pasted on the dashboard")
         return RedirectResponse(jobs.links(job)["review"].replace(jobs.public_url(), ""), 303)
-    return RedirectResponse(f"/dashboard?key={dashboard_key()}", 303)
+    return RedirectResponse(f"/dashboard?key={qkey()}", 303)
 
 
 # ---------------------------------------------------------------- talk to one agent
@@ -332,11 +373,14 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{agent=b.data
 $('#course').onchange=()=>{draw();$('#open').href=$('#course').selectedOptions[0].dataset.review;};
 $('#clear').onclick=()=>{try{localStorage.removeItem(store())}catch{} draw();};
 draw();
+try{$('#msg').focus({preventScroll:false});$('#form').scrollIntoView({block:'end'});}catch{}
 """
 
 TEAM_CSS = """
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{background:transparent;color:var(--accent)}.tabs button.on{background:var(--accent);color:#fff}
-#log{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;height:min(60vh,560px);overflow:auto}
+#log{background:var(--card);border:1px solid var(--line);border-radius:14px 14px 0 0;padding:16px;height:min(38vh,380px);overflow:auto}
+#form{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 14px 14px;padding:12px 16px}
+#form textarea{min-height:70px}#form p{margin:8px 0 0}
 .msg{margin:0 0 14px;max-width:92%}.msg b{display:block;font-size:13px;color:var(--muted)}.msg div{white-space:pre-wrap}
 .msg.you{margin-left:auto;text-align:right}.msg.you>div{background:var(--soft);display:inline-block;text-align:left;padding:8px 12px;border-radius:12px}
 .prop{margin-top:8px;padding:12px;border:1px dashed var(--accent);border-radius:12px;display:grid;gap:8px;white-space:normal}
@@ -356,7 +400,7 @@ async def dashboard_sample(request: Request):
     if not dashboard_ok(request):
         return not_found()
     job = await asyncio.to_thread(jobs.create_sample)
-    return RedirectResponse(f"/team?key={dashboard_key()}&course={job['id']}&agent=theo", 303)
+    return RedirectResponse(f"/team?key={qkey()}&course={job['id']}&agent=theo", 303)
 
 
 def sample_button(k: str, label: str = "Add the sample forklift course") -> str:
@@ -367,7 +411,7 @@ async def team_page(request: Request):
     if not dashboard_ok(request):
         return not_found()
     all_jobs = jobs.all_jobs()
-    k = html.escape(dashboard_key())
+    k = qkey()
     if not all_jobs:
         return page("Talk to the team", f"<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>"
                     "<div class=card><p style='margin-top:0'><b>There's nothing to talk about yet.</b> The agents chat about a specific course, "
@@ -390,9 +434,8 @@ async def team_page(request: Request):
 <div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button>
 <button data-a=sam>Sam · SME</button><button data-a=vera>Vera · visuals</button><button data-a=mila>Mila · voiceover</button><button data-a=dev>Dev · build</button>
 <button data-a=lars>Lars · LMS</button><button data-a=nia>Nia · evaluation</button><button data-a=paige>Paige · project</button></div>
-<p class=muted id=who></p><div id=log aria-live=polite></div><p class=muted id=wait hidden></p><p id=err></p>
-<p id=why class=muted hidden></p>
-<form id=form><textarea id=msg aria-label="Your message"></textarea>
+<p class=muted id=who></p><p id=why class=muted hidden></p><div id=log aria-live=polite></div>
+<form id=form><label for=msg><b>Your message</b></label><textarea id=msg></textarea><p class=muted id=wait hidden></p><p id=err></p>
 <p class=row><button id=send>Send</button> <button type=button class=ghost id=clear>Clear this chat</button></p></form>
 <script>{TEAM_JS}</script>"""
     return page("Talk to the team", body)
@@ -499,7 +542,7 @@ async def course_files_page(request: Request):
     job, _ = _course_and_file(request)
     if not job:
         return not_found()
-    k = html.escape(dashboard_key())
+    k = qkey()
     root = jobs.job_dir(job["id"])
     files = sorted((p for p in root.rglob("*") if p.is_file() and not p.name.endswith(".tmp")),
                    key=lambda p: (p.parent != root, "proposals" in p.parts, p.parent.name, p.name))
@@ -525,7 +568,7 @@ async def course_file_view(request: Request):
     job, f = _course_and_file(request)
     if not job or not f:
         return not_found()
-    k = html.escape(dashboard_key())
+    k = qkey()
     rel = _rel(job, f)
     text = f.read_text(encoding="utf-8", errors="replace")
     if f.suffix == ".md":

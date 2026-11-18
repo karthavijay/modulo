@@ -195,6 +195,9 @@ async def reply(job: dict, agent: str, history: list) -> tuple[dict, int]:
     except anthropic.APIConnectionError as e:
         log.error("Could not reach Claude: %s", e)
         return {"error": "Could not reach Claude. Try again."}, 502
+    except Exception as e:  # e.g. no key set at all
+        log.exception("Agent chat failed")
+        return {"error": f"The agent could not reply ({e.__class__.__name__}: {str(e)[:200]}). Check the Claude key on the dashboard."}, 500
 
     if msg.stop_reason == "refusal":
         return {"reply": "Sorry, I can't help with that one.", "proposal": None}, 200
