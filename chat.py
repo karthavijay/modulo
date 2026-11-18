@@ -96,8 +96,8 @@ async def reply(history: list) -> tuple[dict, int]:
         )
     except anthropic.RateLimitError:
         return {"error": "The team is busy right now. Please try again in a minute."}, 429
-    except anthropic.AuthenticationError:
-        log.error("ANTHROPIC_API_KEY is missing or invalid.")
+    except anthropic.AuthenticationError as e:
+        log.error("Claude rejected ANTHROPIC_API_KEY (401): %s", e.message)
         return {"error": "Chat is not configured yet."}, 500
     except anthropic.APIStatusError as e:
         log.error("Anthropic API error %s: %s", e.status_code, e.message)

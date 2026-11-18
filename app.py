@@ -258,6 +258,13 @@ async def dashboard_new(request: Request):
 
 @asynccontextmanager
 async def lifespan(_app):
+    # Pasted keys sometimes carry spaces, line breaks or quotes; clean them once for everything.
+    for k in ("ANTHROPIC_API_KEY", "RESEND_API_KEY", "NOTIFY_EMAIL"):
+        if k in os.environ:
+            os.environ[k] = os.environ[k].strip().strip('"').strip("'").strip()
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if key:
+        log.info("Claude key loaded: starts %s..., %d characters", key[:10], len(key))
     missing = [k for k in ("ANTHROPIC_API_KEY", "RESEND_API_KEY", "NOTIFY_EMAIL", "DASHBOARD_KEY") if not os.environ.get(k)]
     if missing:
         log.warning("Not set yet: %s", ", ".join(missing))
