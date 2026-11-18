@@ -28,6 +28,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "pipeline"))
 import pipeline  # noqa: E402  (pipeline/pipeline.py)
 
+import db  # noqa: E402
 import emailer  # noqa: E402
 
 log = logging.getLogger("modulo.jobs")
@@ -53,40 +54,77 @@ def job_dir(job_id: str) -> Path:
     return JOBS_DIR / job_id
 
 
+def _mirror(job: dict) -> None:
+    """Keep job.json in the course folder in step with the database (a self-describing folder, and a second copy)."""
+    try:
+        d = job_dir(job["id"])
+        d.mkdir(parents=True, exist_ok=True)
+        tmp = d / "job.json.tmp"
+        tmp.write_text(json.dumps(job, indent=2, ensure_ascii=False), encoding="utf-8")
+        tmp.replace(d / "job.json")
+    except OSError as e:
+        log.warning("Could not write job.json for %s: %s", job.get("id"), e)
+
+
 def load(job_id: str) -> dict:
-    f = job_dir(job_id) / "job.json"
-    if not f.exists():
+    job_dir(job_id)  # checks the id
+    row = db.one("SELECT data FROM jobs WHERE id = ?", (job_id,))
+    if not row:
         raise KeyError(job_id)
-    return json.loads(f.read_text(encoding="utf-8"))
+    return json.loads(row["data"])
 
 
 def save(job: dict) -> None:
     job["updated"] = time.time()
-    d = job_dir(job["id"])
-    d.mkdir(parents=True, exist_ok=True)
-    tmp = d / "job.json.tmp"
-    tmp.write_text(json.dumps(job, indent=2, ensure_ascii=False), encoding="utf-8")
-    tmp.replace(d / "job.json")
+    job_dir(job["id"])
+    data = json.dumps(job, ensure_ascii=False)
+    db.execute(
+        "INSERT INTO jobs (id, status, created, updated, data) VALUES (?, ?, ?, ?, ?) "
+        "ON CONFLICT (id) DO UPDATE SET status = excluded.status, updated = excluded.updated, data = excluded.data",
+        (job["id"], job["status"], job["created"], job["updated"], data))
+    _mirror(job)
 
 
 def all_jobs() -> list[dict]:
+    return [json.loads(r["data"]) for r in db.query("SELECT data FROM jobs ORDER BY created DESC")]
+
+
+def import_from_disk() -> int:
+    """Brings courses that only exist as folders on the disk (from before the database) into the database.
+    Safe to run at every start: courses already in the database are left alone, and no file is changed."""
     if not JOBS_DIR.exists():
-        return []
-    jobs = []
-    for f in JOBS_DIR.glob("*/job.json"):
+        return 0
+    known = {r["id"] for r in db.query("SELECT id FROM jobs")}
+    added = 0
+    for f in sorted(JOBS_DIR.glob("*/job.json")):
         try:
-            jobs.append(json.loads(f.read_text(encoding="utf-8")))
-        except (OSError, json.JSONDecodeError):
-            continue
-    return sorted(jobs, key=lambda j: j["created"], reverse=True)
+            job = json.loads(f.read_text(encoding="utf-8"))
+            if job.get("id") != f.parent.name:
+                log.warning("Skipping %s: its id does not match its folder", f)
+                continue
+            job_dir(job["id"])
+            if job["id"] in known:
+                continue
+            job.setdefault("history", [])
+            job.setdefault("created", f.stat().st_mtime)
+            job.setdefault("updated", job["created"])
+            job.setdefault("status", "done")
+            db.execute("INSERT INTO jobs (id, status, created, updated, data) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING",
+                       (job["id"], job["status"], job["created"], job["updated"], json.dumps(job, ensure_ascii=False)))
+            added += 1
+        except (OSError, ValueError, KeyError) as e:
+            log.warning("Could not bring %s into the database: %s", f, e)
+    if added:
+        log.info("Brought %d existing courses from the disk into the database", added)
+    return added
 
 
 def briefs_today() -> int:
     day_ago = time.time() - 86400
-    return sum(1 for j in all_jobs() if j["created"] > day_ago)
+    return db.one("SELECT COUNT(*) AS n FROM jobs WHERE created > ?", (day_ago,))["n"]
 
 
-def create(name: str, email: str, transcript: str, source: str = "website") -> dict:
+def create(name: str, email: str, transcript: str, source: str = "website", who: str | None = None) -> dict:
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:30] or "client"
     job = {
         "id": f"{time.strftime('%Y%m%d-%H%M')}-{slug}-{secrets.token_hex(2)}",
@@ -104,7 +142,7 @@ def create(name: str, email: str, transcript: str, source: str = "website") -> d
     out.mkdir(parents=True, exist_ok=True)
     brief = f"Client: {name} <{email}>\nSource: {source}\n\n{transcript.strip()}\n"
     (job_dir(job["id"]) / "brief.txt").write_text(brief, encoding="utf-8")
-    note(job, "Brief received")
+    note(job, "Brief received", who)
     enqueue(job["id"])
     return job
 
@@ -148,9 +186,17 @@ def create_sample() -> dict:
     return job
 
 
-def note(job: dict, text: str) -> None:
-    job["history"].append({"at": time.time(), "text": text})
+def note(job: dict, text: str, who: str | None = None) -> None:
+    entry = {"at": time.time(), "text": text}
+    if who:
+        entry["by"] = who
+    job["history"].append(entry)
     save(job)
+
+
+def page_url(job: dict) -> str:
+    """The course page for signed-in team members (no private link code in it)."""
+    return f"/review/{job['id']}"
 
 
 def links(job: dict) -> dict:
@@ -164,41 +210,41 @@ def file_url(job: dict, name: str) -> str:
 
 # ---------------------------------------------------------------- actions from the review page
 
-def approve(job: dict) -> None:
+def approve(job: dict, who: str | None = None) -> None:
     if job["status"] != "awaiting_approval":
         return
     (job_dir(job["id"]) / "output" / "1_design_APPROVED.txt").write_text("Design approved for storyboarding.\n")
     job["status"], job["step"] = "storyboarding", "Waiting to start"
-    note(job, "Design approved")
+    note(job, "Design approved", who)
     enqueue(job["id"])
 
 
-def request_changes(job: dict, feedback: str) -> None:
+def request_changes(job: dict, feedback: str, who: str | None = None) -> None:
     if job["status"] != "awaiting_approval" or not feedback.strip():
         return
     job["status"], job["step"], job["feedback"] = "revising", "Waiting to start", feedback.strip()[:5000]
-    note(job, "Changes requested: " + feedback.strip()[:300])
+    note(job, "Changes requested: " + feedback.strip()[:300], who)
     enqueue(job["id"])
 
 
-def start_pack(job: dict) -> None:
+def start_pack(job: dict, who: str | None = None) -> None:
     if job["status"] != "done" or job.get("pack_done"):
         return
     job["status"], job["step"] = "packing", "Waiting to start"
-    note(job, "Production pack approved")
+    note(job, "Production pack approved", who)
     enqueue(job["id"])
 
 
-def start_build(job: dict) -> None:
+def start_build(job: dict, who: str | None = None) -> None:
     """Owner pressed "Have Dev build the course" (costs money, so only from that button)."""
     if job["status"] != "done":
         return
     job["status"], job["step"] = "building", "Waiting to start"
-    note(job, "Course build approved")
+    note(job, "Course build approved", who)
     enqueue(job["id"])
 
 
-def quick_build(job: dict) -> dict:
+def quick_build(job: dict, who: str | None = None) -> dict:
     """The free rule-based draft, made instantly. Returns the check report."""
     from authoring import course as C
     out = job_dir(job["id"]) / "output"
@@ -207,41 +253,208 @@ def quick_build(job: dict) -> dict:
         raise RuntimeError("There is no finished storyboard to build from yet.")
     saved = C.save(out, C.from_storyboard(storyboard, design, job["id"]))
     job["course_built"] = True
-    note(job, "Quick course draft made (free)")
+    note(job, "Quick course draft made (free)", who)
     return C.check(saved)
 
 
-def retry(job: dict) -> None:
+def retry(job: dict, who: str | None = None) -> None:
     if job["status"] != "failed":
         return
     job["status"] = job.get("failed_status", "designing")
     job["step"] = "Waiting to start"
-    note(job, "Trying again")
+    note(job, "Trying again", who)
     enqueue(job["id"])
 
 
-# ---------------------------------------------------------------- background worker
+# ---------------------------------------------------------------- background work queue
+#
+# The queue lives in the database: a course is waiting for work when its status is one of WORKING
+# and nobody has claimed it. The worker claims up to PARALLEL courses at a time, so several clients'
+# courses move forward together, and releases each claim when that step ends. After a restart or a
+# redeploy, every claim is released and the work picks up again from the last finished step.
+# A course that keeps being interrupted (for example because the server runs out of memory) is
+# stopped after MAX_ATTEMPTS tries and you get an email, so it can't loop and spend money forever.
+
+PARALLEL = max(1, int(os.environ.get("MODULO_PARALLEL_JOBS", "1")))
+MAX_ATTEMPTS = int(os.environ.get("MODULO_MAX_ATTEMPTS", "3"))
+STUCK_HOURS = float(os.environ.get("MODULO_STUCK_HOURS", "3"))
+WORKER_ID = f"{os.getpid()}-{secrets.token_hex(3)}"
+_wake: asyncio.Event | None = None
+_running: dict[str, asyncio.Task] = {}
+
 
 def enqueue(job_id: str) -> None:
-    if _queue is not None:
-        _queue.put_nowait(job_id)
+    """Nudges the worker. The work itself is already recorded by the job's status."""
+    if _wake is not None:
+        try:
+            asyncio.get_running_loop()
+            _wake.set()
+        except RuntimeError:  # called from a worker thread
+            if _loop is not None:
+                _loop.call_soon_threadsafe(_wake.set)
+
+
+_loop: asyncio.AbstractEventLoop | None = None
+
+
+def queue_state() -> dict:
+    rows = db.query("SELECT id, status, claimed_by, claimed_at, attempts FROM jobs WHERE status IN ({})".format(
+        ", ".join("?" * len(WORKING))), sorted(WORKING))
+    return {"running": [r for r in rows if r["claimed_by"]], "waiting": [r for r in rows if not r["claimed_by"]],
+            "parallel": PARALLEL}
+
+
+def release_all_claims() -> list[str]:
+    """At start-up: anything claimed by the previous run of the service was interrupted."""
+    rows = db.query("SELECT id FROM jobs WHERE claimed_by IS NOT NULL")
+    db.execute("UPDATE jobs SET claimed_by = NULL, claimed_at = NULL WHERE claimed_by IS NOT NULL")
+    return [r["id"] for r in rows]
+
+
+def claim_next() -> str | None:
+    """Takes the oldest waiting course, or returns None. Stops a course that has been tried too often."""
+    while True:
+        with db.tx() as c:
+            row = c.one("SELECT id, attempts FROM jobs WHERE claimed_by IS NULL AND status IN ({}) ORDER BY updated LIMIT 1".format(
+                ", ".join("?" * len(WORKING))), sorted(WORKING))
+            if not row:
+                return None
+            if row["attempts"] >= MAX_ATTEMPTS:
+                c.execute("UPDATE jobs SET attempts = 0 WHERE id = ?", (row["id"],))
+                too_many = row["id"]
+            else:
+                n = c.execute("UPDATE jobs SET claimed_by = ?, claimed_at = ?, attempts = attempts + 1 "
+                              "WHERE id = ? AND claimed_by IS NULL", (WORKER_ID, time.time(), row["id"]))
+                if n:
+                    return row["id"]
+                continue
+        _give_up(too_many)
+
+
+def _give_up(job_id: str) -> None:
+    job = load(job_id)
+    status = job["status"]
+    if status not in WORKING:
+        return
+    job["failed_status"] = status
+    job["status"], job["step"] = "failed", "Stopped with a problem"
+    job["error"] = (f"The service was interrupted {MAX_ATTEMPTS} times while working on this step, so it was stopped to "
+                    "avoid paying for the same work again and again. This usually means the server ran out of memory "
+                    "(see Render's Events page for your service). Press Try again to restart from the last finished step.")
+    note(job, "Stopped after repeated interruptions")
+    try:
+        email_failed(job)
+    except Exception:  # noqa: BLE001
+        log.exception("Could not send the failure email for %s", job_id)
+
+
+def release(job_id: str) -> None:
+    job = load(job_id)
+    if job["status"] in WORKING:
+        db.execute("UPDATE jobs SET claimed_by = NULL, claimed_at = NULL WHERE id = ?", (job_id,))
+    else:
+        db.execute("UPDATE jobs SET claimed_by = NULL, claimed_at = NULL, attempts = 0 WHERE id = ?", (job_id,))
+
+
+async def _run_claimed(job_id: str) -> None:
+    try:
+        await run(job_id)
+    except asyncio.CancelledError:
+        # The service is shutting down normally (a redeploy or restart): that doesn't count as a failed try.
+        try:
+            db.execute("UPDATE jobs SET claimed_by = NULL, claimed_at = NULL, "
+                       "attempts = CASE WHEN attempts > 0 THEN attempts - 1 ELSE 0 END WHERE id = ?", (job_id,))
+        except Exception:  # noqa: BLE001
+            pass
+        raise
+    except Exception:  # never let one bad course stop the others
+        log.exception("Worker crashed on %s", job_id)
+        try:
+            job = load(job_id)
+            if job["status"] in WORKING:
+                job["failed_status"] = job["status"]
+                job["status"], job["step"] = "failed", "Stopped with a problem"
+                job["error"] = "An unexpected error stopped the work. Press Try again; if it happens again, tell your developer."
+                note(job, "Problem: unexpected error")
+                await anyio.to_thread.run_sync(email_failed, job)
+        except Exception:  # noqa: BLE001
+            log.exception("Could not record the failure of %s", job_id)
+    try:
+        await anyio.to_thread.run_sync(release, job_id)
+    except Exception:  # noqa: BLE001
+        log.exception("Could not release %s", job_id)
+    if _wake is not None:
+        _wake.set()  # a slot is free: start the next waiting course straight away
+
+
+def check_stuck() -> list[str]:
+    """Emails once about any course whose current step has run far longer than it should."""
+    flagged = []
+    limit = time.time() - STUCK_HOURS * 3600
+    for r in db.query("SELECT id FROM jobs WHERE claimed_by IS NOT NULL AND claimed_at < ?", (limit,)):
+        job = load(r["id"])
+        if job.get("stuck_alerted_at", 0) > limit:
+            continue
+        job["stuck_alerted_at"] = time.time()
+        save(job)
+        flagged.append(job["id"])
+        emailer.send(f"Taking unusually long: {job.get('title') or job['client_name']}", _wrap(
+            f"<p>The step <b>{html.escape(job.get('step', ''))}</b> for the course for <b>{html.escape(job['client_name'])}</b> "
+            f"has been running for more than {STUCK_HOURS:g} hours. Normally the longest step takes about an hour.</p>"
+            "<p>It may still finish. If it hasn't moved by tomorrow, redeploy the service in Render (Manual Deploy, "
+            "Restart service): the work restarts from the last finished step.</p>"
+            f"<p><a href=\"{public_url()}/review/{job['id']}\" style=\"{BTN}background:#2f3e9e;color:#fff\">Open the course page</a></p>"))
+    return flagged
+
+
+_last_alert: dict[str, float] = {}
+
+
+def alert_once_an_hour(what: str, subject: str, body: str) -> None:
+    if time.time() - _last_alert.get(what, 0) < 3600:
+        return
+    _last_alert[what] = time.time()
+    try:
+        emailer.send(subject, _wrap(body))
+    except Exception:  # noqa: BLE001
+        log.exception("Could not send alert %s", what)
 
 
 async def worker() -> None:
-    """Runs forever inside the web server, one course at a time."""
-    global _queue
-    _queue = asyncio.Queue()
-    # Pick up anything that was interrupted by a restart or redeploy.
-    for job in sorted(all_jobs(), key=lambda j: j["created"]):
-        if job["status"] in WORKING:
-            note(job, "Resuming after a restart")
-            _queue.put_nowait(job["id"])
-    while True:
-        job_id = await _queue.get()
+    """Runs forever inside the web server, PARALLEL courses at a time."""
+    global _wake, _loop
+    _wake, _loop = asyncio.Event(), asyncio.get_running_loop()
+    for job_id in await anyio.to_thread.run_sync(release_all_claims):
         try:
-            await run(job_id)
-        except Exception:  # never let one bad job stop the worker
-            log.exception("Worker crashed on %s", job_id)
+            note(load(job_id), "Resuming after a restart")
+        except KeyError:
+            pass
+    log.info("Worker %s started: up to %d courses at a time", WORKER_ID, PARALLEL)
+    last_watch = 0.0
+    while True:
+        try:
+            for jid in [j for j, t in _running.items() if t.done()]:
+                _running.pop(jid)
+            while len(_running) < PARALLEL:
+                job_id = await anyio.to_thread.run_sync(claim_next)
+                if not job_id:
+                    break
+                _running[job_id] = asyncio.create_task(_run_claimed(job_id), name=f"job-{job_id}")
+            if time.time() - last_watch > 600:
+                last_watch = time.time()
+                await anyio.to_thread.run_sync(check_stuck)
+        except Exception as e:  # e.g. the database was briefly unreachable
+            log.exception("Worker loop problem")
+            await anyio.to_thread.run_sync(alert_once_an_hour, "worker", "Modulo: the work queue has a problem",
+                                           "<p>The background worker could not reach the database or hit an error:</p>"
+                                           f"<pre style=\"white-space:pre-wrap\">{html.escape(str(e)[:800])}</pre>"
+                                           "<p>It keeps retrying by itself. If you get this email again in an hour, "
+                                           "check your service and database in Render.</p>")
+        _wake.clear()
+        try:
+            await asyncio.wait_for(_wake.wait(), timeout=5)
+        except asyncio.TimeoutError:
+            pass
 
 
 async def run(job_id: str) -> None:
@@ -391,12 +604,21 @@ def course_ready(job: dict) -> bool:
 
 
 def builder_url(job: dict) -> str:
-    from urllib.parse import quote
-    return f"{public_url()}/builder/{job['id']}?key={quote(os.environ.get('DASHBOARD_KEY', ''), safe='')}"
+    return f"{public_url()}/builder/{job['id']}"  # asks for a login
+
+
+def play_token(job: dict) -> str:
+    """The code in shareable "Try the course" links. Separate from the course's private email link code,
+    so sharing the course with a client (or a Reviewer seeing the link) can't be used to approve or spend.
+    Links shared before this change used the private code and still work."""
+    if not job.get("play_token"):
+        job["play_token"] = secrets.token_urlsafe(18)
+        save(job)
+    return job["play_token"]
 
 
 def preview_url(job: dict) -> str:
-    return f"{public_url()}/play/{job['id']}/{job['token']}/index.html"
+    return f"{public_url()}/play/{job['id']}/{play_token(job)}/index.html"
 
 
 def email_course_built(job: dict) -> None:

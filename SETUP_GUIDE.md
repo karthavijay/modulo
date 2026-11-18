@@ -41,7 +41,7 @@ Everything (website, chat and the course team) lives in one place, called Render
 
 | What | Cost |
 |---|---|
-| Render (keeps the website and the team running all day) | about $7 a month, plus about $0.25 a month for storage |
+| Render (keeps the website and the team running all day) | about $33 a month: the service on the Standard plan ($25, room for three courses at once), the database ($6, plus about $0.30 for its storage), and 5 GB of disk ($1.25). On the Starter plan with one course at a time it's about $14. |
 | Claude (the AI) | pay as you go: a few cents per website chat, about $7 per finished storyboard |
 | Resend (sends the emails) | free for up to 3,000 emails a month |
 | GitHub (stores the files Render reads) | free |
@@ -82,7 +82,7 @@ When it is done, the repository page should list files like `render.yaml`, `app.
    - **RESEND_API_KEY**: your Resend key from Step 2
    - **NOTIFY_EMAIL**: the email you signed up to Resend with
 5. Press **Apply** (or **Deploy Blueprint**). Render may ask for a card for the $7 plan.
-6. Wait about 5 minutes. When the service shows **Live**, you will get an email titled **"Your Modulo service is live"** with a link to your private **dashboard**. Bookmark it. The dashboard lists every course and where it is.
+6. Wait about 5 minutes. When the service shows **Live**, you will get an email titled **"Your Modulo service is live"** with a link to **create your owner login**. Open it, choose your password, and you land on the **dashboard**. Bookmark it. The dashboard lists every course and where it is. From then on you sign in at your service's address with your email and password.
 
 Your website is now live at an address like `https://modulo-xxxx.onrender.com`. You'll find it at the top of the service page in Render.
 
@@ -90,7 +90,7 @@ Your website is now live at an address like `https://modulo-xxxx.onrender.com`. 
 
 You can try it straight away from the dashboard, without going through the website chat:
 
-1. Open the dashboard link from the welcome email.
+1. Sign in (or open the link from the welcome email the first time).
 2. Under **Start a course from a brief you received elsewhere**, type a client name and email, paste a brief (or the sample forklift brief from the `pipeline/samples` folder) and press **Start**.
 3. Within a few minutes you get the design email. This step costs well under a dollar.
 4. Press **Request changes** to see how a revision works, or **Approve** to run the full storyboard (about an hour, about $7).
@@ -114,6 +114,34 @@ To have emails come from your own domain instead of Resend's test address, add t
 - **The course editor** (your own SCORM authoring tool): open it from the course page or the dashboard (**Course editor**). On the left is every page of the course; click one to change it. Each page is made of blocks: text, headings, pictures, callout boxes, click-to-reveal panels, questions and the results block. Add, move or delete blocks with the buttons on each one. Changes save by themselves. **Preview** opens the course as a learner sees it. **Course settings** has the pass mark, number of tries, whether pages unlock in order, and the main color. **Check and download** lists anything to fix (for example a question with no right answer) and gives you three downloads: **SCORM 1.2** (works in almost every LMS; pick this if unsure), **SCORM 2004**, and **Website** (no LMS). It also has a preview link you can send to a client, and **Go back to the previous save** if you change your mind. Pictures start as "Image to come" placeholders until you upload your own. To test a SCORM file before it goes to a client, upload it to a free SCORM Cloud account (cloud.scorm.com) and launch it there.
 - **Changing how an agent works:** the agents' job descriptions are the files in `pipeline/agents/` on GitHub. Click a file, press the pencil icon, edit the text, and press **Commit changes**. Render picks up the change by itself within a few minutes.
 - **Safety limits:** the service starts at most 10 new briefs a day (you can change `MAX_BRIEFS_PER_DAY` in Render, Environment), and your Claude spend limit caps the total.
+
+## Your team: logins and roles
+
+Everyone signs in with their own email and password. As the owner you are an **Admin**. To add someone, open **Team members** at the top of any page, type their name and email, pick a role, and press **Add and make their link**. Send them the link it shows (by email or chat). They open it, choose a password, and they're in. The link works once and for 7 days.
+
+| Role | What they can do |
+|---|---|
+| **Reviewer** | Look at every course, read and download files, try built courses, and request changes to a design. Can't spend money or edit. Good for an SME or a client-side reviewer. |
+| **Designer** | All the course work: start briefs, approve designs, start the production pack and Dev's build, edit courses, talk to the team. |
+| **Admin** | Everything, plus add or switch off team members and download backups. |
+
+Someone forgot their password? On **Team members**, press **Make a new set-password link** next to their name and send it to them. Someone left? Set them to **Switched off** and press **Save**: they are signed out at once.
+
+The **Approve** and **Request changes** buttons in your emails keep working without signing in. Every action on a course is listed with the person's name in the course's **History**.
+
+## Several courses at once, and alerts
+
+The team works on up to three courses at the same time (one at a time on the cheaper Starter plan). If Render restarts the service, the work carries on from the last finished step by itself. You get an email if a step fails, if a step runs for more than three hours, or if the service is interrupted three times on the same step (it then stops, so you never pay for the same work over and over; press **Try again** when ready).
+
+## Backups
+
+Your courses are protected three ways, with nothing for you to do:
+
+1. **Every night** Modulo makes a backup zip of every course, team member and setting. Admins can download it from the **System** page (top of any page). It's worth downloading one now and then to keep on your own computer.
+2. **Render snapshots the disk** every day and keeps each snapshot for 7 days (your service, **Disks**, to restore).
+3. **Render backs up the database** and can put it back to any moment of the last 3 days (your database, **Recovery**).
+
+Optional: an off-site copy of each nightly backup in Cloudflare R2 (free up to 10 GB). Ask Claude to walk you through it if you want it.
 
 ## If something goes wrong
 

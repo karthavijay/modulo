@@ -1,9 +1,9 @@
 // Drives the course editor in a browser against a running local server (MODULO_FAKE=1).
-// Usage: node editor_test.js http://localhost:8800 JOB_ID DASHBOARD_KEY OUTDIR
+// Usage: node editor_test.js http://localhost:8800 JOB_ID EMAIL:PASSWORD OUTDIR   (a Designer or Admin login)
 const { chromium } = require("playwright");
 const path = require("path");
-const [base, job, key, outDir] = process.argv.slice(2);
-const Q = "?key=" + encodeURIComponent(key);
+const [base, job, login, outDir] = process.argv.slice(2);
+const Q = "";
 let failures = 0;
 function check(c, m) { console.log((c ? "  PASS " : "  FAIL ") + m); if (!c) failures++; }
 
@@ -13,6 +13,9 @@ function check(c, m) { console.log((c ? "  PASS " : "  FAIL ") + m); if (!c) fai
   const page = await ctx.newPage();
   const errors = []; page.on("pageerror", e => errors.push(String(e)));
   page.on("dialog", d => d.accept());
+  const [email, ...pw] = login.split(":");
+  const signin = await page.request.post(`${base}/login`, { form: { email, password: pw.join(":") }, maxRedirects: 0 });
+  check(signin.status() === 303, "signs in");
   // start from a fresh free draft of the sample course
   await page.request.post(`${base}/builder/${job}/build${Q}`, { form: { mode: "quick" } });
   await page.goto(`${base}/builder/${job}${Q}`);

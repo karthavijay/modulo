@@ -1,17 +1,31 @@
 # Render Blueprint: creates the whole Modulo service in one go.
 # In Render: New, Blueprint, pick this repository. Render asks for the values marked sync: false.
+#
+# Monthly cost with this file (Render's prices, November 2026):
+#   web service, Standard plan (1 CPU, 2 GB memory)   $25   (enough memory to work on 3 courses at once)
+#   disk, 5 GB                                         $1.25
+#   Postgres database, Basic-256mb                     $6    (+ $0.30 per GB of database storage)
+#   total                                              about $33, plus Claude usage
+# To save money: plan: starter ($7) and MODULO_PARALLEL_JOBS "1" (one course at a time, as before).
+databases:
+  - name: modulo-db
+    plan: basic-256mb        # about USD 6 a month; Render backs it up and can restore it to any moment of the last 3 days
+    databaseName: modulo
+    user: modulo
+    ipAllowList: []          # only reachable from your own Render services, never from the internet
+
 services:
   - type: web
     name: modulo
     runtime: python
-    plan: starter            # about USD 7 a month, always on (the free plan sleeps and has no disk)
+    plan: standard           # about USD 25 a month, always on, 2 GB memory so several courses can run at once
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
-    disk:                    # keeps briefs, designs and storyboards safe across restarts
+    disk:                    # keeps briefs, designs and storyboards safe across restarts; Render snapshots it daily
       name: modulo-data
       mountPath: /var/data
-      sizeGB: 1
+      sizeGB: 5              # room for courses, pictures and the nightly backups (USD 0.25 per GB a month)
     envVars:
       - key: ANTHROPIC_API_KEY     # your Claude API key (platform.claude.com)
         sync: false
@@ -19,8 +33,14 @@ services:
         sync: false
       - key: NOTIFY_EMAIL          # where approval and delivery emails go: the email you signed up to Resend with
         sync: false
-      - key: DASHBOARD_KEY         # secret part of your dashboard link, made up by Render
+      - key: DASHBOARD_KEY         # used once, to create the first (owner) login; made up by Render
         generateValue: true
+      - key: DATABASE_URL          # the Postgres database above, filled in by Render
+        fromDatabase:
+          name: modulo-db
+          property: connectionString
+      - key: MODULO_PARALLEL_JOBS  # how many courses the team works on at the same time
+        value: "3"
       - key: DATA_DIR
         value: /var/data
       - key: CLAUDE_CONFIG_DIR
