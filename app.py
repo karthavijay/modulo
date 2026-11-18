@@ -199,7 +199,7 @@ def page(title: str, body: str, refresh: bool = False, request: Request | None =
         f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
         f"<meta name=robots content=noindex>{meta}<title>{html.escape(title)}</title><style>{CSS}</style></head>"
         f"<body><main>{nav(request)}{body}<p class=muted style='margin-top:40px;font-size:12px'>Version {VERSION}</p></main></body></html>",
-        headers={"cache-control": "no-store", "referrer-policy": "no-referrer"},
+        headers={"cache-control": "no-store", "referrer-policy": "same-origin"},
     )
 
 

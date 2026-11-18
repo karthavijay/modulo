@@ -215,10 +215,19 @@ def same_origin(request: Request) -> bool:
     """Blocks other websites from submitting forms on a signed-in member's behalf."""
     if request.method in ("GET", "HEAD", "OPTIONS"):
         return True
-    origin = request.headers.get("origin") or request.headers.get("referer")
+    # Modern browsers say exactly where a form came from.
+    site = request.headers.get("sec-fetch-site")
+    if site:
+        return site in ("same-origin", "none")
+    # Older browsers: compare the Origin (or Referer) with this site. Browsers send "Origin: null"
+    # in some privacy settings; then the SameSite cookie is the protection.
+    origin = request.headers.get("origin") or ""
+    if not origin or origin == "null":
+        origin = request.headers.get("referer") or ""
     if not origin:
-        return True  # old browsers; the SameSite cookie still protects
-    return urlparse(origin).netloc == request.headers.get("host", request.url.netloc)
+        return True
+    hosts = {request.headers.get("host", ""), request.headers.get("x-forwarded-host", ""), request.url.netloc}
+    return urlparse(origin).netloc in hosts - {""}
 
 
 def login_url(request: Request) -> str:
