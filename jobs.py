@@ -106,6 +106,45 @@ def create(name: str, email: str, transcript: str, source: str = "website") -> d
     return job
 
 
+def create_sample() -> dict:
+    """A finished demo course from the forklift sample, made instantly and for free."""
+    from render import render_design_md, render_docx, render_qa_md, render_storyboard_md
+    samples = HERE / "pipeline" / "samples"
+    design = json.loads((samples / "fake" / "1_design.json").read_text(encoding="utf-8"))
+    storyboard = json.loads((samples / "fake" / "2_storyboard_draft3.json").read_text(encoding="utf-8"))
+    qa = json.loads((samples / "fake" / "3_qa_round3.json").read_text(encoding="utf-8"))
+    job = {
+        "id": f"{time.strftime('%Y%m%d-%H%M')}-sample-forklift-{secrets.token_hex(2)}",
+        "token": secrets.token_urlsafe(24),
+        "client_name": "Sample client (forklift demo)",
+        "client_email": "sample@example.com",
+        "source": "sample",
+        "status": "done",
+        "step": "Sample course, ready to explore",
+        "title": design["title"],
+        "created": time.time(),
+        "cost_usd": 0.0,
+        "history": [],
+    }
+    out = job_dir(job["id"]) / "output"
+    out.mkdir(parents=True, exist_ok=True)
+    (job_dir(job["id"]) / "brief.txt").write_text((samples / "forklift_brief.txt").read_text(encoding="utf-8"), encoding="utf-8")
+    pipeline.save(out / "1_design.json", design)
+    pipeline.save(out / "1_design.md", render_design_md(design))
+    pipeline.save(out / "1_design_APPROVED.txt", "Sample course.\n")
+    pipeline.save(out / "storyboard.json", storyboard)
+    pipeline.save(out / "3_qa_round1.json", qa)
+    pipeline.save(out / "storyboard.md", render_storyboard_md(design, storyboard))
+    pipeline.save(out / "qa_report.md", render_qa_md([qa]))
+    render_docx(design, storyboard, [qa], out / "storyboard.docx")
+    counts = {k: sum(f["severity"] == k for f in qa["findings"]) for k in ("critical", "major", "minor")}
+    job["summary"] = {"title": design["title"], "screens": len(storyboard["screens"]), "qa_rounds": 1,
+                      "passed": bool(qa["pass"]), "open_findings": counts, "cost_usd": 0.0}
+    save(job)
+    note(job, "Sample course added")
+    return job
+
+
 def note(job: dict, text: str) -> None:
     job["history"].append({"at": time.time(), "text": text})
     save(job)

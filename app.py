@@ -237,7 +237,8 @@ async def dashboard(request: Request):
         "under your service's Environment page, to get approval emails.</div>")
     fake_note = "<div class=card><b>Test mode is on</b> (MODULO_FAKE). Courses use the sample forklift answers and cost nothing.</div>" if os.environ.get("MODULO_FAKE") else ""
     body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Bookmark this page.</p>
-<p><a class=btn href="/team?key={k}">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>{email_note}{fake_note}
+<p><a class=btn href="/team?key={k}">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>
+<p>{sample_button(k)} <span class=muted>A finished demo course to explore, free.</span></p>{email_note}{fake_note}
 <div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th><th></th></tr>{rows}</table></div>
 <div class=card><h2 style="margin-top:0">Start a course from a brief you received elsewhere</h2>
 <p class=muted>Paste a brief from an email or a document. It goes through the same steps as a website brief.</p>
@@ -262,9 +263,9 @@ async def dashboard_new(request: Request):
 
 TEAM_JS = r"""
 const $=s=>document.querySelector(s), KEY=new URLSearchParams(location.search).get('key');
-const AG={iris:['Iris','Instructional Designer','Ask about the design, or ask for changes to it.'],
-          theo:['Theo','Storyboard Writer','Ask about any screen, or ask Theo to rewrite, add or remove screens.'],
-          quinn:['Quinn','QA Reviewer','Ask why something was flagged, how serious it is, or to check a screen.']};
+const AG={iris:['Iris','Instructional Designer','Ask about the design, or ask for changes to it.','For example: Iris, why did you choose a 24-minute course?'],
+          theo:['Theo','Storyboard Writer','Ask about any screen, or ask Theo to rewrite, add or remove screens.','For example: Theo, make screen M1-S03 shorter and add a quiz question after it'],
+          quinn:['Quinn','QA Reviewer','Ask why something was flagged, how serious it is, or to check a screen.','For example: Quinn, which of your findings matter most and why?']};
 let agent=new URLSearchParams(location.search).get('agent')||'iris', busy=false;
 const course=()=>$('#course').value, store=()=>`modulo-chat:${course()}:${agent}`;
 function load(){try{return JSON.parse(localStorage.getItem(store())||'[]')}catch{return[]}}
@@ -282,7 +283,14 @@ function draw(){$('#log').innerHTML='';const h=load();
   if(!h.length){const p=document.createElement('p');p.className='muted';p.textContent=AG[agent][2];$('#log').append(p);}
   h.forEach(bubble);$('#log').scrollTop=1e9;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.a===agent));
-  $('#who').textContent=AG[agent][0]+', '+AG[agent][1];}
+  $('#who').textContent=AG[agent][0]+', '+AG[agent][1];
+  const o=$('#course').selectedOptions[0], why=blocked(o);
+  $('#msg').disabled=!!why; $('#send').disabled=!!why; $('#why').hidden=!why; $('#why').textContent=why||'';
+  $('#msg').placeholder=why?'':AG[agent][3];}
+function blocked(o){
+  if(['designing','revising','storyboarding'].includes(o.dataset.status)) return 'The team is working on this course right now. You can chat once this step is finished; the course page shows progress.';
+  if(agent!=='iris' && o.dataset.sb!=='1') return AG[agent][0]+' can chat once the storyboard for this course is finished. Iris is available now: press her tab above.';
+  return '';}
 async function post(url,body){const r=await fetch(url+'?key='+encodeURIComponent(KEY),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
   let j={};try{j=await r.json()}catch{} if(!r.ok) throw new Error(j.error||'Something went wrong.'); return j;}
 async function send(e){e.preventDefault();const text=$('#msg').value.trim();if(!text||busy)return;
@@ -310,7 +318,7 @@ TEAM_CSS = """
 .msg.you{margin-left:auto;text-align:right}.msg.you>div{background:var(--soft);display:inline-block;text-align:left;padding:8px 12px;border-radius:12px}
 .prop{margin-top:8px;padding:12px;border:1px dashed var(--accent);border-radius:12px;display:grid;gap:8px;white-space:normal}
 .prop button{justify-self:start}select{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);max-width:100%}
-#err{color:var(--bad);min-height:1.4em}
+#err{color:var(--bad);min-height:1.4em}textarea:disabled{opacity:.5}button:disabled{opacity:.5;cursor:default}
 """
 
 
@@ -321,6 +329,17 @@ def _admin_job(job_id: str) -> dict | None:
         return None
 
 
+async def dashboard_sample(request: Request):
+    if not dashboard_ok(request):
+        return not_found()
+    job = await asyncio.to_thread(jobs.create_sample)
+    return RedirectResponse(f"/team?key={dashboard_key()}&course={job['id']}&agent=theo", 303)
+
+
+def sample_button(k: str, label: str = "Add the sample forklift course") -> str:
+    return (f"<form method=post action='/dashboard/sample?key={k}' style='display:inline'><button class=ghost>{label}</button></form>")
+
+
 async def team_page(request: Request):
     if not dashboard_ok(request):
         return not_found()
@@ -328,20 +347,26 @@ async def team_page(request: Request):
     k = html.escape(dashboard_key())
     if not all_jobs:
         return page("Talk to the team", f"<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>"
-                    "<p>There are no courses with a design yet. Once Iris has written one, you can chat about it here.</p>")
+                    "<div class=card><p style='margin-top:0'><b>There's nothing to talk about yet.</b> The agents chat about a specific course, "
+                    "and you don't have one with a course design yet.</p>"
+                    "<p>To try it now, add the finished forklift sample course. It's free and takes a second. "
+                    "You can also send a brief from your website, or paste one on the dashboard, and come back once Iris has written the design.</p>"
+                    f"<p>{sample_button(k)}</p></div>")
     want = request.query_params.get("course", "")
     opts = "".join(
-        f"<option value='{j['id']}' data-review='{html.escape(jobs.links(j)['review'])}'{' selected' if j['id'] == want else ''}>"
+        f"<option value='{j['id']}' data-review='{html.escape(jobs.links(j)['review'])}' data-status='{j['status']}' "
+        f"data-sb='{1 if (jobs.job_dir(j['id']) / 'output' / 'storyboard.json').exists() else 0}'{' selected' if j['id'] == want else ''}>"
         f"{html.escape((j.get('title') or 'New brief')[:70])} ({html.escape(j['client_name'][:30])})</option>" for j in all_jobs)
     sel = next((j for j in all_jobs if j["id"] == want), all_jobs[0])
     body = f"""<style>{TEAM_CSS}</style>
 <p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>
 <p class=muted>A private chat with one agent about one course. When Iris or Theo suggest a change, nothing is saved until you press <b>Save to course</b>. Saving keeps a backup and rebuilds the Word storyboard.</p>
-<p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.links(sel)['review'])}">Open course page</a></p>
+<p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.links(sel)['review'])}">Open course page</a> {sample_button(k, "Add sample course")}</p>
 <div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button></div>
 <p class=muted id=who></p><div id=log aria-live=polite></div><p class=muted id=wait hidden></p><p id=err></p>
-<form id=form><textarea id=msg placeholder="For example: Theo, make screen 2.3 shorter and add a knowledge check after it"></textarea>
-<p class=row><button>Send</button> <button type=button class=ghost id=clear>Clear this chat</button></p></form>
+<p id=why class=card hidden></p>
+<form id=form><textarea id=msg aria-label="Your message"></textarea>
+<p class=row><button id=send>Send</button> <button type=button class=ghost id=clear>Clear this chat</button></p></form>
 <script>{TEAM_JS}</script>"""
     return page("Talk to the team", body)
 
@@ -421,6 +446,7 @@ app = Starlette(
         Route("/files/{job_id}/{name}", files),
         Route("/dashboard", dashboard),
         Route("/dashboard/new", dashboard_new, methods=["POST"]),
+        Route("/dashboard/sample", dashboard_sample, methods=["POST"]),
         Route("/team", team_page),
         Route("/api/team/chat", team_chat, methods=["POST"]),
         Route("/api/team/apply", team_apply, methods=["POST"]),
