@@ -1,12 +1,12 @@
 """Web pages for the course builder.
 
-  /builder/<id>?key=...                  the editor (dashboard key)
-  /builder/<id>/build?key=...            POST: start Dev's build (mode=dev) or make the free draft (mode=quick)
-  /builder/<id>/export/<kind>?key=...    download SCORM 1.2, SCORM 2004 or a website zip
-  /api/builder/<id>/course?key=...       GET or POST the course (JSON)
-  /api/builder/<id>/upload?key=...       POST an image
-  /api/builder/<id>/restore?key=...      POST: go back to the previous save
-  /play/<id>/<token>/index.html          the course, playable in any browser (shareable)
+  /builder/<id>                          the editor (Designer or Admin)
+  /builder/<id>/build                    POST: start Dev's build (mode=dev) or make the free draft (mode=quick)
+  /builder/<id>/export/<kind>            download SCORM 1.2, SCORM 2004 or a website zip (any team member)
+  /api/builder/<id>/course               GET or POST the course (JSON)
+  /api/builder/<id>/upload               POST an image
+  /api/builder/<id>/restore              POST: go back to the previous save
+  /play/<id>/<code>/index.html           the course, playable in any browser (shareable; see jobs.play_token)
 """
 
 from __future__ import annotations
@@ -37,8 +37,9 @@ def _app():
     return app
 
 
-def _job(request: Request) -> dict | None:
-    if not _app().dashboard_ok(request):
+def _job(request: Request, need: str = "designer") -> dict | None:
+    import auth
+    if not auth.can(auth.current_user(request), need):
         return None
     try:
         return jobs.load(request.path_params["job_id"])
@@ -58,6 +59,8 @@ def _busy(job: dict) -> bool:
 
 async def builder_page(request: Request):
     A = _app()
+    if blocked := A.gate(request, "designer"):
+        return blocked
     job = _job(request)
     if not job:
         return A.not_found()
@@ -65,14 +68,14 @@ async def builder_page(request: Request):
     jid = job["id"]
     out = _out(job)
     head = (f"<p class=muted><a href='{html.escape(A.dashboard_url())}'>All courses</a> · "
-            f"<a href='{html.escape(jobs.links(job)['review'])}'>Course page</a> · "
-            f"<a href='/course-files/{jid}?key={k}'>Course files</a></p>")
+            f"<a href='{html.escape(jobs.page_url(job))}'>Course page</a> · "
+            f"<a href='/course-files/{jid}'>Course files</a></p>")
     rebuild = request.query_params.get("rebuild") == "1"
     if C.load(out) and not _busy(job) and not rebuild:
         page = (HERE / "editor" / "editor.html").read_text(encoding="utf-8")
-        cfg = {"job": jid, "key": A.dashboard_key(), "preview": f"/play/{jid}/{job['token']}/index.html",
-               "review": jobs.links(job)["review"], "dashboard": A.dashboard_url(),
-               "rebuild": f"/builder/{jid}?key={A.qkey()}&rebuild=1", "files": f"/course-files/{jid}?key={A.qkey()}"}
+        cfg = {"job": jid, "key": "", "preview": jobs.preview_url(job).replace(jobs.public_url(), ""),
+               "review": jobs.page_url(job), "dashboard": A.dashboard_url(),
+               "rebuild": f"/builder/{jid}?rebuild=1", "files": f"/course-files/{jid}"}
         page = page.replace("/*CONFIG*/", "window.BUILDER=" + json.dumps(cfg).replace("</", "<\\/") + ";")
         return Response(page, media_type="text/html", headers={"cache-control": "no-store", "referrer-policy": "no-referrer"})
     if _busy(job):
@@ -80,7 +83,7 @@ async def builder_page(request: Request):
                 f"<p>{A.pill(job['status'])} <span class=muted>{html.escape(job.get('step', ''))}</span></p>"
                 "<div class=card><p style='margin:0'>Dev is building the course. It usually takes 10 to 20 minutes. "
                 "This page refreshes by itself and you'll get an email when it's ready.</p></div>")
-        return A.page("Building the course", body, refresh=True)
+        return A.page("Building the course", body, refresh=True, request=request)
     has_sb = (out / "storyboard.json").exists() and job["status"] == "done"
     body = head + f"<h1>Build the course</h1><p class=muted>{html.escape(job.get('title') or '')}</p>"
     if not has_sb:
@@ -88,8 +91,8 @@ async def builder_page(request: Request):
     else:
         body += build_card(job, k, rebuild=bool(C.load(out)))
         if C.load(out):
-            body += f"<p><a href='/builder/{jid}?key={k}'>Back to the editor</a></p>"
-    return A.page("Build the course", body)
+            body += f"<p><a href='/builder/{jid}'>Back to the editor</a></p>"
+    return A.page("Build the course", body, request=request)
 
 
 def build_card(job: dict, k: str, rebuild: bool = False) -> str:
@@ -104,15 +107,17 @@ a scored assessment with results and retake, progress tracking, and downloads fo
 <p><b>Dev builds it</b>: Dev reads the storyboard module by module and writes clear learner-facing pages, turning narration into text
 and interactions into working questions and click-to-reveal panels. It takes about 10 to 20 minutes and costs {html.escape(BUILD_ESTIMATE)}
 in Claude usage. You'll get an email when it's ready.</p>
-<form method=post action="/builder/{jid}/build?key={k}"><input type=hidden name=mode value=dev><button>Have Dev build the course{again}</button></form>
+<form method=post action="/builder/{jid}/build"><input type=hidden name=mode value=dev><button>Have Dev build the course{again}</button></form>
 <p style="margin-top:18px"><b>Quick draft</b>: copies the storyboard into the course as it is (on-screen text, narration and questions), instantly and free.
 Good for a first look, but it needs more editing.</p>
-<form method=post action="/builder/{jid}/build?key={k}"><input type=hidden name=mode value=quick><button class=ghost>Make a free quick draft{again}</button></form>
+<form method=post action="/builder/{jid}/build"><input type=hidden name=mode value=quick><button class=ghost>Make a free quick draft{again}</button></form>
 {warn}</div>"""
 
 
 async def builder_build(request: Request):
     A = _app()
+    if blocked := A.gate(request, "designer"):
+        return blocked
     job = _job(request)
     if not job:
         return A.not_found()
@@ -120,18 +125,20 @@ async def builder_build(request: Request):
     mode = str(form.get("mode") or "")
     out = _out(job)
     if mode == "quick" and job["status"] == "done":
-        await asyncio.to_thread(jobs.quick_build, job)
+        await asyncio.to_thread(jobs.quick_build, job, A.auth.who(request))
     elif mode == "dev" and job["status"] == "done":
         build = C.course_dir(out) / "build"
         for f in build.glob("module_*.json"):  # a fresh build: forget earlier module results
             f.unlink()
-        jobs.start_build(job)
-    return RedirectResponse(f"/builder/{job['id']}?key={A.qkey()}", 303)
+        jobs.start_build(job, A.auth.who(request))
+    return RedirectResponse(f"/builder/{job['id']}", 303)
 
 
 async def builder_export(request: Request):
     A = _app()
-    job = _job(request)
+    if blocked := A.gate(request, "reviewer"):
+        return blocked
+    job = _job(request, "reviewer")
     kind = request.path_params["kind"]
     if not job or kind not in E.KINDS:
         return A.not_found()
@@ -147,6 +154,8 @@ async def builder_export(request: Request):
 # ---------------------------------------------------------------- API used by the editor
 
 async def api_course(request: Request):
+    if blocked := _app().gate(request, "designer", api=True):
+        return blocked
     job = _job(request)
     if not job:
         return JSONResponse({"error": "This link has expired. Open the editor from your dashboard."}, 404)
@@ -174,6 +183,8 @@ async def api_course(request: Request):
 
 
 async def api_restore(request: Request):
+    if blocked := _app().gate(request, "designer", api=True):
+        return blocked
     job = _job(request)
     if not job or _busy(job):
         return JSONResponse({"error": "Not available right now."}, 409)
@@ -190,6 +201,8 @@ async def api_restore(request: Request):
 
 
 async def api_upload(request: Request):
+    if blocked := _app().gate(request, "designer", api=True):
+        return blocked
     job = _job(request)
     if not job or _busy(job):
         return JSONResponse({"error": "Not available right now."}, 409)
@@ -212,8 +225,8 @@ async def api_upload(request: Request):
 
 
 async def builder_asset(request: Request):
-    """Pictures for the editor (dashboard key)."""
-    job = _job(request)
+    """Pictures for the editor (signed-in team members)."""
+    job = _job(request, "reviewer")
     if not job:
         return Response(status_code=404)
     return _asset(job, request.path_params["name"])
@@ -236,7 +249,8 @@ async def play(request: Request):
         job = jobs.load(request.path_params["job_id"])
     except KeyError:
         return Response("Not found", status_code=404)
-    if not hmac.compare_digest(request.path_params["token"], job["token"]):
+    given = request.path_params["token"]
+    if not (hmac.compare_digest(given, job["token"]) or (job.get("play_token") and hmac.compare_digest(given, job["play_token"]))):
         return Response("Not found", status_code=404)
     path = request.path_params["path"]
     course = C.load(_out(job))

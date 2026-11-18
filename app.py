@@ -5,7 +5,7 @@
   /api/brief        the website's "Send brief" button; starts production automatically
   /review/<id>      a course's page: read the design, approve or request changes, download results
   /files/<id>/...   downloads for a course
-  /dashboard        every course and its status (link is in each email)
+  /dashboard        every course and its status (sign-in; see auth.py and accounts.py)
   /builder/<id>     the course builder: edit the course, preview it, download SCORM (see authoring/routes.py)
   /play/<id>/<t>/   the built course, playable in a browser
   /health           for Render's health check
@@ -28,11 +28,15 @@ from pathlib import Path
 import markdown
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from starlette.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
+import accounts
 import agent_chat
+import auth
+import backup
+import db
 import chat
 import emailer
 import jobs
@@ -52,12 +56,53 @@ def dashboard_key() -> str:
 
 
 def qkey() -> str:
-    """The dashboard key, safe to put in a link (Render's generated keys can contain + / =)."""
-    return quote(dashboard_key(), safe="")
+    """Kept for older code: links no longer carry the dashboard key (team members sign in instead)."""
+    return ""
 
 
 def dashboard_url() -> str:
-    return f"{jobs.public_url()}/dashboard?key={qkey()}"
+    return f"{jobs.public_url()}/dashboard"
+
+
+def key_ok(request: Request) -> bool:
+    key = dashboard_key()
+    given = request.query_params.get("key", "")
+    # A "+" in an old, unencoded link arrives as a space; accept both.
+    return bool(key and given) and (hmac.compare_digest(given, key) or hmac.compare_digest(given.replace(" ", "+"), key))
+
+
+def gate(request: Request, need: str = "reviewer", api: bool = False):
+    """None when the signed-in member may do this; otherwise the response to send instead."""
+    user = auth.current_user(request)
+    if user and not auth.same_origin(request):
+        return JSONResponse({"error": "Not allowed."}, 403) if api else forbidden(request, "This form came from another website.")
+    if auth.can(user, need):
+        return None
+    if user:
+        if api:
+            return JSONResponse({"error": f"Your role ({auth.ROLE_NAMES[user['role']]}) can't do this. Ask an Admin."}, 403)
+        return forbidden(request)
+    if api:
+        return JSONResponse({"error": "Please sign in again (reload the page)."}, 401)
+    if not auth.has_users():
+        # Before the first account exists, the old dashboard link leads to the owner setup.
+        return RedirectResponse("/setup" + (f"?key={quote(request.query_params.get('key', ''), safe='')}" if key_ok(request) else ""), 303)
+    return RedirectResponse(auth.login_url(request), 303)
+
+
+def dashboard_ok(request: Request) -> bool:
+    """True for a signed-in member who may work on courses (Designer or Admin)."""
+    return auth.can(auth.current_user(request), "designer")
+
+
+def forbidden(request: Request, why: str = "") -> HTMLResponse:
+    u = auth.current_user(request)
+    role = auth.ROLE_NAMES.get(u["role"], "") if u else ""
+    r = page("Not allowed", f"<h1>Not allowed</h1><p>{html.escape(why) or f'Your role ({role}) can’t do this.'} "
+             "If you need it, ask an Admin to change your role on the Team members page.</p>"
+             "<p><a class='btn ghost' href='/dashboard'>Back to all courses</a></p>", request=request)
+    r.status_code = 403
+    return r
 
 
 # ---------------------------------------------------------------- API
@@ -94,6 +139,8 @@ async def api_brief(request: Request):
 
 
 async def health(_: Request):
+    if not await asyncio.to_thread(db.ping):
+        return PlainTextResponse("database not reachable", 503)
     return PlainTextResponse("ok")
 
 
@@ -114,6 +161,9 @@ textarea{min-height:120px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:
 table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
 .design h1{font-size:22px}.design h2{font-size:18px}.design h3{font-size:16px}.design{overflow-wrap:anywhere}
 :target{outline:3px solid var(--accent);outline-offset:4px;border-radius:14px}
+.topnav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;padding:0 0 14px;margin:0 0 18px;border-bottom:1px solid var(--line)}
+.topnav a{color:var(--accent)}button.link{background:none;border:0;padding:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
+.err{color:var(--bad)}.ok{color:var(--ok)}label{font-weight:600;display:block;margin:10px 0 4px}select{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
 """
 
 STATUS_TEXT = {
@@ -128,12 +178,27 @@ STATUS_TEXT = {
 }
 
 
-def page(title: str, body: str, refresh: bool = False) -> HTMLResponse:
+def nav(request: Request | None) -> str:
+    """The bar at the top for signed-in team members."""
+    u = auth.current_user(request) if request is not None else None
+    if not u:
+        return ""
+    links = ["<a href='/dashboard'>Courses</a>"]
+    if auth.can(u, "designer"):
+        links.append("<a href='/team'>Talk to the team</a>")
+    if auth.can(u, "admin"):
+        links += ["<a href='/admin/team'>Team members</a>", "<a href='/admin/system'>System</a>"]
+    return (f"<nav class=topnav><span>{' · '.join(links)}</span><span class=muted>{html.escape(u['name'])} "
+            f"({auth.ROLE_NAMES[u['role']]}) · <a href='/account'>Account</a> · "
+            "<form method=post action='/logout' style='display:inline'><button class=link>Sign out</button></form></span></nav>")
+
+
+def page(title: str, body: str, refresh: bool = False, request: Request | None = None) -> HTMLResponse:
     meta = '<meta http-equiv="refresh" content="30">' if refresh else ""
     return HTMLResponse(
         f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
         f"<meta name=robots content=noindex>{meta}<title>{html.escape(title)}</title><style>{CSS}</style></head>"
-        f"<body><main>{body}<p class=muted style='margin-top:40px;font-size:12px'>Version {VERSION}</p></main></body></html>",
+        f"<body><main>{nav(request)}{body}<p class=muted style='margin-top:40px;font-size:12px'>Version {VERSION}</p></main></body></html>",
         headers={"cache-control": "no-store", "referrer-policy": "no-referrer"},
     )
 
@@ -144,12 +209,22 @@ def pill(status: str) -> str:
 
 
 def get_job(request: Request) -> dict | None:
+    """A course opened with its private email link code, or by a signed-in team member."""
     try:
         job = jobs.load(request.path_params["job_id"])
     except KeyError:
         return None
     token = request.query_params.get("t", "")
-    return job if hmac.compare_digest(token, job["token"]) else None
+    if token and hmac.compare_digest(token, job["token"]):
+        request.state.via_link = True
+        return job
+    request.state.via_link = False
+    return job if auth.can(auth.current_user(request), "reviewer") else None
+
+
+def may(request: Request, need: str) -> bool:
+    """Email links can do everything on the course page, as before; team members by their role."""
+    return getattr(request.state, "via_link", False) or auth.can(auth.current_user(request), need)
 
 
 def not_found() -> HTMLResponse:
@@ -161,20 +236,31 @@ def not_found() -> HTMLResponse:
 async def review(request: Request):
     job = get_job(request)
     if not job:
+        if not auth.current_user(request) and not request.query_params.get("t"):
+            return gate(request, "reviewer")
         return not_found()
-    t = html.escape(job["token"])
+    t = html.escape(job["token"]) if request.state.via_link else ""
+    work = may(request, "designer")
+
+    def file_link(name: str) -> str:
+        return jobs.file_url(job, name) if request.state.via_link else f"/files/{jid}/{name}"
     jid = job["id"]
     st = job["status"]
     out = jobs.job_dir(jid) / "output"
     parts = [
         f"<p class=muted><a href='{html.escape(dashboard_url())}'>All courses</a> · "
-        f"<a href='/team?key={qkey()}&course={jid}'>Talk to the team about this course</a> · "
-        f"<a href='/course-files/{jid}?key={qkey()}'>Course files</a></p>",
+        f"<a href='/team?course={jid}'>Talk to the team about this course</a> · "
+        f"<a href='/course-files/{jid}'>Course files</a></p>",
         f"<h1>{html.escape(job.get('title') or 'New course brief')}</h1>",
         f"<p class=muted>Client: {html.escape(job['client_name'])} ({html.escape(job['client_email'])})</p>",
         f"<p>{pill(st)} <span class=muted>{html.escape(job.get('step', ''))}</span></p>",
     ]
-    if st == "awaiting_approval":
+    if st == "awaiting_approval" and not work:
+        parts.append(f"""<div class=card id=changes><h2 style="margin-top:0">Request changes</h2>
+<p class=muted>Write what you'd like Iris to change, in your own words. Approving the design is for Designers and Admins.</p>
+<form method=post action="/review/{jid}/changes?t={t}"><textarea name=feedback required placeholder="For example: make it 15 minutes and add a module on reporting near misses"></textarea>
+<p><button class=ghost>Send changes to Iris</button></p></form></div>""")
+    elif st == "awaiting_approval":
         parts.append(f"""
 <div class=card id=approve><h2 style="margin-top:0">Happy with this design?</h2>
 <p>Approving starts the full storyboard. It takes about an hour and costs roughly $7 in Claude usage. You'll get an email with the Word storyboard when it's done.</p>
@@ -190,22 +276,22 @@ async def review(request: Request):
         parts.append(f"""<div class=card><h2 style="margin-top:0">Something went wrong</h2>
 <pre style="white-space:pre-wrap">{html.escape(job.get('error', ''))}</pre>
 <p>Common causes: the Claude account ran out of credit or hit its spending limit, or the API key is wrong. Fix that, then try again. Finished steps are kept.</p>
-<form method=post action="/review/{jid}/retry?t={t}"><button>Try again</button></form></div>""")
+{f'<form method=post action="/review/{jid}/retry?t={t}"><button>Try again</button></form>' if work else ''}</div>""")
     if st == "done":
         s = job.get("summary", {})
         parts.append(f"""<div class=card><h2 style="margin-top:0">Downloads</h2>
 <p>{s.get('screens', '?')} screens. Final QA {'passed' if s.get('passed') else 'has open points, see the QA report'}. Cost ${job.get('cost_usd', 0):.2f}.</p>
-<p class=row><a class=btn href="{html.escape(jobs.file_url(job, 'storyboard.docx'))}">Storyboard (Word)</a>
-<a class="btn ghost" href="{html.escape(jobs.file_url(job, 'qa_report.md'))}">QA report</a>
-{f'<a class="btn ghost" href="{html.escape(jobs.file_url(job, "production_pack.docx"))}">Production pack (Word)</a>' if (out / "production_pack.docx").exists() else ""}</p></div>""")
+<p class=row><a class=btn href="{html.escape(file_link('storyboard.docx'))}">Storyboard (Word)</a>
+<a class="btn ghost" href="{html.escape(file_link('qa_report.md'))}">QA report</a>
+{f'<a class="btn ghost" href="{html.escape(file_link("production_pack.docx"))}">Production pack (Word)</a>' if (out / "production_pack.docx").exists() else ""}</p></div>""")
         if jobs.course_ready(job):
             parts.append(f"""<div class=card id=course><h2 style="margin-top:0">The course</h2>
 <p>Built and ready to edit. Try it like a learner, change anything without code, and download it for your LMS (SCORM 1.2 or 2004).</p>
-<p class=row><a class=btn href="/builder/{jid}?key={qkey()}">Open the course editor</a>
+<p class=row>{f'<a class=btn href="/builder/{jid}">Open the course editor</a>' if work else ''}
 <a class="btn ghost" href="{html.escape(jobs.preview_url(job))}" target=_blank rel=noopener>Try the course</a></p></div>""")
-        else:
+        elif work:
             parts.append(builder_routes.build_card(job, qkey()))
-        if not job.get("pack_done"):
+        if not job.get("pack_done") and work:
             team = "".join(f"<li><b>{n}</b>, {r}: {t.lower()}</li>" for _, n, r, _, t in jobs.pipeline.PACK_AGENTS)
             parts.append(f"""<div class=card id=pack><h2 style="margin-top:0">Optional: the production pack</h2>
 <p>The rest of the team writes their documents from this storyboard:</p><ul>{team}</ul>
@@ -214,9 +300,10 @@ async def review(request: Request):
     if (out / "1_design.md").exists():
         parts.append(f"<div class='card design'>{jobs.design_html(job)}</div>")
     parts.append("<h2>History</h2><table>" + "".join(
-        f"<tr><td class=muted style='white-space:nowrap'>{time.strftime('%d %b %H:%M UTC', time.gmtime(h['at']))}</td><td>{html.escape(h['text'])}</td></tr>"
+        f"<tr><td class=muted style='white-space:nowrap'>{time.strftime('%d %b %H:%M UTC', time.gmtime(h['at']))}</td>"
+        f"<td>{html.escape(h['text'])}{' <span class=muted>(' + html.escape(h['by']) + ')</span>' if h.get('by') else ''}</td></tr>"
         for h in reversed(job.get("history", []))) + "</table>")
-    return page(job.get("title") or "Course", "".join(parts), refresh=st in jobs.WORKING)
+    return page(job.get("title") or "Course", "".join(parts), refresh=st in jobs.WORKING, request=request)
 
 
 async def review_action(request: Request):
@@ -224,16 +311,21 @@ async def review_action(request: Request):
     if not job:
         return not_found()
     action = request.path_params["action"]
+    need = "reviewer" if action == "changes" else "designer"
+    if not request.state.via_link and (blocked := gate(request, need)):
+        return blocked
+    by = auth.who(request) or ("email link" if request.state.via_link else None)
     if action == "approve":
-        jobs.approve(job)
+        jobs.approve(job, by)
     elif action == "changes":
         form = await request.form()
-        jobs.request_changes(job, str(form.get("feedback") or ""))
+        jobs.request_changes(job, str(form.get("feedback") or ""), by)
     elif action == "retry":
-        jobs.retry(job)
+        jobs.retry(job, by)
     elif action == "pack":
-        jobs.start_pack(job)
-    return RedirectResponse(f"/review/{job['id']}?t={job['token']}", 303)
+        jobs.start_pack(job, by)
+    back = f"/review/{job['id']}" + (f"?t={job['token']}" if request.state.via_link else "")
+    return RedirectResponse(back, 303)
 
 
 async def files(request: Request):
@@ -275,24 +367,19 @@ async def claude_key_status() -> tuple[bool, str]:
     return result
 
 
-def dashboard_ok(request: Request) -> bool:
-    key = dashboard_key()
-    given = request.query_params.get("key", "")
-    # A "+" in an old, unencoded link arrives as a space; accept both.
-    return bool(key) and (hmac.compare_digest(given, key) or hmac.compare_digest(given.replace(" ", "+"), key))
-
-
 async def dashboard(request: Request):
-    if not dashboard_ok(request):
-        return not_found()
+    if blocked := gate(request, "reviewer"):
+        return blocked
     k = qkey()
+    work = auth.can(auth.current_user(request), "designer")
+    all_jobs = jobs.all_jobs()
     rows = "".join(
-        f"<tr><td><a href='{html.escape(jobs.links(j)['review'])}'>{html.escape(j.get('title') or 'New brief')}</a>"
+        f"<tr><td><a href='{html.escape(jobs.page_url(j))}'>{html.escape(j.get('title') or 'New brief')}</a>"
         f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
         f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td>"
-        f"<td><a href='/team?key={k}&course={j['id']}'>Talk to the team</a><br><a href='/course-files/{j['id']}?key={k}'>Course files</a>"
-        f"{'<br><a href=/builder/' + j['id'] + '?key=' + k + '>Course editor</a>' if j.get('course_built') else ''}</td></tr>"
-        for j in jobs.all_jobs()) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
+        f"<td>{'<a href=/team?course=' + j['id'] + '>Talk to the team</a><br>' if work else ''}<a href='/course-files/{j['id']}'>Course files</a>"
+        f"{'<br><a href=/builder/' + j['id'] + '>Course editor</a>' if j.get('course_built') and work else ''}</td></tr>"
+        for j in all_jobs) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
     email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
         "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
         "under your service's Environment page, to get approval emails.</div>")
@@ -302,27 +389,34 @@ async def dashboard(request: Request):
                 f"Claude said: {html.escape(why)}. Put a new key in Render (your service, Environment, ANTHROPIC_API_KEY), save, "
                 "wait until it says Live, then reload this page.</div>")
     fake_note = "<div class=card><b>Test mode is on</b> (MODULO_FAKE). Courses use the sample forklift answers and cost nothing.</div>" if os.environ.get("MODULO_FAKE") else ""
+    q = jobs.queue_state()
+    queue_note = (f"<p class=muted>Work queue: {len(q['running'])} running, {len(q['waiting'])} waiting "
+                  f"(up to {q['parallel']} at a time).</p>") if q["running"] or q["waiting"] else ""
+    if not work:
+        body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Open a course to read it, download files or request changes.</p>
+{queue_note}<div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th><th></th></tr>{rows}</table></div>"""
+        return page("Modulo courses", body, refresh=bool(q["running"] or q["waiting"]), request=request)
     body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Bookmark this page.</p>
-<p><a class=btn href="/team?key={k}">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>
-<p>{sample_button(k)} <span class=muted>A finished demo course to explore, free.</span></p>{email_note}{fake_note}
+<p><a class=btn href="/team">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>
+<p>{sample_button(k)} <span class=muted>A finished demo course to explore, free.</span></p>{email_note}{key_note if not ok else ''}{fake_note}{queue_note}
 <div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th><th></th></tr>{rows}</table></div>
 <div class=card><h2 style="margin-top:0">Start a course from a brief you received elsewhere</h2>
 <p class=muted>Paste a brief from an email or a document. It goes through the same steps as a website brief.</p>
-<form method=post action="/dashboard/new?key={k}"><div class=row><input name=name placeholder="Client name" required style="flex:1;min-width:180px">
+<form method=post action="/dashboard/new"><div class=row><input name=name placeholder="Client name" required style="flex:1;min-width:180px">
 <input name=email type=email placeholder="Client email" required style="flex:1;min-width:180px"></div>
 <p><textarea name=transcript required placeholder="Paste the brief here"></textarea></p><button>Start</button></form></div>"""
-    return page("Modulo courses", body, refresh=any(j["status"] in jobs.WORKING for j in jobs.all_jobs()))
+    return page("Modulo courses", body, refresh=any(j["status"] in jobs.WORKING for j in all_jobs), request=request)
 
 
 async def dashboard_new(request: Request):
-    if not dashboard_ok(request):
-        return not_found()
+    if blocked := gate(request, "designer"):
+        return blocked
     form = await request.form()
     name, email, transcript = (str(form.get(k) or "").strip() for k in ("name", "email", "transcript"))
     if name and email and transcript:
-        job = jobs.create(name[:120], email[:200], transcript[:60000], source="pasted on the dashboard")
-        return RedirectResponse(jobs.links(job)["review"].replace(jobs.public_url(), ""), 303)
-    return RedirectResponse(f"/dashboard?key={qkey()}", 303)
+        job = jobs.create(name[:120], email[:200], transcript[:60000], source="pasted on the dashboard", who=auth.who(request))
+        return RedirectResponse(jobs.page_url(job), 303)
+    return RedirectResponse("/dashboard", 303)
 
 
 # ---------------------------------------------------------------- talk to one agent
@@ -409,40 +503,40 @@ def _admin_job(job_id: str) -> dict | None:
 
 
 async def dashboard_sample(request: Request):
-    if not dashboard_ok(request):
-        return not_found()
+    if blocked := gate(request, "designer"):
+        return blocked
     job = await asyncio.to_thread(jobs.create_sample)
-    return RedirectResponse(f"/team?key={qkey()}&course={job['id']}&agent=theo", 303)
+    return RedirectResponse(f"/team?course={job['id']}&agent=theo", 303)
 
 
 def sample_button(k: str, label: str = "Add the sample forklift course") -> str:
-    return (f"<form method=post action='/dashboard/sample?key={k}' style='display:inline'><button class=ghost>{label}</button></form>")
+    return (f"<form method=post action='/dashboard/sample' style='display:inline'><button class=ghost>{label}</button></form>")
 
 
 async def team_page(request: Request):
-    if not dashboard_ok(request):
-        return not_found()
+    if blocked := gate(request, "designer"):
+        return blocked
     all_jobs = jobs.all_jobs()
     k = qkey()
     if not all_jobs:
-        return page("Talk to the team", f"<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>"
+        return page("Talk to the team", f"<p class=muted><a href='/dashboard'>All courses</a></p><h1>Talk to the team</h1>"
                     "<div class=card><p style='margin-top:0'><b>There's nothing to talk about yet.</b> The agents chat about a specific course, "
                     "and you don't have any courses yet.</p>"
                     "<p>To try it now, add the finished forklift sample course. It's free and takes a second. "
                     "Or send a brief from your website, or paste one on the dashboard; you can chat about it straight away.</p>"
-                    f"<p>{sample_button(k)}</p></div>")
+                    f"<p>{sample_button(k)}</p></div>", request=request)
     want = request.query_params.get("course", "")
     opts = "".join(
-        f"<option value='{j['id']}' data-review='{html.escape(jobs.links(j)['review'])}' data-status='{j['status']}' "
+        f"<option value='{j['id']}' data-review='{html.escape(jobs.page_url(j))}' data-status='{j['status']}' "
         f"data-sb='{1 if (jobs.job_dir(j['id']) / 'output' / 'storyboard.json').exists() else 0}' "
         f"data-pack='{','.join(p.stem for p in (jobs.job_dir(j['id']) / 'output' / 'pack').glob('*.md') if '_before_' not in p.stem)}'"
         f"{' selected' if j['id'] == want else ''}>"
         f"{html.escape((j.get('title') or 'New brief')[:70])} ({html.escape(j['client_name'][:30])})</option>" for j in all_jobs)
     sel = next((j for j in all_jobs if j["id"] == want), all_jobs[0])
     body = f"""<style>{TEAM_CSS}</style>
-<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>
+<p class=muted><a href='/dashboard'>All courses</a></p><h1>Talk to the team</h1>
 <p class=muted>A private chat with one team member about one course. When Iris or Theo suggest a change, nothing is saved until you press <b>Save to course</b>. Saving keeps a backup and rebuilds the Word storyboard.</p>
-<p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.links(sel)['review'])}">Open course page</a> {sample_button(k, "Add sample course")}</p>
+<p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.page_url(sel))}">Open course page</a> {sample_button(k, "Add sample course")}</p>
 <div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button>
 <button data-a=sam>Sam · SME</button><button data-a=vera>Vera · visuals</button><button data-a=mila>Mila · voiceover</button><button data-a=dev>Dev · build</button>
 <button data-a=lars>Lars · LMS</button><button data-a=nia>Nia · evaluation</button><button data-a=paige>Paige · project</button></div>
@@ -450,12 +544,12 @@ async def team_page(request: Request):
 <form id=form><label for=msg><b>Your message</b></label><textarea id=msg></textarea><p class=muted id=wait hidden></p><p id=err></p>
 <p class=row><button id=send>Send</button> <button type=button class=ghost id=clear>Clear this chat</button></p></form>
 <script>{TEAM_JS}</script>"""
-    return page("Talk to the team", body)
+    return page("Talk to the team", body, request=request)
 
 
 async def team_chat(request: Request):
-    if not dashboard_ok(request):
-        return JSONResponse({"error": "Not allowed."}, 403)
+    if blocked := gate(request, "designer", api=True):
+        return blocked
     try:
         body = await request.json()
     except ValueError:
@@ -470,8 +564,8 @@ async def team_chat(request: Request):
 
 
 async def team_apply(request: Request):
-    if not dashboard_ok(request):
-        return JSONResponse({"error": "Not allowed."}, 403)
+    if blocked := gate(request, "designer", api=True):
+        return blocked
     try:
         body = await request.json()
     except ValueError:
@@ -541,7 +635,7 @@ def _help(rel: str) -> str:
 
 
 def _course_and_file(request: Request) -> tuple[dict | None, Path | None]:
-    if not dashboard_ok(request):
+    if not auth.can(auth.current_user(request), "reviewer"):
         return None, None
     try:
         job = jobs.load(request.path_params["job_id"])
@@ -562,17 +656,18 @@ def _rel(job: dict, f: Path) -> str:
 
 
 async def course_files_page(request: Request):
+    if blocked := gate(request, "reviewer"):
+        return blocked
     job, _ = _course_and_file(request)
     if not job:
         return not_found()
-    k = qkey()
     root = jobs.job_dir(job["id"])
     files = sorted((p for p in root.rglob("*") if p.is_file() and not p.name.endswith(".tmp")),
                    key=lambda p: (p.parent != root, "proposals" in p.parts, p.parent.name, p.name))
     rows = []
     for p in files:
         rel = _rel(job, p)
-        q = f"?key={k}&f={html.escape(rel)}"
+        q = f"?f={html.escape(rel)}"
         size = p.stat().st_size
         size_txt = f"{size / 1024:.0f} KB" if size >= 1024 else f"{size} bytes"
         view = "" if p.suffix == ".docx" else f"<a href='/course-files/{job['id']}/view{q}'>Open</a> · "
@@ -580,18 +675,19 @@ async def course_files_page(request: Request):
             f"<tr><td><b>{html.escape(rel)}</b><div class=muted>{html.escape(_help(rel))}</div></td>"
             f"<td class=muted style='white-space:nowrap'>{size_txt}<br>{time.strftime('%d %b %H:%M', time.gmtime(p.stat().st_mtime))} UTC</td>"
             f"<td style='white-space:nowrap'>{view}<a href='/course-files/{job['id']}/download{q}'>Download</a></td></tr>")
-    body = (f"<p class=muted><a href='/dashboard?key={k}'>All courses</a> · <a href='{html.escape(jobs.links(job)['review'])}'>Course page</a></p>"
+    body = (f"<p class=muted><a href='/dashboard'>All courses</a> · <a href='{html.escape(jobs.page_url(job))}'>Course page</a></p>"
             f"<h1>Course files</h1><p class=muted>{html.escape(job.get('title') or 'New brief')} · {html.escape(job['client_name'])}</p>"
             "<p>Everything saved for this course. <b>Open</b> shows a file here in the browser; <b>Download</b> saves it to your computer.</p>"
             f"<div class=card><table><tr><th>File</th><th>Size and date</th><th></th></tr>{''.join(rows)}</table></div>")
-    return page("Course files", body)
+    return page("Course files", body, request=request)
 
 
 async def course_file_view(request: Request):
+    if blocked := gate(request, "reviewer"):
+        return blocked
     job, f = _course_and_file(request)
     if not job or not f:
         return not_found()
-    k = qkey()
     rel = _rel(job, f)
     text = f.read_text(encoding="utf-8", errors="replace")
     if f.suffix == ".md":
@@ -603,19 +699,26 @@ async def course_file_view(request: Request):
             pass
         if f.name == "job.json":
             text = text.replace(job["token"], "(private link code hidden)")
+            if job.get("play_token"):
+                text = text.replace(job["play_token"], "(course preview code hidden)")
         shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px'>{html.escape(text)}</pre>"
     else:
         shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere'>{html.escape(text)}</pre>"
-    body = (f"<p class=muted><a href='/course-files/{job['id']}?key={k}'>Back to course files</a></p>"
+    body = (f"<p class=muted><a href='/course-files/{job['id']}'>Back to course files</a></p>"
             f"<h1 style='overflow-wrap:anywhere'>{html.escape(rel)}</h1><p class=muted>{html.escape(_help(rel))}</p>"
-            f"<p><a class='btn ghost' href='/course-files/{job['id']}/download?key={k}&f={html.escape(rel)}'>Download</a></p>{shown}")
-    return page(rel, body)
+            f"<p><a class='btn ghost' href='/course-files/{job['id']}/download?f={html.escape(rel)}'>Download</a></p>{shown}")
+    return page(rel, body, request=request)
 
 
 async def course_file_download(request: Request):
+    if blocked := gate(request, "reviewer"):
+        return blocked
     job, f = _course_and_file(request)
     if not job or not f:
         return not_found()
+    if f.name == "job.json":  # never hand out the private email link codes
+        text = f.read_text(encoding="utf-8").replace(job["token"], "(private link code hidden)")
+        return Response(text, media_type="application/json", headers={"content-disposition": 'attachment; filename="job.json"'})
     return FileResponse(f, filename=f.name)
 
 
@@ -633,20 +736,50 @@ async def lifespan(_app):
     missing = [k for k in ("ANTHROPIC_API_KEY", "RESEND_API_KEY", "NOTIFY_EMAIL", "DASHBOARD_KEY") if not os.environ.get(k)]
     if missing:
         log.warning("Not set yet: %s", ", ".join(missing))
-    log.info("Dashboard: %s/dashboard?key=<DASHBOARD_KEY>", jobs.public_url())
+    # The database: create tables, bring over logins from the SQLite file if Postgres was just added,
+    # and add any course folders on the disk that the database doesn't know yet. Nothing is deleted.
+    await asyncio.to_thread(db.init)
+    await asyncio.to_thread(db.copy_sqlite_into_postgres)
+    added = await asyncio.to_thread(jobs.import_from_disk)
+    log.info("Database: %s. %d courses in it (%d just brought over from the disk).", db.kind(),
+             len(await asyncio.to_thread(jobs.all_jobs)), added)
+    log.info("Dashboard: %s/dashboard", jobs.public_url())
+    mail_ok = bool(emailer.notify_address() and os.environ.get("RESEND_API_KEY"))
     welcome = jobs.DATA_DIR / "welcome_sent.txt"
-    if dashboard_key() and emailer.notify_address() and os.environ.get("RESEND_API_KEY") and not welcome.exists():
+    has_users = await asyncio.to_thread(auth.has_users)
+    setup_link = f"{jobs.public_url()}/setup?key={quote(dashboard_key(), safe='')}"
+    if dashboard_key() and mail_ok and not welcome.exists() and not has_users:
         body = (f"<p>Your Modulo service is live at <a href='{jobs.public_url()}'>{jobs.public_url()}</a>.</p>"
-                f"<p>Your private dashboard, with every course and its status, is here. Bookmark it:</p>"
-                f"<p><a href='{dashboard_url()}'>Open the Modulo dashboard</a></p>"
+                "<p>First, create your owner login (it takes a minute). Keep this email private: the link works only once, "
+                "for the first account.</p>"
+                f"<p><a href='{setup_link}'>Create my Modulo login</a></p>"
                 "<p>From now on, each brief a client sends from the website starts automatically, "
                 "and you'll get an email when a course design is ready for your OK.</p>")
         if await asyncio.to_thread(emailer.send, "Your Modulo service is live", jobs._wrap(body)):
             jobs.DATA_DIR.mkdir(parents=True, exist_ok=True)
             welcome.write_text(time.ctime())
-    task = asyncio.create_task(jobs.worker())
+            await asyncio.to_thread(db.set_meta, "login_email_sent", str(time.time()))
+    elif dashboard_key() and mail_ok and not has_users and not await asyncio.to_thread(db.get_meta, "login_email_sent"):
+        body = ("<p>Modulo now has personal logins for you and your team, with roles (Admin, Designer, Reviewer). "
+                "The old secret dashboard link is replaced by a sign-in page.</p>"
+                "<p>Create your owner login now (it takes a minute). Keep this email private: the link works only once, "
+                "for the first account.</p>"
+                f"<p><a href='{setup_link}'>Create my Modulo login</a></p>"
+                "<p>The Approve and Request changes buttons in your course emails keep working as before, without signing in.</p>")
+        if await asyncio.to_thread(emailer.send, "Create your Modulo login", jobs._wrap(body)):
+            await asyncio.to_thread(db.set_meta, "login_email_sent", str(time.time()))
+
+    def backup_failed(result: dict) -> None:
+        emailer.send("Modulo: last night's backup did not work", jobs._wrap(
+            f"<p>The nightly backup did not work:</p><pre style='white-space:pre-wrap'>{html.escape(result.get('error', ''))}</pre>"
+            f"<p>Your courses are safe; this only means there is no fresh backup copy. It tries again in a few hours. "
+            f"See <a href='{jobs.public_url()}/admin/system'>the System page</a>.</p>"))
+
+    tasks = [asyncio.create_task(jobs.worker()), asyncio.create_task(backup.nightly(backup_failed))]
     yield
-    task.cancel()
+    for t in tasks:
+        t.cancel()
+    await asyncio.to_thread(db.close)
 
 
 app = Starlette(
@@ -667,6 +800,7 @@ app = Starlette(
         Route("/api/team/chat", team_chat, methods=["POST"]),
         Route("/api/team/apply", team_apply, methods=["POST"]),
         *builder_routes.ROUTES,
+        *accounts.ROUTES,
         Mount("/", StaticFiles(directory=HERE / "public", html=True)),
     ],
     lifespan=lifespan,
