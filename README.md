@@ -14,9 +14,10 @@ One always-on Render web service that runs the Modulo website, the agent chat, a
 | `chat.py` | Website chat via the Anthropic SDK (`claude-opus-5-5`, low effort, JSON schema output, server-side refusal fallback). |
 | `jobs.py` | One folder per brief under `$DATA_DIR/jobs/`, a single background worker (one course at a time), status flow, emails. |
 | `emailer.py` | Resend API. Without a key, emails are written to `$DATA_DIR/outbox/`. |
+| `authoring/` | The course builder (own SCORM authoring tool). `course.py`: the course format (sections, pages, blocks), checks, and a free rule-based draft from a storyboard. `build.py`: Dev builds `output/course/course.json` from `storyboard.json`, one Claude call per module, resumable. `player/`: the HTML5 player (vanilla JS, responsive, keyboard and screen reader friendly) with a SCORM 1.2 and 2004 runtime wrapper; without an LMS it saves progress in localStorage. `export.py`: SCORM 1.2, SCORM 2004 3rd edition and plain web zips, with a structural self-check run on every export. `editor/editor.html` + `routes.py`: the editor at `/builder/<id>` (dashboard key), the shareable player at `/play/<id>/<token>/`. `tests/`: browser tests (see below). |
 | `pipeline/` | The Agent SDK pipeline: Iris, Theo, Quinn (`make_design()`, `make_storyboard()`), then the optional production pack (`make_pack()`: Sam, Vera, Mila, Dev, Lars, Nia, Paige, one Markdown document each, combined into `production_pack.docx`). Instructions in `pipeline/agents/*.md`. Still runnable by hand: `python pipeline/pipeline.py brief.txt`. |
 
-Status flow: `designing -> awaiting_approval -> (revising -> awaiting_approval) -> storyboarding -> done -> (packing -> done, after the owner presses Start the production pack)`, or `failed` with a retry button. On startup the worker re-queues anything left in a working state; the pipeline reuses saved drafts, so a redeploy mid-run loses at most the step in progress.
+Status flow: `designing -> awaiting_approval -> (revising -> awaiting_approval) -> storyboarding -> done -> (packing -> done, after the owner presses Start the production pack) -> (building -> done, after the owner presses Have Dev build the course)`, or `failed` with a retry button. On startup the worker re-queues anything left in a working state; the pipeline reuses saved drafts, so a redeploy mid-run loses at most the step in progress.
 
 Approve and change requests are POST forms on the review page (email links only open the page), so mail scanners that prefetch links cannot start a $7 run. Each job has a random token in its links; the dashboard uses `DASHBOARD_KEY`.
 
@@ -42,6 +43,17 @@ pip install -r requirements.txt
 MODULO_FAKE=1 DASHBOARD_KEY=dev uvicorn app:app --reload
 # open http://localhost:8000 and http://localhost:8000/dashboard?key=dev ; emails land in data/outbox/
 ```
+
+## Course builder tests
+
+```
+authoring/tests/run_tests.sh            # builds the sample as SCORM 1.2 / 2004 / web, plays them in Chromium inside a mock LMS
+                                        # (fail, retake, pass, score, interactions, resume, exit, phone layout, keyboard)
+MODULO_FAKE=1 DASHBOARD_KEY=dev uvicorn app:app --port 8800   # then add the sample course and make a quick draft
+node authoring/tests/editor_test.js http://localhost:8800 <job id> dev /tmp   # drives the editor end to end
+```
+
+Both need Node with Playwright (`NODE_PATH=$(npm root -g)`).
 
 ## Notes
 

@@ -6,6 +6,8 @@
   /review/<id>      a course's page: read the design, approve or request changes, download results
   /files/<id>/...   downloads for a course
   /dashboard        every course and its status (link is in each email)
+  /builder/<id>     the course builder: edit the course, preview it, download SCORM (see authoring/routes.py)
+  /play/<id>/<t>/   the built course, playable in a browser
   /health           for Render's health check
 """
 
@@ -34,6 +36,7 @@ import agent_chat
 import chat
 import emailer
 import jobs
+from authoring import routes as builder_routes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("modulo")
@@ -119,6 +122,7 @@ STATUS_TEXT = {
     "awaiting_approval": "Waiting for your approval",
     "storyboarding": "Storyboard in progress",
     "packing": "Production pack in progress",
+    "building": "Dev is building the course",
     "done": "Finished",
     "failed": "Stopped with a problem",
 }
@@ -194,6 +198,13 @@ async def review(request: Request):
 <p class=row><a class=btn href="{html.escape(jobs.file_url(job, 'storyboard.docx'))}">Storyboard (Word)</a>
 <a class="btn ghost" href="{html.escape(jobs.file_url(job, 'qa_report.md'))}">QA report</a>
 {f'<a class="btn ghost" href="{html.escape(jobs.file_url(job, "production_pack.docx"))}">Production pack (Word)</a>' if (out / "production_pack.docx").exists() else ""}</p></div>""")
+        if jobs.course_ready(job):
+            parts.append(f"""<div class=card id=course><h2 style="margin-top:0">The course</h2>
+<p>Built and ready to edit. Try it like a learner, change anything without code, and download it for your LMS (SCORM 1.2 or 2004).</p>
+<p class=row><a class=btn href="/builder/{jid}?key={qkey()}">Open the course editor</a>
+<a class="btn ghost" href="{html.escape(jobs.preview_url(job))}" target=_blank rel=noopener>Try the course</a></p></div>""")
+        else:
+            parts.append(builder_routes.build_card(job, qkey()))
         if not job.get("pack_done"):
             team = "".join(f"<li><b>{n}</b>, {r}: {t.lower()}</li>" for _, n, r, _, t in jobs.pipeline.PACK_AGENTS)
             parts.append(f"""<div class=card id=pack><h2 style="margin-top:0">Optional: the production pack</h2>
@@ -279,7 +290,8 @@ async def dashboard(request: Request):
         f"<tr><td><a href='{html.escape(jobs.links(j)['review'])}'>{html.escape(j.get('title') or 'New brief')}</a>"
         f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
         f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td>"
-        f"<td><a href='/team?key={k}&course={j['id']}'>Talk to the team</a><br><a href='/course-files/{j['id']}?key={k}'>Course files</a></td></tr>"
+        f"<td><a href='/team?key={k}&course={j['id']}'>Talk to the team</a><br><a href='/course-files/{j['id']}?key={k}'>Course files</a>"
+        f"{'<br><a href=/builder/' + j['id'] + '?key=' + k + '>Course editor</a>' if j.get('course_built') else ''}</td></tr>"
         for j in jobs.all_jobs()) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
     email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
         "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
@@ -510,6 +522,17 @@ def _help(rel: str) -> str:
             if name.startswith(aid):
                 kind = "backup before a chat change" if "_before_" in name else ("readable" if name.endswith(".md") else "raw data")
                 return f"{n}'s {t.lower()} ({kind})"
+    if rel.startswith("output/course/"):
+        if name == "course.json":
+            return "The built course (edit it in the course editor)"
+        if rel.startswith("output/course/versions/"):
+            return "Earlier saved version of the course"
+        if rel.startswith("output/course/assets/"):
+            return "Picture uploaded to the course"
+        if name == "build_notes.md":
+            return "Dev's notes on how the storyboard was built"
+        if name.startswith("module_"):
+            return "Dev's build of one module (raw data)"
     if "_before_" in name:
         return "Backup made before you saved a change from the team chat"
     if rel.startswith("proposals/"):
@@ -643,6 +666,7 @@ app = Starlette(
         Route("/course-files/{job_id}/download", course_file_download),
         Route("/api/team/chat", team_chat, methods=["POST"]),
         Route("/api/team/apply", team_apply, methods=["POST"]),
+        *builder_routes.ROUTES,
         Mount("/", StaticFiles(directory=HERE / "public", html=True)),
     ],
     lifespan=lifespan,

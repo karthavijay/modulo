@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Course builder</title>
+<style>
+:root{--bg:#f7f7fb;--fg:#1c1f2e;--muted:#5d6275;--line:#e1e3ee;--card:#fff;--accent:#2f3e9e;--soft:#eef0fb;--ok:#1d7a46;--okbg:#e7f5ec;--bad:#b3261e;--badbg:#fdecea;--warnbg:#fff6e0}
+@media (prefers-color-scheme:dark){:root{--bg:#12131a;--fg:#ecedf3;--muted:#a3a7b8;--line:#2b2d3a;--card:#1b1c25;--accent:#9aa7ff;--soft:#252845;--ok:#62d394;--okbg:#16301f;--bad:#ff8a80;--badbg:#3a1714;--warnbg:#33290f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+.top h1{font-size:17px;margin:0;flex:1;min-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status{font-size:13px;color:var(--muted);min-width:120px;text-align:right}
+.status.bad{color:var(--bad);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:9px 16px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;text-decoration:none;font-size:14px;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.small{padding:5px 10px;font-size:13px}
+.btn.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 58px)}
+aside{border-right:1px solid var(--line);background:var(--card);padding:12px;overflow:auto;max-height:calc(100vh - 58px);position:sticky;top:58px}
+aside .nav{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+aside .sec{margin:14px 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 8px}
+.item{all:unset;box-sizing:border-box;display:block;width:100%;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+.item:hover{background:var(--bg)}.item:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.item[aria-current=true]{background:var(--soft);font-weight:600}
+.item .warn{color:var(--bad);font-weight:700}
+.add{all:unset;cursor:pointer;color:var(--accent);font-size:13px;font-weight:600;padding:4px 10px;display:block}
+.add:focus-visible{outline:3px solid var(--accent)}
+main{padding:20px 24px 80px;min-width:0}
+.panel{max-width:820px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 14px}
+.card h2{font-size:18px;margin:0 0 10px}
+.card h3{font-size:15px;margin:0}
+label.f{display:block;font-weight:600;font-size:13px;margin:10px 0 4px}
+.hint{font-weight:400;color:var(--muted);font-size:13px}
+input[type=text],input[type=number],textarea,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+textarea{min-height:80px;resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.blockhead{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.blockhead .type{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);flex:1}
+.icon{all:unset;cursor:pointer;width:30px;height:30px;border-radius:8px;display:inline-grid;place-items:center;border:1px solid var(--line);font-size:14px}
+.icon:hover{background:var(--bg)}.icon:focus-visible{outline:3px solid var(--accent)}
+.icon[disabled]{opacity:.35;cursor:default}
+.opt{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:8px;margin:6px 0}
+.opt.right{border-color:var(--ok);background:var(--okbg)}
+.opt .full{grid-column:2 / 3}
+.checks li{margin:4px 0}
+.fix{background:var(--badbg);border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.good{background:var(--okbg);border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.note{background:var(--warnbg);border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.addbar{display:flex;flex-wrap:wrap;gap:6px}
+img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margin:6px 0}
+.muted{color:var(--muted)}
+.err{color:var(--bad);font-weight:600}
+@media (max-width:860px){.layout{grid-template-columns:1fr}aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}main{padding:16px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="ctitle">Course builder</h1>
+  <span class="status" id="status" role="status" aria-live="polite">Loading...</span>
+  <a class="btn ghost" id="previewBtn" target="_blank" rel="noopener">Preview</a>
+  <button class="btn" type="button" id="downloadBtn">Check and download</button>
+</header>
+<div class="layout">
+  <aside aria-label="Course outline"><div class="nav" id="nav"></div><div id="outline"></div></aside>
+  <main id="main" tabindex="-1"><div class="panel" id="panel"><p>Loading the course...</p></div></main>
+</div>
+<script>/*CONFIG*/</script>
+<script>
+(function () {
+  "use strict";
+  var CFG = window.BUILDER;
+  var Q = "?key=" + encodeURIComponent(CFG.key);
+  var course = null, check = null, versions = 0, view = { kind: "page", s: 0, p: 0 };
+  var dirty = false, saving = false, saveTimer = null, lastError = "";
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------------------------------------------------------------- tiny DOM helper
+  function h(tag, attrs) {
+    var e = document.createElement(tag), kids = [].slice.call(arguments, 2);
+    Object.keys(attrs || {}).forEach(function (k) {
+      var v = attrs[k];
+      if (k === "text") e.textContent = v;
+      else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), v);
+      else if (k === "value") e.value = v == null ? "" : v;
+      else if (k === "checked" || k === "disabled" || k === "selected") e[k] = !!v;
+      else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+    });
+    kids.forEach(function (k) { if (k == null || k === false) return; if (Array.isArray(k)) k.forEach(function (x) { if (x) e.appendChild(x); }); else e.appendChild(typeof k === "string" ? document.createTextNode(k) : k); });
+    return e;
+  }
+  var uidN = 0;
+  function uid(prefix) { return prefix + "new" + Date.now().toString(36) + (uidN++); }
+
+  // ---------------------------------------------------------------- saving
+  function setStatus(text, bad) { var s = $("status"); s.textContent = text; s.className = "status" + (bad ? " bad" : ""); }
+  function changed(rerenderOutline) {
+    dirty = true; setStatus("Unsaved changes");
+    clearTimeout(saveTimer); saveTimer = setTimeout(save, 1200);
+    if (rerenderOutline) renderOutline();
+  }
+  function api(path, opts) {
+    return fetch("/api/builder/" + CFG.job + path + Q, opts).then(function (r) {
+      return r.json().catch(function () { return { error: "The server sent an unexpected answer (" + r.status + ")." }; }).then(function (d) { if (!r.ok) throw d; return d; });
+    });
+  }
+  function save() {
+    if (saving) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 500); return Promise.resolve(); }
+    if (!dirty) return Promise.resolve();
+    saving = true; dirty = false; setStatus("Saving...");
+    return api("/course", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(course) })
+      .then(function (d) {
+        saving = false;
+        course.revision = d.course.revision; // keep local edits, take the new revision
+        mergeIds(d.course);
+        check = d.check; versions = d.versions; lastError = "";
+        setStatus(dirty ? "Unsaved changes" : "All changes saved");
+        renderOutline(); if (view.kind === "download") renderPanel();
+      })
+      .catch(function (e) {
+        saving = false; dirty = true; lastError = e.error || "Couldn't save. Check your internet connection.";
+        setStatus("Not saved: " + lastError, true);
+        if (!e.conflict) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 8000); }
+      });
+  }
+  // the server gives new blocks and pages permanent ids; copy them so later saves match
+  function mergeIds(server) {
+    course.sections.forEach(function (s, si) {
+      var ss = server.sections[si]; if (!ss) return; s.id = ss.id;
+      s.pages.forEach(function (p, pi) {
+        var sp = ss.pages[pi]; if (!sp) return; p.id = sp.id;
+        p.blocks.forEach(function (b, bi) { var sb = sp.blocks[bi]; if (sb && sb.type === b.type) b.id = sb.id; });
+      });
+    });
+  }
+  window.addEventListener("beforeunload", function (e) { if (dirty || saving) { save(); e.preventDefault(); e.returnValue = ""; } });
+
+  function load() {
+    return api("/course").then(function (d) {
+      course = d.course; check = d.check; versions = d.versions;
+      $("ctitle").textContent = course.title;
+      setStatus("All changes saved");
+      if (!pageAt(view.s, view.p)) view = { kind: "page", s: 0, p: 0 };
+      renderAll();
+    }).catch(function (e) { $("panel").innerHTML = ""; $("panel").appendChild(h("p", { "class": "err", text: e.error || "Couldn't load the course." })); setStatus("", false); });
+  }
+
+  // ---------------------------------------------------------------- navigation
+  function pageAt(s, p) { return course.sections[s] && course.sections[s].pages[p]; }
+  function pageNumber(s, p) { var n = 0; for (var i = 0; i < s; i++) n += course.sections[i].pages.length; return n + p; }
+  function show(v) { view = v; renderAll(); $("main").focus(); window.scrollTo(0, 0); }
+  function pageProblems(p) {
+    var bad = 0;
+    p.blocks.forEach(function (b) {
+      if (b.type !== "question") return;
+      var r = b.options.filter(function (o) { return o.correct; }).length;
+      if (b.options.length < 2 || r === 0 || (r > 1 && !b.multiple) || !b.prompt) bad++;
+    });
+    return bad;
+  }
+
+  function renderNav() {
+    var nav = $("nav"); nav.innerHTML = "";
+    nav.appendChild(h("button", { "class": "item", type: "button", "aria-current": view.kind === "settings" ? "true" : "false", onclick: function () { show({ kind: "settings" }); } }, "⚙️ Course settings"));
+    nav.appendChild(h("button", { "class": "item", type: "button", "aria-current": view.kind === "download" ? "true" : "false", onclick: function () { show({ kind: "download" }); } }, "⬇️ Check and download"));
+    nav.appendChild(h("a", { "class": "item", href: CFG.review }, "← Back to the course page"));
+  }
+
+  function renderOutline() {
+    var o = $("outline"); o.innerHTML = "";
+    course.sections.forEach(function (sec, si) {
+      o.appendChild(h("div", { "class": "sec" }, sec.title || "Section " + (si + 1)));
+      sec.pages.forEach(function (p, pi) {
+        var cur = view.kind === "page" && view.s === si && view.p === pi;
+        var bad = pageProblems(p);
+        o.appendChild(h("button", { "class": "item", type: "button", "aria-current": cur ? "true" : "false", onclick: function () { show({ kind: "page", s: si, p: pi }); } },
+          (pageNumber(si, pi) + 1) + ". " + (p.title || "Untitled page"), bad ? h("span", { "class": "warn", text: " ⚠", title: "Needs fixing" }) : null,
+          bad ? h("span", { style: "position:absolute;left:-9999px", text: " (needs fixing)" }) : null));
+      });
+      o.appendChild(h("button", { "class": "add", type: "button", onclick: function () {
+        sec.pages.push({ id: uid("p"), title: "New page", blocks: [{ id: uid("b"), type: "text", text: "" }] });
+        changed(); show({ kind: "page", s: si, p: sec.pages.length - 1 });
+      } }, "+ Add a page to this section"));
+    });
+    o.appendChild(h("button", { "class": "add", type: "button", style: "margin-top:10px", onclick: function () {
+      course.sections.push({ id: uid("s"), title: "New section", pages: [{ id: uid("p"), title: "New page", blocks: [{ id: uid("b"), type: "text", text: "" }] }] });
+      changed(); show({ kind: "page", s: course.sections.length - 1, p: 0 });
+    } }, "+ Add a section"));
+  }
+
+  function renderAll() {
+    renderNav(); renderOutline(); renderPanel();
+    $("previewBtn").href = CFG.preview + (view.kind === "page" ? "#page=" + pageNumber(view.s, view.p) : "");
+  }
+
+  // ---------------------------------------------------------------- field helpers
+  function field(label, hint, input) { return h("div", null, h("label", { "class": "f", "for": input.id }, label, hint ? h("span", { "class": "hint", text: " " + hint }) : null), input); }
+  var fid = 0;
+  function textIn(obj, key, opts) {
+    opts = opts || {};
+    var id = "f" + (fid++);
+    var el = h(opts.multi ? "textarea" : "input", { id: id, type: opts.multi ? null : "text", value: obj[key] || "", placeholder: opts.placeholder || "", rows: opts.rows || null,
+      oninput: function () { obj[key] = el.value; changed(opts.outline); if (opts.after) opts.after(); } });
+    return el;
+  }
+  function checkIn(obj, key, label, after) {
+    var id = "f" + (fid++);
+    return h("label", { "for": id, style: "display:flex;gap:8px;align-items:center;margin:8px 0;cursor:pointer" },
+      h("input", { id: id, type: "checkbox", checked: !!obj[key], onchange: function (e) { obj[key] = e.target.checked; changed(true); if (after) after(); } }), label);
+  }
+
+  // ---------------------------------------------------------------- panels
+  function renderPanel() {
+    var panel = $("panel"); panel.innerHTML = "";
+    if (view.kind === "settings") return renderSettings(panel);
+    if (view.kind === "download") return renderDownload(panel);
+    var sec = course.sections[view.s], page = pageAt(view.s, view.p);
+    if (!page) { panel.appendChild(h("p", { text: "This course has no pages yet. Add a section in the outline." })); return; }
+
+    // page header
+    var head = h("div", { "class": "card" });
+    head.appendChild(h("div", { "class": "row", style: "justify-content:space-between" },
+      h("h2", { style: "margin:0" }, "Page " + (pageNumber(view.s, view.p) + 1)),
+      h("div", { "class": "row" },
+        h("button", { "class": "icon", type: "button", title: "Move page up", "aria-label": "Move page up", disabled: view.s === 0 && view.p === 0, onclick: function () { movePage(-1); } }, "↑"),
+        h("button", { "class": "icon", type: "button", title: "Move page down", "aria-label": "Move page down", disabled: view.s === course.sections.length - 1 && view.p === sec.pages.length - 1, onclick: function () { movePage(1); } }, "↓"),
+        h("button", { "class": "btn small ghost", type: "button", onclick: duplicatePage }, "Duplicate"),
+        h("button", { "class": "btn small danger", type: "button", onclick: deletePage }, "Delete page"))));
+    head.appendChild(field("Page title", "", textIn(page, "title", { outline: true })));
+    head.appendChild(field("Section", "(shared by every page in this section)", textIn(sec, "title", { outline: true })));
+    if (page.source && page.source.length) head.appendChild(h("p", { "class": "hint", style: "margin:8px 0 0", text: "From storyboard screen " + page.source.join(", ") }));
+    if (sec.pages.length === 1 && course.sections.length > 1) head.appendChild(h("p", { "class": "hint", text: "This is the only page in its section. Deleting it also removes the section." }));
+    panel.appendChild(head);
+
+    page.blocks.forEach(function (b, bi) { panel.appendChild(blockCard(page, b, bi)); });
+
+    var add = h("div", { "class": "card" }, h("h3", { style: "margin-bottom:8px" }, "Add a block to this page"));
+    var bar = h("div", { "class": "addbar" });
+    [["text", "Text"], ["heading", "Heading"], ["image", "Picture"], ["callout", "Callout box"], ["reveal", "Click to reveal"], ["question", "Question"], ["results", "Results"]].forEach(function (t) {
+      bar.appendChild(h("button", { "class": "btn small ghost", type: "button", onclick: function () { page.blocks.push(newBlock(t[0])); changed(true); renderPanel(); var cards = document.querySelectorAll(".block-card"); var last = cards[cards.length - 1]; if (last) { last.scrollIntoView(); var f = last.querySelector("input,textarea"); if (f) f.focus(); } } }, "+ " + t[1]));
+    });
+    add.appendChild(bar);
+    panel.appendChild(add);
+  }
+
+  function newBlock(type) {
+    var b = { id: uid("b"), type: type };
+    if (type === "text" || type === "heading") b.text = "";
+    if (type === "callout") { b.style = "info"; b.title = ""; b.text = ""; }
+    if (type === "image") { b.src = ""; b.alt = ""; b.caption = ""; b.description = ""; }
+    if (type === "reveal") { b.text = ""; b.items = [{ title: "", text: "" }, { title: "", text: "" }]; }
+    if (type === "question") { b.prompt = ""; b.multiple = false; b.scored = false; b.retry = true; b.options = [{ text: "", correct: true, feedback: "" }, { text: "", correct: false, feedback: "" }]; b.feedback_correct = ""; b.feedback_incorrect = ""; }
+    return b;
+  }
+
+  var NAMES = { text: "Text", heading: "Heading", image: "Picture", callout: "Callout box", reveal: "Click to reveal", question: "Question", results: "Results" };
+
+  function blockCard(page, b, bi) {
+    var card = h("section", { "class": "card block-card", "aria-label": NAMES[b.type] + " block" });
+    card.appendChild(h("div", { "class": "blockhead" },
+      h("span", { "class": "type" }, NAMES[b.type] + (b.type === "question" ? (b.scored ? " (scored)" : " (knowledge check)") : "")),
+      h("button", { "class": "icon", type: "button", title: "Move up", "aria-label": "Move block up", disabled: bi === 0, onclick: function () { page.blocks.splice(bi - 1, 0, page.blocks.splice(bi, 1)[0]); changed(); renderPanel(); } }, "↑"),
+      h("button", { "class": "icon", type: "button", title: "Move down", "aria-label": "Move block down", disabled: bi === page.blocks.length - 1, onclick: function () { page.blocks.splice(bi + 1, 0, page.blocks.splice(bi, 1)[0]); changed(); renderPanel(); } }, "↓"),
+      h("button", { "class": "icon", type: "button", title: "Delete", "aria-label": "Delete this block", onclick: function () { page.blocks.splice(bi, 1); changed(true); renderPanel(); } }, "✕")));
+    var body = blockEditors[b.type](b);
+    card.appendChild(body);
+    return card;
+  }
+
+  var blockEditors = {
+    text: function (b) { return field("Text", "Start a line with - for a bullet, or 1. for a numbered list. Put **two stars** around words for bold.", textIn(b, "text", { multi: true, rows: 6 })); },
+    heading: function (b) { return field("Heading", "", textIn(b, "text")); },
+    callout: function (b) {
+      var id = "f" + (fid++);
+      var sel = h("select", { id: id, onchange: function () { b.style = sel.value; changed(); } },
+        [["info", "Note (blue)"], ["tip", "Tip (green)"], ["warning", "Important (amber)"]].map(function (o) { return h("option", { value: o[0], selected: b.style === o[0] }, o[1]); }));
+      return h("div", null, field("Kind", "", sel), field("Title", "(optional)", textIn(b, "title")), field("Text", "", textIn(b, "text", { multi: true })));
+    },
+    image: function (b) {
+      var box = h("div");
+      function draw() {
+        box.innerHTML = "";
+        if (b.src) {
+          var src = b.src.indexOf("assets/") === 0 ? "/builder/" + CFG.job + "/" + b.src + Q : b.src;
+          box.appendChild(h("img", { "class": "thumb", src: src, alt: "" }));
+        } else {
+          box.appendChild(h("p", { "class": "note", style: "margin:4px 0" }, h("b", { text: "Placeholder. " }), "Learners see “Image to come” and this note until you upload a picture."));
+          box.appendChild(field("What the picture should show", "(for Vera or whoever makes it)", textIn(b, "description", { multi: true, rows: 3 })));
+        }
+        var fileId = "f" + (fid++);
+        var input = h("input", { type: "file", id: fileId, accept: "image/png,image/jpeg,image/gif,image/webp", style: "position:absolute;left:-9999px", onchange: function () { upload(input.files[0]); } });
+        var msg = h("span", { "class": "hint", role: "status" });
+        box.appendChild(h("div", { "class": "row", style: "margin-top:6px" },
+          input, h("label", { "for": fileId, "class": "btn small", tabindex: "0", onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } } }, b.src ? "Replace picture" : "Upload a picture"),
+          b.src ? h("button", { "class": "btn small ghost", type: "button", onclick: function () { b.src = ""; changed(); draw(); } }, "Remove picture") : null, msg));
+        box.appendChild(field("Description for screen readers (alt text)", "Say what matters in the picture. Leave empty only if it's decoration.", textIn(b, "alt")));
+        box.appendChild(field("Caption", "(optional, shown under the picture)", textIn(b, "caption")));
+        function upload(file) {
+          if (!file) return;
+          msg.textContent = "Uploading...";
+          var fd = new FormData(); fd.append("file", file);
+          api("/upload", { method: "POST", body: fd }).then(function (d) { b.src = d.src; changed(); draw(); })
+            .catch(function (e) { msg.textContent = e.error || "Upload failed."; msg.className = "err"; });
+        }
+      }
+      draw();
+      return box;
+    },
+    reveal: function (b) {
+      var box = h("div");
+      function draw() {
+        box.innerHTML = "";
+        box.appendChild(field("Introduction", "(optional)", textIn(b, "text", { multi: true, rows: 2 })));
+        b.items.forEach(function (it, i) {
+          box.appendChild(h("div", { "class": "opt", style: "grid-template-columns:1fr auto" },
+            h("div", null, field("Panel " + (i + 1) + " button", "", textIn(it, "title")), field("What it reveals", "", textIn(it, "text", { multi: true, rows: 3 }))),
+            h("button", { "class": "icon", type: "button", "aria-label": "Remove panel " + (i + 1), onclick: function () { b.items.splice(i, 1); changed(); draw(); } }, "✕")));
+        });
+        box.appendChild(h("button", { "class": "btn small ghost", type: "button", onclick: function () { b.items.push({ title: "", text: "" }); changed(); draw(); } }, "+ Add a panel"));
+      }
+      draw();
+      return box;
+    },
+    question: function (b) {
+      var box = h("div");
+      function draw() {
+        box.innerHTML = "";
+        box.appendChild(field("Question", "", textIn(b, "prompt", { multi: true, rows: 3, after: warn })));
+        box.appendChild(checkIn(b, "multiple", "Learners can select more than one answer (select all that apply)", function () { draw(); }));
+        box.appendChild(checkIn(b, "scored", "Counts toward the final score (assessment question)", function () { b.retry = !b.scored; draw(); renderOutline(); }));
+        var group = "g" + (fid++);
+        b.options.forEach(function (o, i) {
+          var cid = "f" + (fid++);
+          var mark = h("input", { type: b.multiple ? "checkbox" : "radio", name: group, id: cid, checked: o.correct, "aria-label": "Answer " + (i + 1) + " is correct",
+            onchange: function () {
+              if (!b.multiple) b.options.forEach(function (x, j) { x.correct = j === i; }); else o.correct = mark.checked;
+              changed(true); draw();
+            } });
+          box.appendChild(h("div", { "class": "opt" + (o.correct ? " right" : "") },
+            h("div", { style: "text-align:center" }, mark, h("label", { "for": cid, "class": "hint", style: "display:block;font-size:11px" }, "Right")),
+            h("div", null, field("Answer " + (i + 1), "", textIn(o, "text", { placeholder: "Answer text" })),
+              field("Feedback for this answer", "(optional)", textIn(o, "feedback", { multi: true, rows: 2 }))),
+            h("button", { "class": "icon", type: "button", "aria-label": "Remove answer " + (i + 1), disabled: b.options.length <= 2, onclick: function () { b.options.splice(i, 1); changed(true); draw(); } }, "✕")));
+        });
+        box.appendChild(h("button", { "class": "btn small ghost", type: "button", onclick: function () { b.options.push({ text: "", correct: false, feedback: "" }); changed(); draw(); } }, "+ Add an answer"));
+        box.appendChild(field("Feedback when right", "(optional)", textIn(b, "feedback_correct", { multi: true, rows: 2 })));
+        box.appendChild(field("Feedback when wrong", "(optional)", textIn(b, "feedback_incorrect", { multi: true, rows: 2 })));
+        box.appendChild(warnBox);
+        warn();
+      }
+      var warnBox = h("p", { "class": "err", role: "status" });
+      function warn() {
+        var r = b.options.filter(function (o) { return o.correct; }).length;
+        warnBox.textContent = !b.prompt ? "Write the question." : r === 0 ? "Mark the right answer." : (r > 1 && !b.multiple) ? "Several answers are marked right. Tick “more than one answer” or mark only one." : "";
+      }
+      draw();
+      return box;
+    },
+    results: function () {
+      return h("p", { style: "margin:0" }, "Shows the learner's score, pass or fail, and a retake button. It counts every question marked “Counts toward the final score”. The pass mark is in Course settings.");
+    }
+  };
+
+  function movePage(d) {
+    var sec = course.sections[view.s], page = sec.pages[view.p];
+    var flat = []; course.sections.forEach(function (s, si) { s.pages.forEach(function (p, pi) { flat.push([si, pi]); }); });
+    var i = pageNumber(view.s, view.p), j = i + d;
+    if (j < 0 || j >= flat.length) return;
+    sec.pages.splice(view.p, 1);
+    var t = flat[j], ts = t[0], tp = t[1];
+    if (ts === view.s) { sec.pages.splice(tp, 0, page); view.p = tp; }
+    else if (d < 0) { course.sections[ts].pages.push(page); view = { kind: "page", s: ts, p: course.sections[ts].pages.length - 1 }; }
+    else { course.sections[ts].pages.unshift(page); view = { kind: "page", s: ts, p: 0 }; }
+    changed(); renderAll();
+  }
+  function duplicatePage() {
+    var sec = course.sections[view.s];
+    var copy = JSON.parse(JSON.stringify(sec.pages[view.p]));
+    copy.id = uid("p"); copy.title += " (copy)"; copy.blocks.forEach(function (b) { b.id = uid("b"); });
+    sec.pages.splice(view.p + 1, 0, copy);
+    view.p += 1; changed(); renderAll();
+  }
+  function deletePage() {
+    var sec = course.sections[view.s];
+    if (!window.confirm("Delete the page “" + sec.pages[view.p].title + "”? You can undo with “Go back to the previous save” on the Check and download page.")) return;
+    sec.pages.splice(view.p, 1);
+    if (!sec.pages.length && course.sections.length > 1) { course.sections.splice(view.s, 1); view.s = Math.max(0, view.s - 1); view.p = 0; }
+    else view.p = Math.max(0, view.p - 1);
+    changed(); renderAll();
+  }
+
+  function renderSettings(panel) {
+    var s = course.settings;
+    var c = h("div", { "class": "card" }, h("h2", null, "Course settings"));
+    c.appendChild(field("Course title", "", textIn(course, "title", { after: function () { $("ctitle").textContent = course.title; } })));
+    c.appendChild(field("Short description", "(shown in some LMS catalogs)", textIn(course, "description", { multi: true, rows: 3 })));
+    var pid = "f" + (fid++);
+    c.appendChild(field("Pass mark (%)", "Share of scored questions a learner must get right.", h("input", { id: pid, type: "number", min: 0, max: 100, value: s.pass_mark, oninput: function (e) { s.pass_mark = e.target.value; changed(); } })));
+    var aid = "f" + (fid++);
+    c.appendChild(field("How many tries learners get", "0 means unlimited retakes.", h("input", { id: aid, type: "number", min: 0, max: 20, value: s.max_attempts, oninput: function (e) { s.max_attempts = e.target.value; changed(); } })));
+    var nid = "f" + (fid++);
+    var nav = h("select", { id: nid, onchange: function () { s.navigation = nav.value; changed(); } },
+      h("option", { value: "free", selected: s.navigation !== "sequential" }, "Free: learners can open any page from the menu"),
+      h("option", { value: "sequential", selected: s.navigation === "sequential" }, "In order: pages unlock one by one, and questions must be answered to go on"));
+    c.appendChild(field("Navigation", "", nav));
+    c.appendChild(checkIn(s, "quiz_feedback", "Show right or wrong feedback on assessment questions straight away"));
+    var cid = "f" + (fid++);
+    var contrast = h("span", { "class": "hint" });
+    var color = h("input", { id: cid, type: "color", value: s.accent, style: "width:60px;height:36px;padding:2px", oninput: function () { s.accent = color.value; changed(); showContrast(); } });
+    function showContrast() {
+      var hx = s.accent, lin = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      var L = 0.2126 * lin(parseInt(hx.substr(1, 2), 16)) + 0.7152 * lin(parseInt(hx.substr(3, 2), 16)) + 0.0722 * lin(parseInt(hx.substr(5, 2), 16));
+      var r = 1.05 / (L + 0.05);
+      contrast.textContent = r >= 4.5 ? " Readable with white text (" + r.toFixed(1) + " to 1)." : " Too light for white button text (" + r.toFixed(1) + " to 1, needs 4.5). Pick a darker color.";
+      contrast.className = r >= 4.5 ? "hint" : "err";
+    }
+    c.appendChild(h("div", null, h("label", { "class": "f", "for": cid }, "Main color"), h("div", { "class": "row" }, color, contrast)));
+    showContrast();
+    c.appendChild(field("Message when a learner passes", "(optional)", textIn(s, "pass_message", { multi: true, rows: 2 })));
+    c.appendChild(field("Message when a learner doesn't pass", "(optional)", textIn(s, "fail_message", { multi: true, rows: 2 })));
+    panel.appendChild(c);
+  }
+
+  function renderDownload(panel) {
+    var c = h("div", { "class": "card" }, h("h2", null, "Check and download"));
+    if (check.fix.length) c.appendChild(h("div", { "class": "fix" }, h("b", { text: "Please fix these first:" }), h("ul", { "class": "checks" }, check.fix.map(function (t) { return h("li", { text: t }); }))));
+    else c.appendChild(h("div", { "class": "good" }, h("b", { text: "Ready to download. " }), check.pages + " pages, " + check.scored + " scored questions."));
+    if (check.note.length) c.appendChild(h("div", { "class": "note" }, h("b", { text: "Before it goes to learners:" }), h("ul", { "class": "checks" }, check.note.map(function (t) { return h("li", { text: t }); }))));
+    panel.appendChild(c);
+
+    var d = h("div", { "class": "card" }, h("h2", null, "Download"));
+    [["scorm12", "SCORM 1.2", "Works in almost every LMS (Cornerstone, Moodle, TalentLMS, Docebo and others). Choose this if you're not sure."],
+     ["scorm2004", "SCORM 2004", "For LMSs that ask for it. Reports completion and pass or fail separately."],
+     ["web", "Website (no LMS)", "A folder you can put on any website or open on a computer. Progress is saved in the learner's browser only."]].forEach(function (k) {
+      d.appendChild(h("div", { "class": "row", style: "margin:10px 0;align-items:flex-start" },
+        h("button", { "class": "btn" + (k[0] === "scorm12" ? "" : " ghost"), type: "button", style: "min-width:190px", disabled: check.fix.length > 0 && !d.dataset.anyway,
+          onclick: function () { save().then(function () { window.location = "/builder/" + CFG.job + "/export/" + k[0] + Q; }); } }, "Download " + k[1]),
+        h("span", { "class": "muted", style: "flex:1;min-width:200px" }, k[2])));
+    });
+    if (check.fix.length) d.appendChild(h("button", { "class": "btn small ghost", type: "button", onclick: function () { d.dataset.anyway = "1"; [].forEach.call(d.querySelectorAll("button.btn:not(.small)"), function (x) { x.disabled = false; }); } }, "Download anyway"));
+    d.appendChild(h("p", { "class": "muted", style: "margin-bottom:0" }, "To test before sending to a client, upload the SCORM file to a free SCORM Cloud account (cloud.scorm.com) and launch it there."));
+    panel.appendChild(d);
+
+    var share = h("div", { "class": "card" }, h("h2", null, "Share a preview"),
+      h("p", null, "Anyone with this link can try the course in their browser. It always shows the latest saved version."),
+      h("input", { type: "text", readonly: true, value: location.origin + CFG.preview, "aria-label": "Preview link", onfocus: function (e) { e.target.select(); } }));
+    panel.appendChild(share);
+
+    var more = h("div", { "class": "card" }, h("h2", null, "Versions and rebuilding"));
+    more.appendChild(h("p", null, "Every save keeps the previous version. " + (versions ? versions + " earlier version" + (versions === 1 ? " is" : "s are") + " kept." : "")));
+    more.appendChild(h("div", { "class": "row" },
+      h("button", { "class": "btn small ghost", type: "button", disabled: !versions, onclick: function () {
+        if (!window.confirm("Go back to the version before your last save? Your current version is replaced.")) return;
+        clearTimeout(saveTimer); dirty = false;
+        api("/restore", { method: "POST" }).then(function (dd) { course = dd.course; check = dd.check; versions = dd.versions; setStatus("Went back to the previous save"); renderAll(); })
+          .catch(function (e) { setStatus(e.error || "Couldn't go back.", true); });
+      } }, "Go back to the previous save"),
+      h("a", { "class": "btn small ghost", href: CFG.rebuild }, "Build again from the storyboard"),
+      h("a", { "class": "btn small ghost", href: CFG.files }, "Course files")));
+    if (course.built_by) more.appendChild(h("p", { "class": "hint", text: "First built by: " + course.built_by }));
+    panel.appendChild(more);
+  }
+
+  $("downloadBtn").addEventListener("click", function () { show({ kind: "download" }); });
+  $("previewBtn").addEventListener("click", function () { save(); });
+  load();
+})();
+</script>
+</body>
+</html>
