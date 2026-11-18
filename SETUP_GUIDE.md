@@ -12,7 +12,26 @@ When it is set up, it all runs by itself:
 4. When you press **Approve**, Theo writes the storyboard and Quinn checks it. This takes about an hour.
 5. You get a second email with the **Word storyboard** and the **QA report** attached.
 
-Nothing expensive happens until you approve. The storyboard step is the part that costs about $7.
+6. **Optional:** the storyboard email also offers the **production pack**. If you press it, the other seven team members each write their document (listed below). That takes about 20 to 30 minutes, costs about $4 to $6, and arrives as one Word file.
+
+Nothing expensive happens until you approve. The storyboard step is the part that costs about $7, and the production pack only runs when you ask for it.
+
+## The team and what each one makes
+
+| Team member | When | What they make |
+|---|---|---|
+| Iris, Instructional Designer | First | The course design: objectives, modules, assessment |
+| Theo, Storyboard Writer | After you approve the design | The screen-by-screen storyboard with narration |
+| Quinn, QA Reviewer | With Theo | The QA report, and Theo fixes what Quinn finds |
+| Sam, SME Liaison | Production pack | SME review pack: facts to confirm, interview questions, sign-off checklist |
+| Vera, Visual Designer | Production pack | Visual style guide, asset list with alt text, and ready-to-use image prompts |
+| Mila, Voiceover and Media Producer | Production pack | Voice casting, recording specs, pronunciation guide, caption plan |
+| Dev, eLearning Developer | Production pack | Build specification for Storyline or Rise: triggers, variables, accessibility |
+| Lars, LMS and SCORM Administrator | Production pack | Publishing settings, tracking tests and LMS launch checklist |
+| Nia, Learning Analyst | Production pack | How to measure whether the course worked, with a survey and 90-day plan |
+| Paige, Project Manager | Production pack, last | Project plan, schedule, open items and risks, ready for the client |
+
+The production pack is documents only. No voice is recorded, no images are generated and nothing is uploaded to an LMS. Those could be connected later (for example ElevenLabs for voice, an image service for Vera's prompts, SCORM Cloud for Lars) once you decide you want them.
 
 Everything (website, chat and the course team) lives in one place, called Render. You no longer need Netlify.
 
@@ -88,7 +107,7 @@ To have emails come from your own domain instead of Resend's test address, add t
 
 - **You only need your inbox.** Each email has the buttons you need.
 - **The dashboard** shows every course, its status and cost, and lets you start a course from a brief that came in by email or phone.
-- **Talking to one agent:** on the dashboard, press **Talk to the team** (or the link next to a course). Pick the course, then pick **Iris** (design), **Theo** (storyboard) or **Quinn** (QA) and chat as you would with a colleague. For example: "Theo, make screen 2.3 shorter and add a knowledge check after it", or "Quinn, why did you flag screen 4.1?". When Iris or Theo suggest a change, a box appears with **Save to course**. Nothing changes until you press it. Saving keeps a backup of the old version and rebuilds the Word storyboard, which you download from the course page as usual. You can chat at any stage, even while a course is in production: the agents see the brief, the design and the latest draft. Changes can only be saved once the current step has finished. No course yet? Press **Add the sample forklift course** on the dashboard for a free, finished demo course to chat about. Starting a chat costs about 20 cents, because the agent reads the whole course; follow-up messages cost a few cents.
+- **Talking to one agent:** on the dashboard, press **Talk to the team** (or the link next to a course). Pick the course, then pick any of the ten team members, for example **Iris** (design), **Theo** (storyboard), **Quinn** (QA) or **Vera** (visuals) and chat as you would with a colleague. For example: "Theo, make screen 2.3 shorter and add a knowledge check after it", or "Quinn, why did you flag screen 4.1?". When a team member suggests a change to their work, a box appears with **Save to course**. Nothing changes until you press it. Saving keeps a backup of the old version and rebuilds the Word storyboard, which you download from the course page as usual. You can chat at any stage, even while a course is in production: the agents see the brief, the design and the latest draft. Changes can only be saved once the current step has finished. No course yet? Press **Add the sample forklift course** on the dashboard for a free, finished demo course to chat about. Starting a chat costs about 20 cents, because the agent reads the whole course; follow-up messages cost a few cents.
 - **Seeing every file of a course:** on the dashboard, press **Course files** next to a course (it's also at the top of each course page). It lists everything saved for that course with a short explanation of each file: the brief, Iris's design, each storyboard draft, each QA round, costs, and backups. Press **Open** to read a file in the browser, or **Download** to save it, including the Word storyboard.
 - **Changing how an agent works:** the agents' job descriptions are the files in `pipeline/agents/` on GitHub. Click a file, press the pencil icon, edit the text, and press **Commit changes**. Render picks up the change by itself within a few minutes.
 - **Safety limits:** the service starts at most 10 new briefs a day (you can change `MAX_BRIEFS_PER_DAY` in Render, Environment), and your Claude spend limit caps the total.

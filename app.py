@@ -38,7 +38,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 log = logging.getLogger("modulo")
 HERE = Path(__file__).resolve().parent
 MAX_BRIEFS_PER_DAY = int(os.environ.get("MAX_BRIEFS_PER_DAY", "10"))
-DOWNLOADS = {"storyboard.docx", "qa_report.md", "storyboard.md", "1_design.md", "run_log.json"}
+DOWNLOADS = {"storyboard.docx", "qa_report.md", "storyboard.md", "1_design.md", "run_log.json", "production_pack.docx"}
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -111,6 +111,7 @@ STATUS_TEXT = {
     "revising": "Iris is revising the design",
     "awaiting_approval": "Waiting for your approval",
     "storyboarding": "Storyboard in progress",
+    "packing": "Production pack in progress",
     "done": "Finished",
     "failed": "Stopped with a problem",
 }
@@ -184,7 +185,14 @@ async def review(request: Request):
         parts.append(f"""<div class=card><h2 style="margin-top:0">Downloads</h2>
 <p>{s.get('screens', '?')} screens. Final QA {'passed' if s.get('passed') else 'has open points, see the QA report'}. Cost ${job.get('cost_usd', 0):.2f}.</p>
 <p class=row><a class=btn href="{html.escape(jobs.file_url(job, 'storyboard.docx'))}">Storyboard (Word)</a>
-<a class="btn ghost" href="{html.escape(jobs.file_url(job, 'qa_report.md'))}">QA report</a></p></div>""")
+<a class="btn ghost" href="{html.escape(jobs.file_url(job, 'qa_report.md'))}">QA report</a>
+{f'<a class="btn ghost" href="{html.escape(jobs.file_url(job, "production_pack.docx"))}">Production pack (Word)</a>' if (out / "production_pack.docx").exists() else ""}</p></div>""")
+        if not job.get("pack_done"):
+            team = "".join(f"<li><b>{n}</b>, {r}: {t.lower()}</li>" for _, n, r, _, t in jobs.pipeline.PACK_AGENTS)
+            parts.append(f"""<div class=card id=pack><h2 style="margin-top:0">Optional: the production pack</h2>
+<p>The rest of the team writes their documents from this storyboard:</p><ul>{team}</ul>
+<p>It takes about 20 to 30 minutes and costs {html.escape(jobs.PACK_ESTIMATE)} in Claude usage. You'll get an email with one Word file when it's ready. They write documents only: no voice recording, image generation or LMS upload happens.</p>
+<form method=post action="/review/{jid}/pack?t={t}"><button>Start the production pack</button></form></div>""")
     if (out / "1_design.md").exists():
         parts.append(f"<div class='card design'>{jobs.design_html(job)}</div>")
     parts.append("<h2>History</h2><table>" + "".join(
@@ -205,6 +213,8 @@ async def review_action(request: Request):
         jobs.request_changes(job, str(form.get("feedback") or ""))
     elif action == "retry":
         jobs.retry(job)
+    elif action == "pack":
+        jobs.start_pack(job)
     return RedirectResponse(f"/review/{job['id']}?t={job['token']}", 303)
 
 
@@ -268,7 +278,14 @@ TEAM_JS = r"""
 const $=s=>document.querySelector(s), KEY=new URLSearchParams(location.search).get('key');
 const AG={iris:['Iris','Instructional Designer','Ask about the design, or ask for changes to it.','For example: Iris, why did you choose a 24-minute course?'],
           theo:['Theo','Storyboard Writer','Ask about any screen, or ask Theo to rewrite, add or remove screens.','For example: Theo, make screen M1-S03 shorter and add a quiz question after it'],
-          quinn:['Quinn','QA Reviewer','Ask why something was flagged, how serious it is, or to check a screen.','For example: Quinn, which of your findings matter most and why?']};
+          quinn:['Quinn','QA Reviewer','Ask why something was flagged, how serious it is, or to check a screen.','For example: Quinn, which of your findings matter most and why?'],
+          sam:['Sam','SME Liaison','Ask about what the SME must check, open facts, or the interview guide.','For example: Sam, what are the five things the SME must confirm first?'],
+          vera:['Vera','Visual Designer','Ask about the look, colors, characters, or image prompts.','For example: Vera, make the palette warmer and give me prompts for module 1'],
+          mila:['Mila','Voiceover and Media Producer','Ask about the voice, recording specs, pronunciation or captions.','For example: Mila, what voice would you cast and why?'],
+          dev:['Dev','eLearning Developer','Ask about the build in Storyline or Rise, variables, or build risks.','For example: Dev, which screens are hardest to build?'],
+          lars:['Lars','LMS and SCORM Administrator','Ask about SCORM or xAPI settings, tracking and LMS testing.','For example: Lars, should we use SCORM 1.2 or 2004 here?'],
+          nia:['Nia','Learning Analyst','Ask how to measure whether the course worked.','For example: Nia, what should we report to the client after 90 days?'],
+          paige:['Paige','Project Manager','Ask about the plan, schedule, open items and risks.','For example: Paige, what are the next three steps with the client?']};
 let agent=new URLSearchParams(location.search).get('agent')||'iris', busy=false;
 const course=()=>$('#course').value, store=()=>`modulo-chat:${course()}:${agent}`;
 function load(){try{return JSON.parse(localStorage.getItem(store())||'[]')}catch{return[]}}
@@ -295,6 +312,7 @@ function blocked(o){return '';}
 function stageNote(o){
   if(['designing','revising','storyboarding'].includes(o.dataset.status)) return 'This course is in production right now. You can chat about it; any changes can be saved once the current step has finished.';
   if(agent==='theo' && o.dataset.sb!=='1') return 'The storyboard is not finished yet, so Theo can answer questions and share ideas, but not change screens yet.';
+  if(!['iris','theo','quinn'].includes(agent) && !(o.dataset.pack||'').split(',').includes(agent)) return AG[agent][0]+"'s document for this course hasn't been written yet. You can still ask questions; it's written when you start the production pack on the course page.";
   return '';}
 async function post(url,body){const r=await fetch(url+'?key='+encodeURIComponent(KEY),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
   let j={};try{j=await r.json()}catch{} if(!r.ok) throw new Error(j.error||'Something went wrong.'); return j;}
@@ -360,14 +378,18 @@ async def team_page(request: Request):
     want = request.query_params.get("course", "")
     opts = "".join(
         f"<option value='{j['id']}' data-review='{html.escape(jobs.links(j)['review'])}' data-status='{j['status']}' "
-        f"data-sb='{1 if (jobs.job_dir(j['id']) / 'output' / 'storyboard.json').exists() else 0}'{' selected' if j['id'] == want else ''}>"
+        f"data-sb='{1 if (jobs.job_dir(j['id']) / 'output' / 'storyboard.json').exists() else 0}' "
+        f"data-pack='{','.join(p.stem for p in (jobs.job_dir(j['id']) / 'output' / 'pack').glob('*.md') if '_before_' not in p.stem)}'"
+        f"{' selected' if j['id'] == want else ''}>"
         f"{html.escape((j.get('title') or 'New brief')[:70])} ({html.escape(j['client_name'][:30])})</option>" for j in all_jobs)
     sel = next((j for j in all_jobs if j["id"] == want), all_jobs[0])
     body = f"""<style>{TEAM_CSS}</style>
 <p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>
-<p class=muted>A private chat with one agent about one course. When Iris or Theo suggest a change, nothing is saved until you press <b>Save to course</b>. Saving keeps a backup and rebuilds the Word storyboard.</p>
+<p class=muted>A private chat with one team member about one course. When Iris or Theo suggest a change, nothing is saved until you press <b>Save to course</b>. Saving keeps a backup and rebuilds the Word storyboard.</p>
 <p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.links(sel)['review'])}">Open course page</a> {sample_button(k, "Add sample course")}</p>
-<div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button></div>
+<div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button>
+<button data-a=sam>Sam · SME</button><button data-a=vera>Vera · visuals</button><button data-a=mila>Mila · voiceover</button><button data-a=dev>Dev · build</button>
+<button data-a=lars>Lars · LMS</button><button data-a=nia>Nia · evaluation</button><button data-a=paige>Paige · project</button></div>
 <p class=muted id=who></p><div id=log aria-live=polite></div><p class=muted id=wait hidden></p><p id=err></p>
 <p id=why class=muted hidden></p>
 <form id=form><textarea id=msg aria-label="Your message"></textarea>
@@ -426,6 +448,7 @@ FILE_HELP = {
     "storyboard.json": "The storyboard (raw data)",
     "qa_report.md": "Quinn's QA report",
     "run_log.json": "Time and cost of each step",
+    "production_pack.docx": "The production pack: all seven team documents in one Word file",
 }
 
 
@@ -439,6 +462,11 @@ def _help(rel: str) -> str:
     m = re.match(r"3_qa_round(\d+)\.json$", name)
     if m:
         return f"Quinn's QA review, round {m.group(1)}"
+    if rel.startswith("output/pack/"):
+        for aid, n, r, _, t in jobs.pipeline.PACK_AGENTS:
+            if name.startswith(aid):
+                kind = "backup before a chat change" if "_before_" in name else ("readable" if name.endswith(".md") else "raw data")
+                return f"{n}'s {t.lower()} ({kind})"
     if "_before_" in name:
         return "Backup made before you saved a change from the team chat"
     if rel.startswith("proposals/"):

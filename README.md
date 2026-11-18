@@ -14,9 +14,9 @@ One always-on Render web service that runs the Modulo website, the agent chat, a
 | `chat.py` | Website chat via the Anthropic SDK (`claude-opus-5-5`, low effort, JSON schema output, server-side refusal fallback). |
 | `jobs.py` | One folder per brief under `$DATA_DIR/jobs/`, a single background worker (one course at a time), status flow, emails. |
 | `emailer.py` | Resend API. Without a key, emails are written to `$DATA_DIR/outbox/`. |
-| `pipeline/` | The Agent SDK pipeline (Iris, Theo, Quinn), split into `make_design()` and `make_storyboard()`. Still runnable by hand: `python pipeline/pipeline.py brief.txt`. |
+| `pipeline/` | The Agent SDK pipeline: Iris, Theo, Quinn (`make_design()`, `make_storyboard()`), then the optional production pack (`make_pack()`: Sam, Vera, Mila, Dev, Lars, Nia, Paige, one Markdown document each, combined into `production_pack.docx`). Instructions in `pipeline/agents/*.md`. Still runnable by hand: `python pipeline/pipeline.py brief.txt`. |
 
-Status flow: `designing -> awaiting_approval -> (revising -> awaiting_approval) -> storyboarding -> done`, or `failed` with a retry button. On startup the worker re-queues anything left in a working state; the pipeline reuses saved drafts, so a redeploy mid-run loses at most the step in progress.
+Status flow: `designing -> awaiting_approval -> (revising -> awaiting_approval) -> storyboarding -> done -> (packing -> done, after the owner presses Start the production pack)`, or `failed` with a retry button. On startup the worker re-queues anything left in a working state; the pipeline reuses saved drafts, so a redeploy mid-run loses at most the step in progress.
 
 Approve and change requests are POST forms on the review page (email links only open the page), so mail scanners that prefetch links cannot start a $7 run. Each job has a random token in its links; the dashboard uses `DASHBOARD_KEY`.
 

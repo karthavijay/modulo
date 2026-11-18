@@ -28,6 +28,8 @@ AGENTS = {
     "theo": {"name": "Theo", "role": "Storyboard Writer", "prompt": "storyboard_writer"},
     "quinn": {"name": "Quinn", "role": "QA Reviewer", "prompt": "qa_reviewer"},
 }
+PACK = {aid: {"name": n, "role": r, "prompt": pr, "doc": t} for aid, n, r, pr, t in pipeline.PACK_AGENTS}
+AGENTS.update(PACK)
 
 SCREEN = pipeline.STORYBOARD_SCHEMA["properties"]["screens"]["items"]
 STRS = {"type": "array", "items": {"type": "string"}}
@@ -45,6 +47,15 @@ SCHEMAS = {
     }),
     "quinn": pipeline._obj({"reply": {"type": "string"}}),
 }
+PACK_CHAT_SCHEMA = pipeline._obj({"reply": {"type": "string"}, "revised_document": {"anyOf": [{"type": "string"}, {"type": "null"}]}})
+for _aid in PACK:
+    SCHEMAS[_aid] = PACK_CHAT_SCHEMA
+
+PACK_RULES = """You are now in a private one-on-one chat with the studio owner about this course. They are your manager, not the client.
+Answer plainly and briefly in "reply": plain text, short paragraphs, no markdown headings, no em dashes.
+Your own document ({doc}) is included below if you have written it. Only when the owner asks you to change it, put the complete revised document in Markdown in "revised_document" and say in "reply" what you changed. Otherwise set "revised_document" to null.
+If your document has not been written yet, answer questions and share ideas; it is written when the owner starts the production pack.
+Nothing is saved until the owner presses Save."""
 
 CHAT_RULES = {
     "iris": """You are now in a private one-on-one chat with the studio owner about this course. They are your manager, not the client.
@@ -99,6 +110,8 @@ def editable(job: dict, f: dict, agent: str) -> str | None:
                 "You may still suggest changes; the owner can ask again or save them afterwards.")
     if agent == "iris" and not f["design"]:
         return "There is no design yet to change."
+    if agent in PACK and not (f["out"] / "pack" / f"{agent}.md").exists():
+        return "Your document has not been written yet, so there is nothing to change."
     if agent == "theo" and not f["storyboard"]:
         return "There is no finished storyboard yet, so screens can't be changed. Answer questions and suggest ideas only."
     return None
@@ -116,6 +129,8 @@ def context_text(job: dict, f: dict, agent: str) -> str:
         parts.append("<current_storyboard>Not written yet.</current_storyboard>")
     if f["qa_rounds"]:
         parts.append(pipeline.block("latest_qa_review", f["qa_rounds"][-1]))
+    for heading, text in pipeline.pack_docs(f["out"]):
+        parts.append(pipeline.block("team_document", f"# {heading}\n\n{text}"))
     return "\n\n".join(parts)
 
 
@@ -164,7 +179,8 @@ async def reply(job: dict, agent: str, history: list) -> tuple[dict, int]:
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
             output_config={"effort": "medium", "format": {"type": "json_schema", "schema": SCHEMAS[agent]}},
-            system=pipeline.agent_prompt(AGENTS[agent]["prompt"]) + "\n\n" + CHAT_RULES[agent],
+            system=pipeline.agent_prompt(AGENTS[agent]["prompt"]) + "\n\n" + (
+                CHAT_RULES[agent] if agent in CHAT_RULES else PACK_RULES.format(doc=AGENTS[agent]["doc"])),
             messages=turns,
         ) as stream:
             msg = await stream.get_final_message()
@@ -206,6 +222,9 @@ def _save_proposal(job: dict, agent: str, data: dict) -> dict | None:
         if data["delete_screen_ids"]:
             bits.append("remove " + ", ".join(data["delete_screen_ids"]))
         summary = "Storyboard: " + "; ".join(bits)
+    elif agent in PACK and data.get("revised_document"):
+        change = {"document": data["revised_document"]}
+        summary = f"Revised {AGENTS[agent]['doc'].lower()}"
     if not change:
         return None
     pid = f"{int(time.time())}-{secrets.token_hex(3)}"
@@ -224,6 +243,14 @@ def apply(job: dict, proposal_id: str) -> str:
         raise KeyError(proposal_id)
     p = json.loads(pf.read_text(encoding="utf-8"))
     f = course_files(job["id"])
+    if "document" in p:
+        md = out_doc = f["out"] / "pack" / f"{p['agent']}.md"
+        pipeline.save(out_doc.with_name(f"{p['agent']}_before_{time.strftime('%Y%m%d-%H%M%S')}.md"), md.read_text(encoding="utf-8"))
+        pipeline.save(md, p["document"])
+        pipeline.rebuild_pack_docx(f["out"])
+        pf.rename(pf.with_suffix(".saved"))
+        jobs.note(job, f"Saved from chat with {AGENTS[p['agent']]['name']}: {p['summary']}")
+        return p["summary"] + " saved. The production pack Word file has been rebuilt."
     if "design" not in p and not f["storyboard"]:
         raise ValueError("There is no finished storyboard to change yet.")
     out, stamp = f["out"], time.strftime("%Y%m%d-%H%M%S")

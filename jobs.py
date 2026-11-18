@@ -31,7 +31,8 @@ import emailer  # noqa: E402
 log = logging.getLogger("modulo.jobs")
 DATA_DIR = Path(os.environ.get("DATA_DIR", HERE / "data"))
 JOBS_DIR = DATA_DIR / "jobs"
-WORKING = {"designing", "revising", "storyboarding"}
+WORKING = {"designing", "revising", "storyboarding", "packing"}
+PACK_ESTIMATE = os.environ.get("MODULO_PACK_ESTIMATE", "about $4 to $6")
 MAX_ROUNDS = int(os.environ.get("MODULO_MAX_ROUNDS", "2"))
 
 _queue: asyncio.Queue[str] | None = None
@@ -178,6 +179,14 @@ def request_changes(job: dict, feedback: str) -> None:
     enqueue(job["id"])
 
 
+def start_pack(job: dict) -> None:
+    if job["status"] != "done" or job.get("pack_done"):
+        return
+    job["status"], job["step"] = "packing", "Waiting to start"
+    note(job, "Production pack approved")
+    enqueue(job["id"])
+
+
 def retry(job: dict) -> None:
     if job["status"] != "failed":
         return
@@ -242,6 +251,20 @@ async def run(job_id: str) -> None:
             job["status"], job["step"] = "done", "Storyboard delivered"
             note(job, "Storyboard finished")
             await anyio.to_thread.run_sync(email_done, job)
+        elif status == "packing":
+            def progress(text: str) -> None:
+                j = load(job_id)
+                j["step"] = text
+                save(j)
+            progress("The team is starting the production pack")
+            summary = await pipeline.make_pack(out, brief, progress)
+            job = load(job_id)
+            job["pack_done"] = True
+            job["pack_cost_usd"] = summary["cost_usd"]
+            job["cost_usd"] = summary["total_cost_usd"]
+            job["status"], job["step"] = "done", "Storyboard and production pack delivered"
+            note(job, f"Production pack finished ({summary['documents']} documents)")
+            await anyio.to_thread.run_sync(email_pack_done, job)
     except Exception as e:
         log.error("Job %s failed:\n%s", job_id, traceback.format_exc())
         job = load(job_id)
@@ -297,9 +320,29 @@ def email_done(job: dict) -> None:
         f"<p>The Word storyboard and the QA report are attached. Total Claude cost for this course: ${job.get('cost_usd', 0):.2f}.</p>"
         f"<p><a href=\"{links(job)['review']}\" style=\"{BTN}background:#2f3e9e;color:#fff\">Open the course page</a></p>"
         "<p style=\"color:#555\">This is a draft for human review. Please have your SME check the content before it goes to the client.</p>"
+        "<hr><p><b>Optional next step: the production pack.</b> The rest of the team can now write their documents from this storyboard: "
+        "Sam's SME review pack, Vera's visual style guide and image prompts, Mila's voiceover brief, Dev's build specification, "
+        f"Lars's LMS launch plan, Nia's evaluation plan and Paige's project plan. It takes about 20 to 30 minutes and costs {PACK_ESTIMATE}. "
+        "Nothing runs unless you ask for it.</p>"
+        f"<p><a href=\"{links(job)['review']}#pack\" style=\"{BTN}background:#eef0fb;color:#2f3e9e\">Review and start the production pack</a></p>"
     )
     emailer.send(f"Storyboard ready: {s.get('title', job['client_name'])}", _wrap(body),
                  [out / "storyboard.docx", out / "qa_report.md"])
+
+
+def email_pack_done(job: dict) -> None:
+    out = job_dir(job["id"]) / "output"
+    items = "".join(
+        f"<li><b>{html.escape(title)}</b> ({name}, {role})</li>"
+        for aid, name, role, _, title in pipeline.PACK_AGENTS if (out / "pack" / f"{aid}.md").exists())
+    body = (
+        f"<p>The production pack for <b>{html.escape(job.get('title', ''))}</b> is ready. It's attached as one Word file with these documents:</p>"
+        f"<ul>{items}</ul>"
+        f"<p>Cost of the pack: ${job.get('pack_cost_usd', 0):.2f}. Total Claude cost for this course: ${job.get('cost_usd', 0):.2f}.</p>"
+        f"<p><a href=\"{links(job)['review']}\" style=\"{BTN}background:#2f3e9e;color:#fff\">Open the course page</a></p>"
+        "<p style=\"color:#555\">These are drafts for your review. You can ask any team member to change their document in Talk to the team.</p>"
+    )
+    emailer.send(f"Production pack ready: {job.get('title', job['client_name'])}", _wrap(body), [out / "production_pack.docx"])
 
 
 def email_failed(job: dict) -> None:

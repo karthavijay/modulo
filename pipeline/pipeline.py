@@ -118,7 +118,12 @@ async def run_agent(name: str, task: str, schema: dict, ledger: Ledger, label: s
     print(f"  ... {label}", flush=True)
     if FAKE:
         await anyio.sleep(float(os.environ.get("MODULO_FAKE_SECONDS", "2")))
-        data = json.loads((HERE / "samples" / "fake" / FAKE_ANSWERS[name]).read_text(encoding="utf-8"))
+        if name in FAKE_ANSWERS:
+            data = json.loads((HERE / "samples" / "fake" / FAKE_ANSWERS[name]).read_text(encoding="utf-8"))
+        else:
+            data = {"title": label, "summary": "Test mode document.",
+                    "document": f"## About this document\n\nTest mode. In a real run, {label.split()[0]} writes this.\n\n"
+                                "| Screen | Note |\n|---|---|\n| M1-S01 | **Example** row |\n\n- First point\n- Second point\n"}
         ledger.add({"step": label + " (test mode)", "cost_usd": 0.0, "seconds": 0})
         return data
     workdir = tempfile.mkdtemp(prefix="modulo-")  # empty folder: agents read nothing local
@@ -253,6 +258,74 @@ async def make_storyboard(out: Path, brief: str, max_rounds: int = 2) -> dict:
         "open_findings": {s: sum(f["severity"] == s for f in final["findings"]) for s in ("critical", "major", "minor")},
         "cost_usd": ledger.total,
     }
+
+
+# ---------------------------------------------------------------------------
+# Stage 3 (optional, after its own approval): the rest of the team
+# ---------------------------------------------------------------------------
+
+# (id, name, role, instructions file, document title), in the order they run.
+PACK_AGENTS = [
+    ("sam", "Sam", "SME Liaison", "sme_liaison", "SME review pack"),
+    ("vera", "Vera", "Visual Designer", "visual_designer", "Visual style guide and asset list"),
+    ("mila", "Mila", "Voiceover and Media Producer", "media_producer", "Voiceover and media production brief"),
+    ("dev", "Dev", "eLearning Developer", "elearning_developer", "Build specification"),
+    ("lars", "Lars", "LMS and SCORM Administrator", "lms_administrator", "LMS launch plan"),
+    ("nia", "Nia", "Learning Analyst", "learning_analyst", "Evaluation and measurement plan"),
+    ("paige", "Paige", "Project Manager", "project_manager", "Project plan and client handover"),
+]
+
+PACK_SCHEMA = _obj({"title": STR, "summary": STR, "document": STR})
+
+
+def pack_docs(out: Path) -> list[tuple[str, str]]:
+    """The finished team documents as (heading, markdown), in team order."""
+    docs = []
+    for aid, name, role, _, title in PACK_AGENTS:
+        f = out / "pack" / f"{aid}.md"
+        if f.exists():
+            docs.append((f"{title} ({name}, {role})", f.read_text(encoding="utf-8")))
+    return docs
+
+
+def rebuild_pack_docx(out: Path) -> None:
+    from render import render_pack_docx
+    design = _load(out / "1_design.json") or {"title": "Course"}
+    docs = pack_docs(out)
+    if docs:
+        render_pack_docx(design["title"], docs, out / "production_pack.docx")
+
+
+async def make_pack(out: Path, brief: str, progress=None) -> dict:
+    """Each remaining team member writes their document, one after another. Resumable."""
+    ledger = Ledger(out / "run_log.json")
+    design, storyboard = _load(out / "1_design.json"), _load(out / "storyboard.json")
+    if not design or not storyboard:
+        raise RuntimeError("The production pack needs a finished storyboard first.")
+    qa = sorted(out.glob("3_qa_round*.json"), key=lambda p: int(p.stem.rsplit("round", 1)[1]))
+    context = (block("client_brief", brief) + "\n\n" + block("approved_design", design)
+               + "\n\n" + block("storyboard", storyboard)
+               + ("\n\n" + block("latest_qa_review", _load(qa[-1])) if qa else ""))
+    (out / "pack").mkdir(exist_ok=True)
+    start = ledger.total
+    for aid, name, role, prompt, title in PACK_AGENTS:
+        md = out / "pack" / f"{aid}.md"
+        if md.exists():
+            continue
+        if progress:
+            progress(f"{name} ({role}) is writing the {title.lower()}")
+        team_so_far = "".join("\n\n" + block("team_document", f"# {h}\n\n{t}") for h, t in pack_docs(out))
+        data = await run_agent(
+            prompt,
+            context + team_so_far + f"\n\nWrite your document: {title}. Put the whole document, in Markdown, in "
+            "\"document\". Use ## headings for its sections and Markdown tables where they help. "
+            "Put a one or two sentence summary for the studio owner in \"summary\".",
+            PACK_SCHEMA, ledger, f"{name} writes the {title.lower()}",
+        )
+        save(out / "pack" / f"{aid}.json", data)
+        save(md, data["document"])
+    rebuild_pack_docx(out)
+    return {"documents": len(pack_docs(out)), "cost_usd": round(ledger.total - start, 4), "total_cost_usd": ledger.total}
 
 
 # ---------------------------------------------------------------------------
