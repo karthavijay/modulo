@@ -10,6 +10,7 @@ One always-on Render web service that runs the Modulo website, the agent chat, a
 |---|---|
 | `render.yaml` | Render Blueprint: Python web service on the Starter plan with a 1 GB disk at `/var/data`. |
 | `app.py` | Starlette app: website (`public/`), `/api/chat`, `/api/brief`, `/review/<id>`, `/files/<id>/<name>`, `/dashboard`, `/health`. |
+| `agent_chat.py` | `/team` page (dashboard key): one-on-one chat with Iris, Theo or Quinn about a course. Iris/Theo return structured change proposals stored under `proposals/`; `/api/team/apply` saves one (backup kept) and rebuilds md + docx. Course context is prompt-cached. |
 | `chat.py` | Website chat via the Anthropic SDK (`claude-opus-5-5`, low effort, JSON schema output, server-side refusal fallback). |
 | `jobs.py` | One folder per brief under `$DATA_DIR/jobs/`, a single background worker (one course at a time), status flow, emails. |
 | `emailer.py` | Resend API. Without a key, emails are written to `$DATA_DIR/outbox/`. |

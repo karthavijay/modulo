@@ -27,6 +27,7 @@ from starlette.responses import FileResponse, HTMLResponse, JSONResponse, PlainT
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
+import agent_chat
 import chat
 import emailer
 import jobs
@@ -152,7 +153,8 @@ async def review(request: Request):
     st = job["status"]
     out = jobs.job_dir(jid) / "output"
     parts = [
-        f"<p class=muted><a href='{html.escape(dashboard_url())}'>All courses</a></p>",
+        f"<p class=muted><a href='{html.escape(dashboard_url())}'>All courses</a> · "
+        f"<a href='/team?key={html.escape(dashboard_key())}&course={jid}'>Talk to the team about this course</a></p>",
         f"<h1>{html.escape(job.get('title') or 'New course brief')}</h1>",
         f"<p class=muted>Client: {html.escape(job['client_name'])} ({html.escape(job['client_email'])})</p>",
         f"<p>{pill(st)} <span class=muted>{html.escape(job.get('step', ''))}</span></p>",
@@ -227,14 +229,16 @@ async def dashboard(request: Request):
     rows = "".join(
         f"<tr><td><a href='{html.escape(jobs.links(j)['review'])}'>{html.escape(j.get('title') or 'New brief')}</a>"
         f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
-        f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td></tr>"
-        for j in jobs.all_jobs()) or "<tr><td colspan=4 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
+        f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td>"
+        f"<td><a href='/team?key={k}&course={j['id']}'>Talk to the team</a></td></tr>"
+        for j in jobs.all_jobs()) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
     email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
         "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
         "under your service's Environment page, to get approval emails.</div>")
     fake_note = "<div class=card><b>Test mode is on</b> (MODULO_FAKE). Courses use the sample forklift answers and cost nothing.</div>" if os.environ.get("MODULO_FAKE") else ""
-    body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Bookmark this page.</p>{email_note}{fake_note}
-<div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th></tr>{rows}</table></div>
+    body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Bookmark this page.</p>
+<p><a class=btn href="/team?key={k}">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>{email_note}{fake_note}
+<div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th><th></th></tr>{rows}</table></div>
 <div class=card><h2 style="margin-top:0">Start a course from a brief you received elsewhere</h2>
 <p class=muted>Paste a brief from an email or a document. It goes through the same steps as a website brief.</p>
 <form method=post action="/dashboard/new?key={k}"><div class=row><input name=name placeholder="Client name" required style="flex:1;min-width:180px">
@@ -252,6 +256,129 @@ async def dashboard_new(request: Request):
         job = jobs.create(name[:120], email[:200], transcript[:60000], source="pasted on the dashboard")
         return RedirectResponse(jobs.links(job)["review"].replace(jobs.public_url(), ""), 303)
     return RedirectResponse(f"/dashboard?key={dashboard_key()}", 303)
+
+
+# ---------------------------------------------------------------- talk to one agent
+
+TEAM_JS = r"""
+const $=s=>document.querySelector(s), KEY=new URLSearchParams(location.search).get('key');
+const AG={iris:['Iris','Instructional Designer','Ask about the design, or ask for changes to it.'],
+          theo:['Theo','Storyboard Writer','Ask about any screen, or ask Theo to rewrite, add or remove screens.'],
+          quinn:['Quinn','QA Reviewer','Ask why something was flagged, how serious it is, or to check a screen.']};
+let agent=new URLSearchParams(location.search).get('agent')||'iris', busy=false;
+const course=()=>$('#course').value, store=()=>`modulo-chat:${course()}:${agent}`;
+function load(){try{return JSON.parse(localStorage.getItem(store())||'[]')}catch{return[]}}
+function keep(h){try{localStorage.setItem(store(),JSON.stringify(h))}catch{}}
+function bubble(m){const d=document.createElement('div');d.className='msg '+(m.from==='you'?'you':'them');
+  const who=document.createElement('b');who.textContent=m.from==='you'?'You':AG[agent][0];d.append(who);
+  const t=document.createElement('div');t.textContent=m.text;d.append(t);
+  if(m.proposal){const c=document.createElement('div');c.className='prop';
+    const s=document.createElement('div');s.textContent='Proposed change: '+m.proposal.summary;c.append(s);
+    if(m.saved){const ok=document.createElement('div');ok.className='muted';ok.textContent=m.saved;c.append(ok);}
+    else{const b=document.createElement('button');b.textContent='Save to course';b.onclick=()=>save(m,b);c.append(b);}
+    d.append(c);}
+  $('#log').append(d);}
+function draw(){$('#log').innerHTML='';const h=load();
+  if(!h.length){const p=document.createElement('p');p.className='muted';p.textContent=AG[agent][2];$('#log').append(p);}
+  h.forEach(bubble);$('#log').scrollTop=1e9;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.a===agent));
+  $('#who').textContent=AG[agent][0]+', '+AG[agent][1];}
+async function post(url,body){const r=await fetch(url+'?key='+encodeURIComponent(KEY),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  let j={};try{j=await r.json()}catch{} if(!r.ok) throw new Error(j.error||'Something went wrong.'); return j;}
+async function send(e){e.preventDefault();const text=$('#msg').value.trim();if(!text||busy)return;
+  const h=load();h.push({from:'you',text});keep(h);$('#msg').value='';draw();busy=true;$('#err').textContent='';
+  $('#wait').hidden=false;$('#wait').textContent=AG[agent][0]+' is reading the course and thinking. Bigger changes can take a minute or two.';
+  try{const j=await post('/api/team/chat',{job_id:course(),agent,history:h});h.push({from:agent,text:j.reply,proposal:j.proposal});keep(h);}
+  catch(x){$('#err').textContent=x.message;}
+  busy=false;$('#wait').hidden=true;draw();}
+async function save(m,b){b.disabled=true;b.textContent='Saving...';
+  try{const j=await post('/api/team/apply',{job_id:course(),proposal_id:m.proposal.id});
+    const h=load();const t=h.find(x=>x.proposal&&x.proposal.id===m.proposal.id);if(t)t.saved=j.message;keep(h);draw();}
+  catch(x){b.disabled=false;b.textContent='Save to course';$('#err').textContent=x.message;}}
+$('#form').onsubmit=send;
+$('#msg').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){send(e)}});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{agent=b.dataset.a;draw();});
+$('#course').onchange=()=>{draw();$('#open').href=$('#course').selectedOptions[0].dataset.review;};
+$('#clear').onclick=()=>{try{localStorage.removeItem(store())}catch{} draw();};
+draw();
+"""
+
+TEAM_CSS = """
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{background:transparent;color:var(--accent)}.tabs button.on{background:var(--accent);color:#fff}
+#log{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;height:min(60vh,560px);overflow:auto}
+.msg{margin:0 0 14px;max-width:92%}.msg b{display:block;font-size:13px;color:var(--muted)}.msg div{white-space:pre-wrap}
+.msg.you{margin-left:auto;text-align:right}.msg.you>div{background:var(--soft);display:inline-block;text-align:left;padding:8px 12px;border-radius:12px}
+.prop{margin-top:8px;padding:12px;border:1px dashed var(--accent);border-radius:12px;display:grid;gap:8px;white-space:normal}
+.prop button{justify-self:start}select{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);max-width:100%}
+#err{color:var(--bad);min-height:1.4em}
+"""
+
+
+def _admin_job(job_id: str) -> dict | None:
+    try:
+        return jobs.load(str(job_id))
+    except KeyError:
+        return None
+
+
+async def team_page(request: Request):
+    if not dashboard_ok(request):
+        return not_found()
+    all_jobs = [j for j in jobs.all_jobs() if (jobs.job_dir(j["id"]) / "output" / "1_design.json").exists()]
+    k = html.escape(dashboard_key())
+    if not all_jobs:
+        return page("Talk to the team", f"<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>"
+                    "<p>There are no courses with a design yet. Once Iris has written one, you can chat about it here.</p>")
+    want = request.query_params.get("course", "")
+    opts = "".join(
+        f"<option value='{j['id']}' data-review='{html.escape(jobs.links(j)['review'])}'{' selected' if j['id'] == want else ''}>"
+        f"{html.escape((j.get('title') or 'New brief')[:70])} ({html.escape(j['client_name'][:30])})</option>" for j in all_jobs)
+    sel = next((j for j in all_jobs if j["id"] == want), all_jobs[0])
+    body = f"""<style>{TEAM_CSS}</style>
+<p class=muted><a href='/dashboard?key={k}'>All courses</a></p><h1>Talk to the team</h1>
+<p class=muted>A private chat with one agent about one course. When Iris or Theo suggest a change, nothing is saved until you press <b>Save to course</b>. Saving keeps a backup and rebuilds the Word storyboard.</p>
+<p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.links(sel)['review'])}">Open course page</a></p>
+<div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button></div>
+<p class=muted id=who></p><div id=log aria-live=polite></div><p class=muted id=wait hidden></p><p id=err></p>
+<form id=form><textarea id=msg placeholder="For example: Theo, make screen 2.3 shorter and add a knowledge check after it"></textarea>
+<p class=row><button>Send</button> <button type=button class=ghost id=clear>Clear this chat</button></p></form>
+<script>{TEAM_JS}</script>"""
+    return page("Talk to the team", body)
+
+
+async def team_chat(request: Request):
+    if not dashboard_ok(request):
+        return JSONResponse({"error": "Not allowed."}, 403)
+    try:
+        body = await request.json()
+    except ValueError:
+        return JSONResponse({"error": "Bad request."}, 400)
+    job = _admin_job(body.get("job_id"))
+    agent = body.get("agent")
+    if not job or agent not in agent_chat.AGENTS:
+        return JSONResponse({"error": "Pick a course and an agent."}, 400)
+    history = body.get("history") if isinstance(body.get("history"), list) else []
+    data, status = await agent_chat.reply(job, agent, history)
+    return JSONResponse(data, status)
+
+
+async def team_apply(request: Request):
+    if not dashboard_ok(request):
+        return JSONResponse({"error": "Not allowed."}, 403)
+    try:
+        body = await request.json()
+    except ValueError:
+        return JSONResponse({"error": "Bad request."}, 400)
+    job = _admin_job(body.get("job_id"))
+    if not job:
+        return JSONResponse({"error": "Course not found."}, 404)
+    if job["status"] in jobs.WORKING:
+        return JSONResponse({"error": "The team is still working on this course. Save once it has finished."}, 409)
+    try:
+        message = await asyncio.to_thread(agent_chat.apply, job, str(body.get("proposal_id") or ""))
+    except KeyError:
+        return JSONResponse({"error": "That change was already saved or has expired."}, 404)
+    return JSONResponse({"message": message})
 
 
 # ---------------------------------------------------------------- app
@@ -294,6 +421,9 @@ app = Starlette(
         Route("/files/{job_id}/{name}", files),
         Route("/dashboard", dashboard),
         Route("/dashboard/new", dashboard_new, methods=["POST"]),
+        Route("/team", team_page),
+        Route("/api/team/chat", team_chat, methods=["POST"]),
+        Route("/api/team/apply", team_apply, methods=["POST"]),
         Mount("/", StaticFiles(directory=HERE / "public", html=True)),
     ],
     lifespan=lifespan,
