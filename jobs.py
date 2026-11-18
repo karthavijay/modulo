@@ -2,6 +2,8 @@
 
 Status flow:
   designing -> awaiting_approval -> (revising -> awaiting_approval) -> storyboarding -> done
+  done -> packing -> done      (optional production pack, started by the owner)
+  done -> building -> done     (optional: Dev builds the playable course, started by the owner)
   any working step can end in "failed"; "Try again" picks up from the last finished step.
 """
 
@@ -31,7 +33,7 @@ import emailer  # noqa: E402
 log = logging.getLogger("modulo.jobs")
 DATA_DIR = Path(os.environ.get("DATA_DIR", HERE / "data"))
 JOBS_DIR = DATA_DIR / "jobs"
-WORKING = {"designing", "revising", "storyboarding", "packing"}
+WORKING = {"designing", "revising", "storyboarding", "packing", "building"}
 PACK_ESTIMATE = os.environ.get("MODULO_PACK_ESTIMATE", "about $4 to $6")
 MAX_ROUNDS = int(os.environ.get("MODULO_MAX_ROUNDS", "2"))
 
@@ -187,6 +189,28 @@ def start_pack(job: dict) -> None:
     enqueue(job["id"])
 
 
+def start_build(job: dict) -> None:
+    """Owner pressed "Have Dev build the course" (costs money, so only from that button)."""
+    if job["status"] != "done":
+        return
+    job["status"], job["step"] = "building", "Waiting to start"
+    note(job, "Course build approved")
+    enqueue(job["id"])
+
+
+def quick_build(job: dict) -> dict:
+    """The free rule-based draft, made instantly. Returns the check report."""
+    from authoring import course as C
+    out = job_dir(job["id"]) / "output"
+    design, storyboard = pipeline._load(out / "1_design.json"), pipeline._load(out / "storyboard.json")
+    if job["status"] in WORKING or not storyboard:
+        raise RuntimeError("There is no finished storyboard to build from yet.")
+    saved = C.save(out, C.from_storyboard(storyboard, design, job["id"]))
+    job["course_built"] = True
+    note(job, "Quick course draft made (free)")
+    return C.check(saved)
+
+
 def retry(job: dict) -> None:
     if job["status"] != "failed":
         return
@@ -265,6 +289,23 @@ async def run(job_id: str) -> None:
             job["status"], job["step"] = "done", "Storyboard and production pack delivered"
             note(job, f"Production pack finished ({summary['documents']} documents)")
             await anyio.to_thread.run_sync(email_pack_done, job)
+        elif status == "building":
+            from authoring.build import make_course
+
+            def progress(text: str) -> None:
+                j = load(job_id)
+                j["step"] = text
+                save(j)
+            progress("Dev is starting the course build")
+            summary = await make_course(out, brief, job_id, progress)
+            job = load(job_id)
+            job["course_built"] = True
+            job["build_summary"] = summary
+            job["build_cost_usd"] = round(job.get("build_cost_usd", 0) + summary["cost_usd"], 4)
+            job["cost_usd"] = summary["total_cost_usd"]
+            job["status"], job["step"] = "done", "Course built"
+            note(job, f"Dev built the course ({summary['pages']} pages)")
+            await anyio.to_thread.run_sync(email_course_built, job)
     except Exception as e:
         log.error("Job %s failed:\n%s", job_id, traceback.format_exc())
         job = load(job_id)
@@ -343,6 +384,37 @@ def email_pack_done(job: dict) -> None:
         "<p style=\"color:#555\">These are drafts for your review. You can ask any team member to change their document in Talk to the team.</p>"
     )
     emailer.send(f"Production pack ready: {job.get('title', job['client_name'])}", _wrap(body), [out / "production_pack.docx"])
+
+
+def course_ready(job: dict) -> bool:
+    return (job_dir(job["id"]) / "output" / "course" / "course.json").exists() and job["status"] != "building"
+
+
+def builder_url(job: dict) -> str:
+    from urllib.parse import quote
+    return f"{public_url()}/builder/{job['id']}?key={quote(os.environ.get('DASHBOARD_KEY', ''), safe='')}"
+
+
+def preview_url(job: dict) -> str:
+    return f"{public_url()}/play/{job['id']}/{job['token']}/index.html"
+
+
+def email_course_built(job: dict) -> None:
+    s = job.get("build_summary", {})
+    fixes = "".join(f"<li>{html.escape(x)}</li>" for x in s.get("fix", []))
+    notes = "".join(f"<li>{html.escape(x)}</li>" for x in s.get("note", []))
+    body = (
+        f"<p>Dev has built <b>{html.escape(job.get('title', ''))}</b> as a real course: {s.get('pages', '?')} pages"
+        + (f", with {s.get('scored')} scored questions and a results page" if s.get("scored") else "") + ".</p>"
+        f"<p><a href=\"{preview_url(job)}\" style=\"{BTN}background:#2f3e9e;color:#fff\">Try the course</a>"
+        f"<a href=\"{builder_url(job)}\" style=\"{BTN}background:#eef0fb;color:#2f3e9e\">Edit and download SCORM</a></p>"
+        + (f"<p><b>Please fix before export:</b></p><ul>{fixes}</ul>" if fixes else "")
+        + (f"<p><b>Before it goes to learners:</b></p><ul>{notes}</ul>" if notes else "")
+        + f"<p>Cost of the build: ${s.get('cost_usd', 0):.2f}. Total Claude cost for this course: ${job.get('cost_usd', 0):.2f}.</p>"
+        "<p style=\"color:#555\">In the editor you can change any text, question or setting, upload pictures, "
+        "and download the course for your LMS as SCORM 1.2 or SCORM 2004. The Try the course link works for anyone you send it to, so you can share it with your client.</p>"
+    )
+    emailer.send(f"Course built: {job.get('title', job['client_name'])}", _wrap(body))
 
 
 def email_failed(job: dict) -> None:

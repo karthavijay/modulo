@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Mock LMS</title></head>
+<body style="margin:0">
+<script>
+// A tiny mock LMS: implements the SCORM 1.2 (API) or 2004 (API_1484_11) runtime and records every call.
+var params = new URLSearchParams(location.search);
+var ver = params.get("v");                  // "1.2" or "2004"
+var store = JSON.parse(localStorage.getItem("cmi-" + ver) || "{}");
+window.calls = [];
+window.cmi = store;
+var state = "new";
+function rec(fn, args, ret) { calls.push([fn].concat(args, ["=>", ret])); return ret; }
+function save() { localStorage.setItem("cmi-" + ver, JSON.stringify(store)); }
+var count = function () { return Object.keys(store).filter(function (k) { return /^cmi\.interactions\.\d+\.id$/.test(k); }).length; };
+function getv(k) {
+  if (k === "cmi.interactions._count") return String(count());
+  if (k === (ver === "2004" ? "cmi.entry" : "cmi.core.entry")) return store.__launched ? "resume" : "ab-initio";
+  return store[k] == null ? "" : store[k];
+}
+if (ver === "2004") {
+  window.API_1484_11 = {
+    Initialize: function () { state = "running"; return rec("Initialize", [], "true"); },
+    Terminate: function () { state = "done"; store.__launched = 1; save(); return rec("Terminate", [], "true"); },
+    GetValue: function (k) { return rec("GetValue", [k], state === "running" ? getv(k) : ""); },
+    SetValue: function (k, v) { if (state !== "running") return rec("SetValue", [k, v], "false"); store[k] = v; return rec("SetValue", [k, v], "true"); },
+    Commit: function () { save(); return rec("Commit", [], "true"); },
+    GetLastError: function () { return "0"; }, GetErrorString: function () { return ""; }, GetDiagnostic: function () { return ""; }
+  };
+} else {
+  window.API = {
+    LMSInitialize: function () { state = "running"; return rec("LMSInitialize", [], "true"); },
+    LMSFinish: function () { state = "done"; store.__launched = 1; save(); return rec("LMSFinish", [], "true"); },
+    LMSGetValue: function (k) { return rec("LMSGetValue", [k], state === "running" ? getv(k) : ""); },
+    LMSSetValue: function (k, v) { if (state !== "running") return rec("LMSSetValue", [k, v], "false"); store[k] = v; return rec("LMSSetValue", [k, v], "true"); },
+    LMSCommit: function () { save(); return rec("LMSCommit", [], "true"); },
+    LMSGetLastError: function () { return "0"; }, LMSGetErrorString: function () { return ""; }, LMSGetDiagnostic: function () { return ""; }
+  };
+}
+var f = document.createElement("iframe");
+f.src = params.get("pkg") + "/index.html";
+f.style.cssText = "border:0;width:100vw;height:100vh";
+document.body.appendChild(f);
+</script>
+</body></html>
