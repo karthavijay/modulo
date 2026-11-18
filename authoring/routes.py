@@ -77,7 +77,7 @@ async def builder_page(request: Request):
                "review": jobs.page_url(job), "dashboard": A.dashboard_url(),
                "rebuild": f"/builder/{jid}?rebuild=1", "files": f"/course-files/{jid}"}
         page = page.replace("/*CONFIG*/", "window.BUILDER=" + json.dumps(cfg).replace("</", "<\\/") + ";")
-        return Response(page, media_type="text/html", headers={"cache-control": "no-store", "referrer-policy": "no-referrer"})
+        return Response(page, media_type="text/html", headers={"cache-control": "no-store", "referrer-policy": "same-origin"})
     if _busy(job):
         body = (head + f"<h1>{html.escape(job.get('title') or 'Course')}</h1>"
                 f"<p>{A.pill(job['status'])} <span class=muted>{html.escape(job.get('step', ''))}</span></p>"
@@ -256,7 +256,7 @@ async def play(request: Request):
     course = C.load(_out(job))
     if not course:
         return Response("This course hasn't been built yet.", status_code=404)
-    headers = {"cache-control": "no-store", "referrer-policy": "no-referrer", "x-robots-tag": "noindex"}
+    headers = {"cache-control": "no-store", "referrer-policy": "same-origin", "x-robots-tag": "noindex"}
     if path in ("", "index.html"):
         return Response(E.index_html(course), media_type="text/html", headers=headers)
     if path == "course.js":
