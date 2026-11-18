@@ -1,0 +1,959 @@
+{
+  "course_title": "Forklift Safety Refresher: Inspect, Yield, Stay Stable",
+  "screens": [
+    {
+      "id": "M0-S01",
+      "module": "M0: Why We're Here: Your Floor, Your Numbers",
+      "title": "Welcome: Your Floor, Your Calls",
+      "screen_type": "title",
+      "on_screen_text": "Forklift Safety Refresher: Inspect, Yield, Stay Stable\n\nLast year's near misses: mostly pedestrians at intersections and dock doors, plus a couple of raised-load turns.\nAlso: pre-shift checks sometimes signed, not done.\n[CLIENT TO CONFIRM: real figures, if approved]\n\nAbout 24 minutes. Your place is saved.\n[Start]",
+      "narration": "You're certified, and many of you have run trucks on these floors for years, so this isn't a rules lecture. It's about the quick calls you make on a busy shift. Last year, most near misses across our three DCs were pedestrian conflicts at intersections and dock doors, plus a couple of tip-over scares from turning with a raised load. And pre-shift checks sometimes get signed without being done. Over the next 24 minutes, you'll make those calls yourself.",
+      "visuals": "Full-bleed real video loop (10 to 15 seconds, muted, no flashing) or still photo: a counterbalance truck traveling a DC aisle at shift start, operator in correct PPE, a reach truck working at height in the background. Title and text are live Storyline text on a dark semi-opaque panel (contrast at least 4.5:1). As the narration reaches 'Last year', three realistic photo tiles fade in along the bottom, each with a live-text label: (1) 'Pedestrians at intersections and dock doors': a pedestrian stepping out at a racking end cap as a truck approaches; (2) 'Raised-load turns': a counterbalance truck turning at an aisle end with a pallet at chest height; (3) 'Checks signed, not done': an operator ticking a checklist without leaving the seat. If the client approves real figures, add a simple bar chart built from live Storyline shapes and text, with a data table equivalent. Client logo top left [CLIENT TO CONFIRM: logo file]. Use footage from the client's DCs if a shoot is approved, otherwise realistic stock that matches the fleet.",
+      "interaction": "Learner selects Start (mouse, or Tab then Enter or Space). Start jumps to M0-S03. On return visits, the course resumes automatically at the last screen viewed (Resume set to Always resume), with no prompt. The background video loop has a visible Pause button (WCAG 2.2.2).",
+      "feedback": "None.",
+      "objective_ids": [],
+      "notes": "REVISION 3 CHANGE LOG (QA fixes on revision 2):\nMAJOR\n1) Seat time re-estimated with realistic per-item timing. Inspection cut from 10 to 8 items (4 defects, 4 normal; within the design's 4 to 5 defects), with one-sentence feedback (M1-S06, M1-S07). M1-S08 narration trimmed to about 78 words. M4 re-timed at 25 seconds per item. Narration trimmed in M0-S04, M1-S03, M1-S04, M1-S05, M1-S09, M1-S10, M2-S05, M2-S09, M3-S01, M3-S04, M4-S01, M4-S23. M2-S03 extinguisher distractor removed. New total about 24:20 (note 12).\n2) Final Check entry fixed: new variable M4_Passed; Reset Results is the first Start trigger on M4-S01; hub tile 4 and M4-S01 route passed learners and learners with 3 attempts used to M4-S23; Start disabled when AttemptsLeft = 0 (M0-S04, M4-S01, M4-S22). Player menu restricted (note 1).\n3) Review feedback is now one result-neutral 'Why' text per item, shown when ReviewMode = true. Must-pass rule now uses a second, hidden results slide (M4-S22a). SafetyCritical_LO2 and SafetyCritical_LO7 variables removed.\n4) LO2 now discriminates: M1-S09 option B is a delayed tag-out; new M1-S09a practices an operate-and-report minor defect; M4-S05, M4-S06 and M4-S07 rewritten so tag-out wording appears in distractors or the learner must pick which finding drives the tag-out.\n5) Simulator (M3-S03) no longer moves focus; result panel sits on the base slide after the settings.\n6) M4-S04 distractor C reworded (beacon or strobe, not 'warning light').\n7) Reach truck tip-over response is a gating item with a due date (note 11a). Fallbacks written for M3-S08, M3-S10 and M4-S21 (new M4-S21F).\nMINOR\n- Resume prompt wording removed (Always resume kept).\n- M1-S06, M1-S07 and all counter-based slides reset to initial state on revisit (note 5).\n- Design deviations listed below for written sign-off.\n- M4-S11 correct option now includes the horn. M4-S09 options neutral, with a new distractor and reordered answers. M4-S01 narration carries the must-pass placeholder. M2-S13 and M3-S11 narration rewritten to extend, not repeat, the bullets. Alarm terms standardized (glossary, note 14). Highlight outlines use a double stroke for 3:1 non-text contrast (note 5).\nRetired IDs (not renumbered so review comments stay traceable): M0-S02, M1-S02, M2-S12. New IDs: M1-S09a, M4-S21F (fallback only), M4-S22a (hidden, must-pass only).\n\nDESIGN DEVIATIONS REQUIRING WRITTEN SIGN-OFF FROM THE DESIGN OWNER (status: PENDING. Do not send this storyboard to the client until each line is signed and dated here):\n(a) Dock drills cut from 3 to 2 (M2-S12 retired). If not approved, restore the drill text held in the M2-S11 notes and re-time M2. Decision: [ ] Signed: [NAME, DATE]\n(b) M4 runs about 5:00 against the design's 4:00, because 10 scenario items realistically take about 25 seconds each. M0 to M3 come in under their allocations. Decision: [ ] Signed: [NAME, DATE]\n(c) Total about 24:20 against the design's 24:00, within the client's 25:00 maximum. Decision: [ ] Signed: [NAME, DATE]\n(d) Contingent: if the reach truck tip-over fallback is used, LO7 practice and assessment become counterbalance only (M3-S10 and M4-S21 removed). Client must also be told. Decision: [ ] Signed: [NAME, DATE]\n\nALT TEXT: background: 'Forklift operator in a hi-vis vest driving a counterbalance truck down a warehouse aisle at the start of a shift.' Tile 1: 'A pedestrian steps out from behind a racking end cap into the path of an approaching forklift.' Tile 2: 'A forklift turns at the end of an aisle carrying a pallet raised to chest height.' Tile 3: 'An operator ticks boxes on a pre-shift checklist without leaving the seat.' If a chart is used: 'Bar chart of last year's near misses by category. Data table follows.'\n[CLIENT TO CONFIRM: whether real near-miss figures can be shown. If not, delete the placeholder line and keep the wording general.]\nOPTIONAL LEADERSHIP MESSAGE: [CLIENT TO CONFIRM: a 30-second opening message from site leadership or Dana]. If supplied, insert as M0-S01a (captioned video with transcript) and trim this narration so M0 stays at or under 2:00. Re-check the course total against note 12.\n\nGLOBAL BUILD NOTES (apply to every screen unless stated otherwise):\n1) Storyline 360, 16:9, Modern player. [CLIENT TO CONFIRM: responsive settings once delivery devices are known.] Player: Menu, Resources (Transcript PDF, Quick Reference PDF), CC button with captions ON by default, volume, play/pause, seekbar (drag allowed on revisit). PLAYER MENU: delete every slide entry except one, 'Course menu', which goes to M0-S04. Learners can only enter the Final Check through the hub tile, so the routing in M0-S04 always runs.\n2) Navigation: Next is always enabled on content screens so experienced operators can move quickly. On interaction screens, Next enables once the interaction is complete. Modules unlock in sequence on first attempt (see M0-S04).\n3) VARIABLES (complete list; kept minimal because of the SCORM 1.2 suspend_data limit of about 4,096 characters):\n- TruckType (text, CB or RT, default CB)\n- M1_Done, M2_Done, M3_Done (true/false)\n- M1_Flagged (number: items flagged in the inspection, including false flags; shown on screen)\n- M1_Found (number: defects correctly flagged, 0 to 4)\n- M1_FalseFlags (number: normal items flagged as defects)\n- M2_Found (number: conflict points found)\n- Sim_Tries (number: simulator setting changes)\n- Attempts (number, 0 to 3)\n- AttemptsLeft (number: set to 3 minus Attempts on M4-S01)\n- M4_Passed (true/false: set true when the PASS layer on M4-S22 opens; never reset)\n- ReviewMode (true/false)\nRemoved in revision 3: SafetyCritical_LO2 and SafetyCritical_LO7 (replaced by the hidden results slide M4-S22a). Per-item status in M1-S06, M1-S07, M2-S03, M2-S04 and the simulator uses object states, not extra variables. On-screen variable references use Storyline syntax, for example %M1_Found%. Measure suspend_data length in the Cornerstone test environment at alpha.\n4) SCORM 1.2 reporting is specified on M4-S22 (Passed/Incomplete, with failed sent only after the final attempt). Formative interactions in M0 to M3 are not scored or reported.\n5) Accessibility (built to WCAG 2.2 AA, which also meets the client's 2.1 AA minimum): logical focus order (title, body text, interaction, navigation); visible focus indicator on all custom objects; alt text as specified on each screen; decorative images marked decorative; text contrast at least 4.5:1; targets at least 24 by 24 px (44 preferred); states never shown by color alone (icon plus text label); no flashing; no timed elements; every hotspot interaction has a keyboard-operable list alternative with identical logic. FOCUS: when a layer opens because the learner selected something (inspect, feedback, results), focus moves to its heading, and Close or Continue returns focus to the control that opened it. Focus is never moved automatically by a change of setting or value (WCAG 3.2.2). HIGHLIGHTS: every outline or marker drawn over a photo or video uses a double stroke (white inner line, dark outer line, at least 2 px each) so it reaches at least 3:1 non-text contrast on any background (WCAG 1.4.11). REVISIT: every slide with counters or object states (M1-S06, M1-S07, M2-S03, M2-S04, M3-S03) is set to 'When revisiting: Reset to initial state', so its variables and object states always reset together.\n6) Captions: closed captions on all VO and video, including meaningful sounds in square brackets, for example [horn sounds], [no alarm sound]. Full transcript PDF in Resources. Narration describes key visual events, so video does not need separate audio description [verify at alpha].\n7) Voice: VOICE A is the narrator: calm, peer to peer, sounds like an experienced operator, not an announcer. VOICE B reads short character lines (Ray; Priya on radio), labeled in the narration field.\n8) Spanish phase 2 readiness: no text baked into images or video. All labels, callouts, counters, plan labels and data plate values are live Storyline text layered over media. Truck and door numbers that appear physically in photos are always repeated in live text. Text boxes sized for about 30% expansion. VO and caption scripts exported as separate files named by screen ID. Storyline translation export used for on-screen text. The glossary (note 14) goes to the translator.\n9) Visual style: realistic photography, video or 3D of the client's truck types [CLIENT TO CONFIRM: makes and models in the fleet]. No cartoons. Everyone in correct PPE [CLIENT TO CONFIRM: site PPE, for example hi-vis vest, safety footwear].\n10) Fictional cast (representative only, no real names or incidents): Marcus Reyes (counterbalance, 14 years), Tasha Greene (reach truck, 8 months), Luis Ortega (dock lead, on foot), Priya Nair (shift supervisor), Ray Dunn (night-shift operator), Andre Cole (counterbalance, 9 years).\n11) SME: Dana (EHS manager) must verify all safety content before VO recording and build sign-off. Every [CLIENT TO CONFIRM] item goes on Dana's review list. Priority items:\n(a) GATING ITEM: reach truck makes and models, operator stance (side or forward facing), entry position, and the SOP and manufacturer tip-over response for them. Due from Dana by [CLIENT TO CONFIRM: calendar date, no later than the end of project week 3, before VO scripts lock]. One confirmed wording is then used in M2-S02, M3-S08, M3-S10, M4-S21, all visuals and the quick-reference PDF. If it is not confirmed by that date, apply the fallback written on M3-S08, M3-S10 and M4-S21 (use M4-S21F), and record deviation (d) above.\n(b) defect categories (operate, operate and report, tag out) for every defect used in M1 and M4, including the torn seat cover used as the minor example;\n(c) the simulator logic table in M3-S03;\n(d) pedestrian right of way and site controls;\n(e) SOP section numbers for every 'SOP ref'.\n12) SEAT TIME (realistic screen estimates, revision 3): M0 1:45, M1 5:55, M2 5:50, M3 5:50, M4 5:00. Total about 24:20, within the client's 20 to 25 minute maximum. Method: narration at 130 wpm; inspection items at about 12 seconds each (short description, one choice, one-sentence feedback); hotspot areas about 7 seconds each; assessment items at about 25 seconds each, allowing slower reading for operators more comfortable in Spanish. Narration totals about 1,500 words (about 11.5 minutes); the rest is reading, decisions and unnarrated video and items. 25:00 is a hard limit. Re-time at alpha with 3 to 5 operators, including at least one more comfortable in Spanish. If the alpha median exceeds 24:45, apply these cuts in order (each needs design owner approval): (i) M1-S04 becomes a single 'Why each item matters' Resources PDF, saving about 0:15; (ii) M3-S05 replay cut to the right-hand version only, saving about 0:10; (iii) M2-S04 distractor D2 removed, saving about 0:07; (iv) M0-S03 poll removed, saving about 0:25.\n13) Scenario and assessment screens with answer options may exceed 40 on-screen words; this is intended.\n14) GLOSSARY (use these terms only, on screen, in VO and in the quick reference; send to the translator): reverse alarm (counterbalance: sounds when reverse is selected); travel alarm (reach truck: sounds when the truck travels); horn; tag out (put the site out-of-service tag on the truck and take it out of service); operate and report; operator presence pedal (reach truck); overhead guard; stability triangle; combined center of gravity (short label 'CG'); load trailing; travel height; data plate; rated capacity; load center. [CLIENT TO CONFIRM: fleet and site terms; if the client says 'backup alarm', replace 'reverse alarm' everywhere.]\n\nEst. time on this screen: 0:50."
+    },
+    {
+      "id": "M0-S03",
+      "module": "M0: Why We're Here: Your Floor, Your Numbers",
+      "title": "Quick Poll: What Do You See Most?",
+      "screen_type": "interaction",
+      "on_screen_text": "Quick question, not scored.\nWhich of these do you see most on your shift?\n\n( ) People stepping out at intersections or dock doors\n( ) Loads carried raised through turns\n( ) Checklists signed without a real check\n( ) Honestly, none of these\n\n[Submit]",
+      "narration": "Before we start, one quick question, not scored. Which of these do you see most often on your shift?",
+      "visuals": "Clean layout with a muted photo of a DC floor behind a semi-opaque panel. Standard radio-button options.",
+      "interaction": "Storyline survey question (Pick One), not scored. The learner selects one option, then Submit. Submit is enabled once an option is selected. After feedback, Continue jumps to M0-S04.",
+      "feedback": "Options 1 to 3: 'Thanks. Keep that one in mind. Each part of this course is built around one of these, and you'll make the calls yourself.'\nOption 4 (none of these): 'Good to hear. Keep watching for them anyway. They're easy to miss when a shift feels routine.'\n[CLIENT TO CONFIRM: if Cornerstone can return aggregate results, a later version could show 'How your answer compares with other operators'. Default build: reflection only, no comparison.]",
+      "objective_ids": [],
+      "notes": "Survey question set to not report to the LMS by default [CLIENT TO CONFIRM: whether poll responses should be reported as survey interactions]. Do not tell learners their answer is anonymous unless the client confirms it.\nRadio buttons are native Storyline question objects so screen readers announce the group and selected state. Focus moves to the feedback layer heading after Submit.\nEst. time: 0:25 (including response)."
+    },
+    {
+      "id": "M0-S04",
+      "module": "M0: Why We're Here: Your Floor, Your Numbers",
+      "title": "Your Route Through the Course",
+      "screen_type": "content",
+      "on_screen_text": "Your route:\n1. The Pre-Shift Inspection That Actually Counts (6 min)\n2. Intersections and Dock Doors: Seeing People First (6 min)\n3. Loads, Turns and Tip-Overs (6 min)\n4. Final Check (about 5 min)\n\nStopping early? Your place is saved.",
+      "narration": "Three parts of about six minutes each, then a short final check. They open in order the first time through. If your huddle runs short, close the course; it picks up where you left off. Captions are on because the floor is loud, and the CC button turns them off. Let's start where every shift starts: with the truck.",
+      "visuals": "Course menu with four large tiles. Each tile has a realistic photo thumbnail (truck inspection, intersection, raised load, operator at a terminal), a live-text title and the duration. Tile states: Available (no icon), Locked (padlock icon plus the word 'Locked'), Done (check icon plus the word 'Done'). Tile 4 has two extra states: Passed (check icon plus the word 'Passed') and Attempts used (information icon plus the words 'Attempts used').",
+      "interaction": "Hub menu. Learner selects the Module 1 tile. On first attempt, tiles 2 to 4 are locked. Tile 2 unlocks when M1_Done is true, tile 3 when M2_Done is true, and tile 4 when M1_Done, M2_Done and M3_Done are all true. Modules 1 to 3 stay open for review once done. Each module's summary screen returns to this hub.\nTILE 4 (FINAL CHECK) ROUTING, triggers in this order:\n1) Jump to M4-S23 if M4_Passed = true OR Attempts >= 3. (A learner who has passed, or used all attempts, gets the wrap-up and quick reference, never a new scored attempt.)\n2) Jump to M4-S01 if M4_Passed = false AND Attempts < 3 AND the tile is unlocked.\nTILE 4 STATE on timeline start: Passed if M4_Passed = true; Attempts used if M4_Passed = false and Attempts >= 3; otherwise Available or Locked as above.",
+      "feedback": "If a locked tile is selected: 'This part opens after you finish the one before it.'",
+      "objective_ids": [],
+      "notes": "Tiles are buttons with accessible names that include their state, for example 'Module 2, Intersections and Dock Doors, 6 minutes, locked' or 'Final Check, passed'. Locked tiles stay in the tab order so screen reader users hear the locked state. Thumbnails are decorative (the tile text carries the meaning).\nThis hub is the only entry in the player Menu (global note 1).\nCORNERSTONE TEST CASES for this screen (add to the M4-S22 list): fail, Back to menu, reopen tile 4 (must start a fresh draw with no carried-over answers); pass, reopen tile 4 (must go to M4-S23, no new attempt); fail 3 times, reopen tile 4 (must go to M4-S23).\nM0 TOTAL EST.: about 1:45 (S01 0:50, S03 0:25, S04 0:30).\nEst. time: 0:30."
+    },
+    {
+      "id": "M1-S01",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "5:50 a.m., Truck 07",
+      "screen_type": "scenario",
+      "on_screen_text": "5:50 a.m. Truck 07.\nMarcus Reyes: 14 years on counterbalance trucks.\nThree trailers already on the doors.",
+      "narration": "Ten to six. Marcus Reyes has run counterbalance trucks for fourteen years. Truck 07 was fine yesterday, and the day before. Three trailers are on the doors, and Priya, his supervisor, wants the first one unloaded by six thirty. Marcus could tick every box in a minute without leaving the seat. Most days, nothing would happen. So what does that minute miss?",
+      "visuals": "Photo or short video: Marcus (40s to 50s, hi-vis vest, safety footwear) climbing into a counterbalance truck numbered 07 in the truck parking or charging area, clipboard and checklist on the seat. Dock doors with three trailers in the background. '5:50 a.m.' appears as live text, top left.",
+      "interaction": "None. Learner selects Next.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "ALT TEXT: 'Experienced operator Marcus gets into counterbalance truck 07 early in the morning, checklist on the seat, with trailers waiting at the dock doors behind him.'\nThe truck number is painted on the truck in the photo and repeated in live text, so no meaning depends on the image.\nEst. time: 0:30."
+    },
+    {
+      "id": "M1-S03",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Same Truck, Two Checks",
+      "screen_type": "content",
+      "on_screen_text": "Same truck. Two checks.\nLook, touch, test.\n\nOne-minute check: 0 defects found\nReal check: 3 defects found",
+      "narration": "Most defects don't show from the seat. Here's truck 07, checked two ways. On the left, the one-minute version: glance at the gauges, tick, sign. Every box says OK. On the right, the same truck, checked on foot. Wear at the heel of the left fork, with a fine crack starting. Hydraulic fluid under the mast. Then the tests: horn fine, reverse alarm silent. Each one takes away a margin you rely on: fork strength, lift control, and the warning people listen for.",
+      "visuals": "Worked-example video or animated photo sequence (about 40 seconds), split screen. LEFT, live-text label 'One-minute check': Marcus seated, glancing at the display, ticking boxes, signing. RIGHT, live-text label 'Real check': Marcus walking around truck 07; close-ups of (1) left fork heel wear with a fine crack, (2) fluid drips and a wet patch under the mast, (3) Marcus selecting reverse with no alarm. Each defect is marked as the narration names it by a double-stroke outline (white inner line, dark outer line) with a numbered live-text label, so the marker reaches at least 3:1 contrast on light floors and yellow trucks and never relies on color alone. Counters '0 defects found' and '3 defects found' are live text. No text burned into the video.",
+      "interaction": "Video with player play, pause and replay. Next is enabled at all times.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Revision 3: narration trimmed from about 100 to about 82 words; video shortened to about 40 seconds; outlines changed to a double stroke (WCAG 1.4.11).\nCAPTIONS include sound descriptions: [horn sounds] and [reverse selected, no alarm sound].\nALT TEXT (poster frame): 'Split screen of the same forklift: on the left, an operator ticks a checklist from the seat; on the right, the operator inspects the forks, mast and reverse alarm on foot.'\nThe narration describes each defect as it appears, so it doubles as audio description.\nSME TO VERIFY: Dana to confirm the three defects match the client checklist and are realistic for the fleet. Fork heel wear limits come from the SOP or manufacturer; no figures on screen.\nEst. time: 0:40."
+    },
+    {
+      "id": "M1-S04",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Easy to Skip, Expensive to Miss",
+      "screen_type": "interaction",
+      "on_screen_text": "Easy to skip. Expensive to miss.\nSelect any item to see why it matters.\n\n[Forks] [Chains] [Hydraulics] [Tires] [Horn, lights, reverse or travel alarm] [Brakes] [Seatbelt or restraint] [Data plate] [Battery or LPG] [Reach truck extras]",
+      "narration": "These are the items that get skipped most. Know them cold? Move on. Newer? Select a few to see why each one is on your checklist.",
+      "visuals": "Photo of a counterbalance truck with numbered marker shapes (double stroke, global note 5) on each area, matching the numbered buttons. Each reveal layer shows a close-up photo of that item plus live text. The 'Reach truck extras' layer shows a reach truck close-up (baselegs, load wheels, operator presence pedal).",
+      "interaction": "Optional click-to-reveal with 10 buttons, each opening a layer with a close-up photo and text. Viewed buttons show a check icon plus the word 'Viewed'. Next is always enabled (optional exploration).\nLAYER TEXT:\nForks: 'Look for cracks, bends and heel wear, and check the locking pins. A worn heel can fail under a load you've lifted a hundred times.'\nChains: 'Check for stretch, kinks, rust and uneven tension. If a chain fails, the carriage drops, along with whatever is on it.'\nHydraulics: 'Look for leaks at hoses, fittings and cylinders, and for fluid under the mast. A leak can mean a load that drifts down or a lift that fails.'\nTires: 'Check for chunks, cuts, flat spots and wear (and pressure on pneumatic tires). Damaged tires reduce stability, especially in turns.'\nHorn, lights, reverse or travel alarm: 'Test them, don't assume. The horn, the lights and the reverse alarm (counterbalance) or travel alarm (reach truck) are how pedestrians know you're there.'\nBrakes: 'Test the service and parking brakes before you lift anything. You need them most when you're loaded.'\nSeatbelt or restraint: 'Check that it latches and isn't cut or frayed. On a sit-down truck, it keeps you inside the overhead guard in a tip-over.'\nData plate: 'It must be present and readable. It's how you know the rated capacity and load center.'\nBattery or LPG: 'Electric: cables and connectors undamaged, no corrosion. LPG: cylinder secure, connection tight, no smell of gas.' [CLIENT TO CONFIRM: checklist wording]\nReach truck extras: 'Also check the reach mechanism, the load wheels in the baselegs, and the operator presence pedal.' [CLIENT TO CONFIRM: from the reach truck checklist]",
+      "feedback": "None (informational reveals).",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Revision 3: alarm label standardized to the glossary terms (global note 14); narration trimmed.\nFINAL ITEM LIST must match the client's pre-shift checklist(s) [CLIENT TO CONFIRM: separate checklists for counterbalance and reach, electric and LPG?]. Dana to verify every reason statement.\nEach layer has a Close button. Focus goes to the layer heading on open and back to the button on close. Each button's accessible name includes its viewed state.\nALT TEXT base photo: 'Counterbalance forklift with numbered markers on the forks, chains, mast hoses, tires, horn and lights, brakes, seatbelt, data plate and LPG cylinder.' Close-up alt text describes each item, for example 'Close-up of a fork heel showing wear.'\nFirst item on the alpha cut list (global note 12).\nEst. time: 0:15 (longer if the learner explores; experienced operators are expected to skip)."
+    },
+    {
+      "id": "M1-S05",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Your Turn: Pick Your Truck",
+      "screen_type": "interaction",
+      "on_screen_text": "Your turn. Inspect a truck.\nWhich do you run most?\n\n[Counterbalance (sit-down)]  [Reach truck]",
+      "narration": "Your turn. Pick the truck you run most, inspect it item by item, and select Done when you'd sign. It isn't timed.",
+      "visuals": "Two large photo buttons: a sit-down counterbalance truck and a reach truck matching the fleet model, each with a live-text label.",
+      "interaction": "Learner selects one button. Counterbalance sets TruckType = 'CB' and jumps to M1-S06. Reach truck sets TruckType = 'RT' and jumps to M1-S07. TruckType is reused in M2-S06 (image swap) and M3-S08 to M3-S10 (order of the tip-over checks).",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Buttons have accessible names, for example 'Counterbalance, sit-down truck'. The photos sit inside the buttons, so the label carries the meaning.\nOptional: after finishing one inspection, offer 'Try the other truck' on the results layer (Next still goes to M1-S08). Time for the optional second inspection is not counted in seat time.\nEst. time: 0:15."
+    },
+    {
+      "id": "M1-S06",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Inspect Truck 07 (Counterbalance)",
+      "screen_type": "interaction",
+      "on_screen_text": "Inspect truck 07.\nSelect each item to inspect it, then choose OK or Flag as defect.\nSelect Done when you'd sign off.\n\nItems flagged: %M1_Flagged%\n[Checklist view]  [Done]",
+      "narration": "Truck 07. Walk-around first, then the operational tests. Select each item, inspect it, then decide: OK, or flag it.",
+      "visuals": "High-resolution photo or 3D render of a sit-down counterbalance truck (LPG or electric to match the fleet [CLIENT TO CONFIRM]), three-quarter view. 8 inspectable items in walk-around order: 4 planted defects (1 left fork heel wear with a hairline crack; 3 fluid weeping at the lift cylinder hose fitting with a wet patch under the mast; 5 seatbelt buckle that won't latch; 7 silent reverse alarm) and 4 normal items with harmless cosmetic wear so the learner has to judge (2 chains with surface grime; 4 tires with light sidewall scuffing; 6 LPG cylinder with dust; 8 brakes). Operational tests sit on a dashboard inset: Test reverse alarm, Test brakes. Each inspect layer shows a close-up image or plays the test, plus a live-text description. Hotspot focus and state markers use the double stroke (global note 5).",
+      "interaction": "INSPECT FLOW (same logic in hotspot view and Checklist view):\n1) Selecting an item opens its Inspect layer: close-up image (or test sound or silence) plus the description below. Nothing on this layer says whether the item is OK.\n2) Two buttons: [OK] and [Flag as defect]. The learner must choose one.\n3) Only after the choice does the one-sentence feedback appear, with a Close button. The choice is then locked. The hotspot changes state: 'OK' (check icon plus the word OK) or 'Flagged' (flag icon plus the word Flagged).\n4) Flag on a defect: add 1 to M1_Found and M1_Flagged. Flag on a normal item: add 1 to M1_FalseFlags and M1_Flagged. OK on a defect: the hotspot also gets a hidden 'Missed' state used by the results layer.\n5) Done is available at any time. Items never inspected count as not inspected; defects among them appear on the results layer as 'Not inspected'.\nCHECKLIST VIEW (accessible alternative, same variables and states): a list of the 8 items in walk-around order. Each item shows its description and two radio buttons (OK, Flag as defect); the feedback appears under the item after a choice.\nINSPECT DESCRIPTIONS:\n1 Forks: 'Left fork: heel worn, with a fine line across the bend. Right fork: no damage.'\n2 Chains: 'Even tension, links lubricated, no kinks. Grime on the outer plates.'\n3 Mast and hoses: 'Fluid weeping at the lift cylinder hose fitting. Wet patch on the floor below.'\n4 Tires: 'Even wear, light scuffs on the sidewalls. No chunks, cuts or flat spots.'\n5 Seatbelt: 'Webbing intact. You push the buckle in. It doesn't latch.'\n6 LPG cylinder: 'Secure, pin in place, connection tight, no gas smell. Dusty.'\n7 Reverse alarm test: 'Reverse selected. [no alarm sound]'\n8 Brakes test: 'Service brake stops smoothly. Parking brake holds.'",
+      "feedback": "DEFECTS (Flag / OK):\n1 Forks. Flag: 'Good catch: that's a crack at the heel, where a fork takes the most stress, and it can fail without warning.' OK: 'Missed: that fine line at the heel is a crack, and a cracked fork can fail without warning under load.'\n3 Mast and hoses. Flag: 'Good catch: a hydraulic leak can mean a drifting load or a failed lift, and the fluid is a slip hazard.' OK: 'Missed: that's a hydraulic leak, which can mean a drifting load, a failed lift and a slip hazard.'\n5 Seatbelt. Flag: 'Good catch: a belt that won't latch can't keep you inside the overhead guard if the truck tips.' OK: 'Missed: a belt that won't latch can't keep you inside the overhead guard if the truck tips.'\n7 Reverse alarm. Flag: 'Good catch: people behind you rely on the reverse alarm, especially at dock doors.' OK: 'Missed: there was no alarm in reverse, and people behind you rely on it, especially at dock doors.'\nNORMAL ITEMS (OK / Flag):\n2 Chains. OK: 'Right: grime is normal; tension, links and lubrication are what matter.' Flag: 'This one's fine: grime isn't a defect, and the tension and links are good.'\n4 Tires. OK: 'Right: light scuffs are normal wear.' Flag: 'This one's fine: you're looking for chunks, cuts and flat spots, not scuffs.'\n6 LPG cylinder. OK: 'Right: secure, tight and no gas smell.' Flag: 'This one's fine: dust isn't a defect when the cylinder is secure and tight.'\n8 Brakes. OK: 'Right: both brakes work.' Flag: 'This one's fine: the service brake stops smoothly and the parking brake holds.'\nRESULTS LAYER (on Done):\nIf M1_Found = 4 and M1_FalseFlags = 0: 'You found 4 of 4, with no false flags. That's a real check, and none of these would have shown from the seat.'\nOtherwise: 'You found %M1_Found% of 4 defects.' Then, only if M1_FalseFlags > 0: 'You also flagged %M1_FalseFlags% item(s) that were fine. Better to ask than to miss something, but know what fine looks like.' Then, only if M1_Found < 4: 'Missed or not inspected:' followed by each missed or uninspected defect with its 'Missed' text above, then: 'A real check finds them. A signed box doesn't.'",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Revision 3: cut from 10 to 8 items (data plate defect and horn removed; data plate legibility is still taught in M1-S04, practiced in M1-S07 and assessed in M4-S03 and M4-S05). Feedback cut to one sentence per choice. Re-timed.\nSLIDE PROPERTY: When revisiting: Reset to initial state (global note 5). VARIABLES: M1_Flagged, M1_Found, M1_FalseFlags reset to 0 when the timeline starts. Item status uses hotspot object states (Normal, OK, Flagged, Missed), not extra variables. Results-layer list items are shown or hidden by those states. Alpha test: exit mid-inspection, resume, and confirm the counter and the hotspot states agree.\nHotspots are transparent buttons with visible focus outlines and accessible names that include their state (for example 'Left and right forks, not yet inspected'). Tab order follows the walk-around: forks, chains, mast, tires, seatbelt, LPG cylinder, then the operational tests. Focus moves to the Inspect layer heading on open, to the feedback text after a choice, and back to the hotspot on Close (all learner-initiated).\nAUDIO: the reverse alarm test plays no sound and shows the caption [no alarm sound]. Any test sounds under 3 seconds.\nALT TEXT base image: 'Counterbalance forklift truck 07 ready for inspection. Select parts of the truck to inspect them, or use Checklist view.' Close-up alt text matches each item's description.\nSME TO VERIFY: Dana to confirm the defects and normal items against the client checklist, that the cosmetic wear on normal items would not fail the check, and the fuel type (swap the LPG item for battery and cables if the fleet is electric).\nEst. time: 2:00 (8 items at about 12 seconds, plus narration and results)."
+    },
+    {
+      "id": "M1-S07",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Inspect Truck R12 (Reach Truck)",
+      "screen_type": "interaction",
+      "on_screen_text": "Inspect reach truck R12.\nSelect each item to inspect it, then choose OK or Flag as defect.\nSelect Done when you'd sign off.\n\nItems flagged: %M1_Flagged%\n[Checklist view]  [Done]",
+      "narration": "Reach truck R12. Walk-around first, then the operational tests. Select each item, inspect it, then decide: OK, or flag it.",
+      "visuals": "High-resolution photo or 3D render of a reach truck matching the fleet [CLIENT TO CONFIRM: model, operator stance and entry position]. 8 inspectable items in walk-around order: 4 planted defects (2 kinked, rust-stiffened link near the top of the left lift chain; 4 cracked battery connector housing with copper showing on one cable; 6 silent horn; 7 truck creeps on the travel control with the operator presence pedal released, shown as a short clip) and 4 normal items with harmless cosmetic wear (1 forks with scuffed paint; 3 reach mechanism and hoses; 5 data plate with edge scratches but readable; 8 brakes). Dashboard inset: Test horn, Test operator presence pedal, Test brakes. Hotspot focus and state markers use the double stroke (global note 5).",
+      "interaction": "Same INSPECT FLOW, variables, results logic and Checklist view as M1-S06.\nINSPECT DESCRIPTIONS:\n1 Forks: 'Straight, no cracks or heel wear. Paint scuffed on the faces.'\n2 Lift chains: 'One link near the top of the left chain is kinked and stiff with rust.'\n3 Reach mechanism and hoses: 'Extends and retracts smoothly. Hoses dry.'\n4 Battery and cables: 'Connector housing cracked. Copper showing on one cable near the plug.'\n5 Data plate: 'Scratched at the edges. Every value readable.'\n6 Horn test: 'Horn button pressed. [no sound]'\n7 Operator presence pedal test: 'Foot off the pedal, you use the travel control. The truck creeps forward.'\n8 Brakes test: 'Stops smoothly and holds.'",
+      "feedback": "DEFECTS (Flag / OK):\n2 Chains. Flag: 'Good catch: a kinked, rusted link can fail under load and drop the carriage and the load.' OK: 'Missed: that kinked, rusted link can fail under load and drop the carriage and the load.'\n4 Battery connector. Flag: 'Good catch: a cracked connector with exposed copper can arc, overheat or cut power without warning.' OK: 'Missed: a cracked connector with exposed copper can arc, overheat or cut power without warning.'\n6 Horn. Flag: 'Good catch: with a silent horn, you can't warn people at intersections and dock doors.' OK: 'Missed: the horn made no sound, so you can't warn people at intersections and dock doors.'\n7 Operator presence pedal. Flag: 'Good catch: if the truck moves with your foot off the pedal, the protection that stops it is gone.' OK: 'Missed: the truck moved with your foot off the pedal, so the protection that stops it is gone.'\nNORMAL ITEMS (OK / Flag):\n1 Forks. OK: 'Right: scuffed paint is normal wear.' Flag: 'This one's fine: no cracks, bends or heel wear, just scuffed paint.'\n3 Reach mechanism. OK: 'Right: smooth and dry.' Flag: 'This one's fine: it moves smoothly and the hoses are dry.'\n5 Data plate. OK: 'Right: scratched but fully readable.' Flag: 'This one's fine: edge scratches don't matter when every value is readable.'\n8 Brakes. OK: 'Right: stops smoothly and holds.' Flag: 'This one's fine: the truck stops smoothly and holds.'\nRESULTS LAYER: same text and logic as M1-S06 (out of 4), listing missed or uninspected reach truck defects.",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Revision 3: cut from 10 to 8 items (load wheel defect and lights and travel alarm test removed; both are taught in M1-S04 and assessed in M4-S03). Feedback cut to one sentence per choice.\nSLIDE PROPERTY: When revisiting: Reset to initial state. Same variables, object states, focus rules and audio rules as M1-S06. The operator presence pedal clip is under 5 seconds, captioned [truck creeps forward with pedal released], with a pause control.\nALT TEXT base image: 'Reach truck R12 ready for inspection. Select parts of the truck to inspect them, or use Checklist view.'\nSME TO VERIFY: Dana to confirm the defects match the reach truck checklist and fleet models (operator presence pedal design varies by manufacturer).\nEst. time: 2:00 (shown instead of M1-S06, not as well as it)."
+    },
+    {
+      "id": "M1-S08",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Operate, Report or Tag Out",
+      "screen_type": "content",
+      "on_screen_text": "Every check ends one of three ways:\n- Passes: operate.\n- Minor, no safety impact: operate and report.\n- Affects safe operation: tag out, report, don't operate.\nNot sure? Tag it out and ask.\n\nOSHA 29 CFR 1910.178: examine before use, at least daily. Site SOP [CLIENT TO CONFIRM: section]",
+      "narration": "Every check ends one of three ways. Everything passes: you operate. Something minor that doesn't affect safe operation, like [CLIENT TO CONFIRM: example, for instance a torn seat cover]: operate and report it. Anything that affects how the truck lifts, steers, stops, warns people or protects you: tag it, report it to [CLIENT TO CONFIRM: supervisor or maintenance contact], and don't drive it. OSHA requires that check before use, at least daily, and an unsafe truck stays out of service until it's repaired.",
+      "visuals": "Three-column decision graphic in live text, each column marked by a different shape icon plus a label: a check mark ('Operate'), a clipboard ('Operate and report'), a tag ('Tag out'). Under the Tag out column, a photo of the client's out-of-service tag [CLIENT TO CONFIRM: tag design]. Sources line in smaller text at the bottom (still at least 4.5:1 contrast).",
+      "interaction": "None. Learner selects Next.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1",
+        "LO2"
+      ],
+      "notes": "Revision 3: narration trimmed from about 110 to about 78 words. The OSHA lead-in and the spoken 'Not sure? Tag it out and ask' were cut; the OSHA basis is now one closing sentence and the 'not sure' rule stays on screen.\nSME TO VERIFY: wording reflects 29 CFR 1910.178(q)(7) (examined before being placed in service, at least daily; after each shift where trucks are used round the clock) and 1910.178(q)(1) (trucks not in safe operating condition removed from service). The three categories, the minor-defect example, the reporting contact, the tag-out steps (for example tag on the controls, key removed, maintenance notified) and the 'when in doubt, tag it out' guidance must all come from the site SOP [CLIENT TO CONFIRM].\nALT TEXT for the tag photo: 'The site's out-of-service tag.' Columns are built as a three-item list for screen readers.\nEst. time: 0:40."
+    },
+    {
+      "id": "M1-S09",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "You Found It. Now What?",
+      "screen_type": "scenario",
+      "on_screen_text": "You're on truck 07 and your check finds a crack at the heel of the left fork.\nThe first trailer has waited 10 minutes. Priya's on the radio.\nWhat do you do?\n\nA) Operate, but keep loads light until maintenance can look at it.\nB) Unload the first trailer, then tag it out and report it.\nC) Tag it out now, report it and take another truck.",
+      "narration": "Whichever truck you inspected, picture yourself on truck 07, with a crack at the fork heel.\n\nVOICE B (Priya, on radio): Door 2's still waiting. You on your way?",
+      "visuals": "Close-up of the cracked fork heel (same asset as M1-S03), with a handheld radio clipped to the operator's vest in the foreground and the dock with a waiting trailer blurred in the background.",
+      "interaction": "Branching single choice with consequence layers. Answer order is fixed so the letters match the feedback. A and B show a consequence and then Try again (back to the choices). C shows the outcome and enables Next, which goes to M1-S09a.",
+      "feedback": "A (incorrect): 'You run light pallets for an hour. On the fourth, the fork tip catches the pallet deck and the cracked heel gives way. The load drops at the dock edge, a few feet from Luis. Nobody's hurt this time. A cracked fork isn't a defect you can drive carefully around. Try again.'\nB (incorrect): 'You clear the trailer in 25 minutes, lifting every pallet on a cracked fork. Nothing breaks this time, but every lift was a gamble, and the tag came too late to protect anyone, including you. A tag-out defect comes out of service when you find it, not when it's convenient. Try again.'\nC (correct): 'Right call. You tag truck 07 out of service [CLIENT TO CONFIRM: tag and key steps], report it to [CLIENT TO CONFIRM: contact], and take truck 09. You're eight minutes behind. Eight minutes is a lot cheaper than a dropped load.'",
+      "objective_ids": [
+        "LO2"
+      ],
+      "notes": "Revision 3 (LO2 discrimination): option B is now a delayed tag-out, so the correct answer is no longer the only option that mentions tagging. The learner has to judge when, not just whether. Narration trimmed.\nConsequence layers use a still image for each outcome (A: pallet dropped on the dock floor, no one hurt, Luis stepping back; B: the operator lifting a pallet at the trailer, with a close-up inset of the cracked heel; C: tag hanging on the steering wheel). Non-graphic.\nALT TEXT A: 'A pallet has dropped off a forklift's forks at the dock edge; a worker nearby steps back.' B: 'An operator unloads a trailer with a forklift whose fork heel is cracked.' C: 'An out-of-service tag hangs on the steering wheel of truck 07.'\nThe radio line is VOICE B, captioned [Priya on radio].\nSME TO VERIFY: a cracked fork is a tag-out defect under the SOP.\nEst. time: 0:30."
+    },
+    {
+      "id": "M1-S09a",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Truck 09: Minor or Tag Out?",
+      "screen_type": "scenario",
+      "on_screen_text": "You take truck 09. Everything passes except the seat cover, which is torn along one edge. The seat is secure and the belt latches.\nWhat do you do?\n\nA) Tag it out too. Better safe than sorry.\nB) Operate it, and report the torn cover.\nC) Operate it. A cover isn't worth writing up.",
+      "narration": "Truck 09, then. One more call before you roll.",
+      "visuals": "Close-up photo of a sit-down truck seat with the cover torn along one edge, foam showing, seat firmly mounted and the seatbelt latched across it. Truck number 09 repeated in live text.",
+      "interaction": "Branching single choice. Answer order fixed. A and C show feedback, then Try again. B shows feedback and enables Next, which goes to M1-S10.",
+      "feedback": "A (incorrect): 'Careful, but not needed here. A torn cover doesn't affect how the truck lifts, steers, stops, warns people or protects you, so it's operate and report. Tagging out safe trucks takes them off the floor and makes real tags mean less. If you're ever genuinely unsure, tagging it out and asking is still the right call. Try again.'\nB (correct): 'Right call. It doesn't affect safe operation, so you run the truck and report the cover [CLIENT TO CONFIRM: how minor defects are reported, for example noted on the checklist and passed to maintenance] so it gets fixed before it turns into something bigger.'\nC (incorrect): 'Reporting minor defects is how they get fixed before they become bigger ones, and it keeps the checklist honest. Operate, and report it. Try again.'",
+      "objective_ids": [
+        "LO2"
+      ],
+      "notes": "NEW in revision 3 (QA major finding 4): practices the operate-and-report half of the LO2 decision taught on M1-S08, so the practice set no longer has one answer for every item.\nSME TO VERIFY: a torn seat cover with a secure seat and working belt is operate and report under the SOP. If the SOP classes it differently, swap in a minor defect Dana names and update M1-S08, M4-S05 and M4-S07 to match.\nALT TEXT: 'Seat of forklift truck 09: the cover is torn along one edge, but the seat is firmly mounted and the seatbelt is latched.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M1-S10",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "'Skip It, I Drove It Last Night'",
+      "screen_type": "scenario",
+      "on_screen_text": "6:05 a.m., another morning.\nRay (night shift): 'Line's backed up. Skip the walk-around, it was fine last night. I drove it.'\n\nA) 'Fair enough.' Sign the checklist and go.\nB) Do the operational tests from the seat and skip the walk-around.\nC) Do the full check, and tell Ray you'll be on the line as soon as it's done.",
+      "narration": "Another morning. Ray ran this truck on nights, and he's trying to help.\n\nVOICE B (Ray): Line's backed up. Skip the walk-around, it was fine last night. I drove it.",
+      "visuals": "Photo: Ray (night-shift operator, hi-vis vest, coffee in hand, friendly and tired) talking to the learner-operator, who stands beside a counterbalance truck holding a checklist. Neutral, collegial body language.",
+      "interaction": "Branching single choice with feedback layers. A and B: Try again. C: Next enabled, which goes to M1-S11.",
+      "feedback": "A (incorrect): 'Ray drove it, but he wasn't checking it, and a lot can change between shifts. A fork gets clipped, a hose starts weeping overnight. When you sign the checklist, you're the one saying the truck is safe. Try again.'\nB (incorrect): 'That's half a check. The walk-around is where you find forks, chains, tires and leaks. Try again.'\nC (correct): 'Right call. A real check takes a few minutes, and you're the one signing for this truck and driving it. If line pressure keeps squeezing out check time, raise it with Priya. [CLIENT TO CONFIRM: check time is built into shift start.]'",
+      "objective_ids": [
+        "LO1",
+        "LO2"
+      ],
+      "notes": "Revision 3: narration trimmed.\nALT TEXT: 'Night-shift operator Ray, holding a coffee, talks to an operator who is about to inspect a forklift.'\nRay's line is VOICE B, captioned [Ray].\n[CLIENT TO CONFIRM: whether time for the pre-shift check is formally built into shift start; adjust the C feedback to match.]\nEst. time: 0:25."
+    },
+    {
+      "id": "M1-S11",
+      "module": "M1: The Pre-Shift Inspection That Actually Counts",
+      "title": "Inspection: What to Take Back to the Floor",
+      "screen_type": "summary",
+      "on_screen_text": "Pre-shift check:\n- Look, touch, test. Not from the seat.\n- Your signature means you checked.\n- Affects safe operation? Tag out, report, take another truck.\n- Minor? Operate and report.\n\n[Back to menu]",
+      "narration": "Get off the seat and check for real. If something affects safe operation, the truck comes out of service, however backed up the line is. Next: intersections and dock doors.",
+      "visuals": "Photo of Marcus walking around truck 07 with the checklist. The takeaways as live text in a clean panel.",
+      "interaction": "Learner selects Back to menu. Trigger: set M1_Done = true when the timeline starts; Back to menu jumps to M0-S04.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1",
+        "LO2"
+      ],
+      "notes": "Revision 3: added the 'Minor? Operate and report' line to match M1-S09a; narration shortened so it doesn't read the bullets.\nALT TEXT: 'Marcus walks around his forklift with the checklist, inspecting it.'\nEst. time: 0:15.\nM1 TOTAL EST.: about 5:55 (one inspection path): S01 0:30, S03 0:40, S04 0:15, S05 0:15, S06 or S07 2:00, S08 0:40, S09 0:30, S09a 0:25, S10 0:25, S11 0:15."
+    },
+    {
+      "id": "M2-S01",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "2:40 p.m., Aisle 14",
+      "screen_type": "scenario",
+      "on_screen_text": "2:40 p.m. Aisle 14 meets the dock staging lane.\nTasha Greene: reach truck, 8 months in.\nLuis Ortega: dock lead, on foot.",
+      "narration": "Two forty in the afternoon. Tasha Greene, eight months on reach trucks, is heading out of aisle 14 with a tall stack of cartons. Luis Ortega, the dock lead, steps out of the dock office, eyes on his scanner. A racking end cap sits between them. Neither can see the other, and each assumes the other will stop.",
+      "visuals": "Split image: LEFT, Tasha's view from a reach truck, with the tall carton load blocking part of her forward view and the end cap ahead. RIGHT, Luis stepping out of a dock office door looking down at a handheld scanner. Below, a simple top-down plan (realistic diagram style, not cartoon) showing both converging on the end cap. All plan labels ('Tasha, reach truck', 'Luis', 'End cap', 'Dock office') are live Storyline text placed over the diagram, not part of the graphic.",
+      "interaction": "None. Learner selects Next.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO3"
+      ],
+      "notes": "ALT TEXT left: 'View from a reach truck: a tall stack of cartons blocks part of the view ahead toward a racking end cap.' Right: 'Dock lead Luis walks out of the dock office looking at his scanner.' Plan: 'Top-down plan: the truck and Luis are both heading for the same blind corner at the racking end cap.'\nEst. time: 0:30."
+    },
+    {
+      "id": "M2-S02",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Where You Can't See",
+      "screen_type": "content",
+      "on_screen_text": "Where you can't see:\n- Racking end caps and aisle ends\n- Dock doors and trailer edges\n- Staging lanes full of pallets\n- Your truck's own blind spots\n\nLoad blocks your view? Travel with the load trailing.",
+      "narration": "Conflicts happen where views are blocked: aisle ends, end caps, dock doors, full staging lanes. Your truck adds its own blind spots. On a counterbalance, the mast and load block much of the view ahead, and the counterweight hides what's low behind you. On a reach truck, the mast, the load and where you stand each cut off part of the view. If the load blocks your view ahead, travel with it trailing.",
+      "visuals": "Two top-down diagrams side by side: a counterbalance truck and a reach truck (drawn to match the confirmed fleet model and operator position [CLIENT TO CONFIRM]). Blind-spot zones shown as hatched areas with live-text labels: 'Mast and load', 'Counterweight', and on the reach truck 'Operator position' [CLIENT TO CONFIRM: wording once stance is confirmed]. Hatching plus labels, never color alone.",
+      "interaction": "None. Learner selects Next.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO3"
+      ],
+      "notes": "REACH TRUCK STANCE: the reach truck blind-spot zone and label must follow the stance and entry position Dana confirms (global note 11a, gating item), and must match M3-S08, M3-S10, M4-S21 and the quick-reference PDF. If the gating item misses its date, use the general wording already in the narration ('where you stand') and label the zone 'Operator position'.\nSME TO VERIFY: travel with load trailing when the load obstructs forward view (29 CFR 1910.178(n)(4)); blind-spot descriptions for the fleet models [CLIENT TO CONFIRM: models]; SOP section number.\nALT TEXT: 'Top-down diagrams of a counterbalance truck and a reach truck. Hatched zones show blind spots: in front, blocked by the mast and load; low behind the counterweight; and the area blocked by the reach truck operator's position.' (Update the last clause once stance is confirmed.)\nEst. time: 0:35."
+    },
+    {
+      "id": "M2-S03",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Spot It: The Intersection",
+      "screen_type": "interaction",
+      "on_screen_text": "Find the conflict points.\nSelect every spot where a person and a truck could meet without seeing each other.\n\n[List view]  [Done]",
+      "narration": "Here's the end of aisle 14 from Tasha's side. Find every spot where a person and a truck could meet without seeing each other, then select Done.",
+      "visuals": "Realistic photo or 3D still of the aisle 14 intersection from the reach truck's approach. It contains: (H1) a racking end cap on the left hiding the cross aisle; (H2) the dock office personnel door on the right opening onto the travel lane; (H3) a tall pallet stack in the staging lane blocking the view to the right; (H4) the zone directly ahead of the truck's tall load. Distractor: (D1) a convex mirror on a column.",
+      "interaction": "Hotspot hazard spotting with 5 selectable areas (4 conflict points, 1 distractor). Each selection opens a short feedback layer. Found conflict points get a double-stroke outline and a live-text 'Conflict point' label. Done opens the results layer.\nLIST VIEW (accessible alternative, same variables): checkboxes with neutral descriptions: 'Racking end cap on the left'; 'Dock office door on the right'; 'Pallet stack in the staging lane'; 'Area directly ahead of the load'; 'Mirror on the column'.",
+      "feedback": "H1 End cap: 'Yes. The end cap hides anyone walking along the cross aisle until you're both already in the intersection.'\nH2 Office door: 'Yes. People come through this door fast, often looking at a scanner or paperwork, straight into the travel lane.'\nH3 Pallet stack: 'Yes. The stack blocks the view down the staging lane. Someone working behind it can't see you, and you can't see them.'\nH4 Ahead of the load: 'Yes. That tall load hides anyone directly ahead. With a load like this, Tasha should travel with the load trailing.'\nD1 Mirror: 'Not a conflict point. It's a help: use it, but don't rely on it alone. It shows some of the cross aisle, not all of it.'\nRESULTS: 4 found: 'You found all 4. These are the places to slow down and look every time.' Fewer: 'You found %M2_Found% of 4. The ones you missed are now highlighted with labels. These are the places to slow down and look every time.'",
+      "objective_ids": [
+        "LO3"
+      ],
+      "notes": "Revision 3: fire extinguisher distractor removed to save time (the extinguisher is still used as a distractor in M4-S08). Highlights use the double stroke (global note 5).\nSLIDE PROPERTY: When revisiting: Reset to initial state. VARIABLE: M2_Found (reset to 0 when the screen starts; reused in M2-S04).\nHotspots have visible focus and accessible names. Highlighted areas use an outline shape plus a live-text label.\n[CLIENT TO CONFIRM: whether convex mirrors are used at the DCs. If not, swap D1 for a floor-marked stop line.]\nALT TEXT base image: 'Intersection at the end of aisle 14, seen from an approaching reach truck: a racking end cap on the left, a dock office door on the right, a pallet stack in the staging lane and a mirror on a column.'\nEst. time: 0:40."
+    },
+    {
+      "id": "M2-S04",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Spot It: Dock Door 6",
+      "screen_type": "interaction",
+      "on_screen_text": "Now the dock.\nSelect every spot where a person and a truck could meet without seeing each other.\n\n[List view]  [Done]",
+      "narration": "Now dock door 6, mid-unload. Same task.",
+      "visuals": "Realistic photo or 3D still of dock door 6 with an open trailer (door number repeated in live text). Contains: (H1) a truck driver (visitor vest) stepping off the trailer edge beside the door into the travel lane; (H2) a dark trailer interior with a worker partly visible inside; (H3) a congested staging lane with a dock worker hand-stacking between pallets. Distractors: (D1) trailer restraint engaged with its indicator showing; (D2) dock light on and aimed into the trailer.",
+      "interaction": "Same mechanics as M2-S03: 5 selectable areas (3 conflict points, 2 distractors), feedback layers, Done opens results. M2_Found reset to 0 on timeline start.\nLIST VIEW: 'Trailer edge beside door 6'; 'Inside the trailer'; 'Staging lane'; 'Trailer restraint'; 'Dock light'.",
+      "feedback": "H1 Driver at the trailer edge: 'Yes. Drivers often step off the trailer or out from beside it right at the door, into your path, and they may not know your site's traffic rules.'\nH2 Inside the trailer: 'Yes. A worker inside a dark trailer can't see you coming, and you can't see them until you're at the edge.'\nH3 Staging lane: 'Yes. A narrowed staging lane puts people and trucks in the same small space, with pallets blocking the view.'\nD1 Restraint: 'Not a conflict point. A secured trailer is what you want before you go in.'\nD2 Dock light: 'Not a conflict point. A working dock light helps you see into the trailer.'\nRESULTS: 3 found: 'You found all 3.' Fewer: 'You found %M2_Found% of 3. The ones you missed are now highlighted with labels.'",
+      "objective_ids": [
+        "LO3"
+      ],
+      "notes": "SLIDE PROPERTY: When revisiting: Reset to initial state. Highlights use the double stroke.\nTrailer hazards appear only in context, per the design assumption. [CLIENT TO CONFIRM: trailer restraint type (vehicle restraint or wheel chocks) and dock lighting at each DC.]\nALT TEXT base image: 'Dock door 6 during unloading: a truck driver steps off the trailer edge, a worker is inside the dark trailer, a worker stacks cartons in a crowded staging lane, the trailer restraint is engaged, and a dock light shines into the trailer.'\nD2 is item (iii) on the alpha cut list (global note 12).\nEst. time: 0:35."
+    },
+    {
+      "id": "M2-S05",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "The Approach Sequence",
+      "screen_type": "content",
+      "on_screen_text": "Every intersection. Every dock door.\n1. Slow down\n2. Sound the horn\n3. Look both ways\n4. Yield to pedestrians\n5. Make eye contact\n6. Proceed\n\nNo eye contact? Stop and wait.",
+      "narration": "You know this one. Run all of it, every time. Slow down before the intersection, not in it. Sound the horn: OSHA requires it at cross aisles and wherever your view is blocked. Look both ways. Yield to pedestrians: at our sites, [CLIENT TO CONFIRM: pedestrians have the right of way]. Then get eye contact. The horn tells people you're there. Eye contact tells you they know. No eye contact? Stop and wait. Then proceed.",
+      "visuals": "Worked-example video (about 35 seconds) from the operator's seat, approaching the aisle 14 intersection and doing each step correctly. As the narration names each step, its number and label in a live-text sidebar list gain a bold border plus an arrow icon. Ends with a pedestrian nodding and the truck proceeding.",
+      "interaction": "Video with play, pause and replay. Next enabled.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "Revision 3: narration trimmed to about 72 words.\nSME TO VERIFY: slow down and sound the horn at cross aisles and obstructed locations (29 CFR 1910.178(n)(4)); the site rule on pedestrian right of way [CLIENT TO CONFIRM]; any site speed limits or horn rules [CLIENT TO CONFIRM].\nCAPTIONS include [horn sounds].\nALT TEXT (poster frame): 'Operator's view approaching an intersection, with a list of the six approach steps beside it.'\nThe sidebar is a real list; the active step is shown by a bold border and arrow, not color alone.\nEst. time: 0:35."
+    },
+    {
+      "id": "M2-S06",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Your Call 1: Load Blocking Your View",
+      "screen_type": "scenario",
+      "on_screen_text": "Busy afternoon. You're carrying a double stack of totes toward the aisle 9 intersection. The load blocks your view ahead.\nHow do you approach?\n\nA) Travel forward and lean out to see around the load.\nB) Travel with the load trailing, looking the way you're going.\nC) Travel forward slowly, sounding the horn the whole way.",
+      "narration": "Your turn, from the operator's seat. The staging lane on your right is full of pallets, and you can't see over the totes. What's your approach?",
+      "visuals": "Operator's-seat photo with a tall stack of totes on the forks filling most of the forward view, and the aisle 9 end cap barely visible. Swap the photo by TruckType (counterbalance or reach truck view) if budget allows; otherwise use a counterbalance view.",
+      "interaction": "Branching single choice. A and C: consequence layer, then Try again. B: feedback, then Next to M2-S07.",
+      "feedback": "A (incorrect): 'Leaning out puts your head and shoulders outside the overhead guard, and you still can't see properly. When the load blocks your view ahead, travel with the load trailing. Try again.'\nB (correct): 'Right. Load trailing, looking the way you're traveling. Now you can see what's ahead.'\nC (incorrect): 'The horn helps people hear you, but you still can't see them. Someone stepping out of the staging lane would be in front of your load before you knew they were there. Travel with the load trailing. Try again.'",
+      "objective_ids": [
+        "LO4",
+        "LO3"
+      ],
+      "notes": "Optional TruckType image swap: on timeline start, if TruckType = RT, show the reach truck state of the image.\nALT TEXT: 'Operator's view: a tall stack of totes on the forks blocks most of the view ahead toward an aisle intersection.'\nEst. time: 0:30."
+    },
+    {
+      "id": "M2-S07",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Your Call 2: The Approach",
+      "screen_type": "scenario",
+      "on_screen_text": "You're about 15 feet from the intersection.\nWhat's your sequence?\n\nA) Sound the horn, keep your speed, look, go through.\nB) Slow down, sound the horn, look both ways, yield, make eye contact, proceed.\nC) Slow down, look, go through if no one's there. Horn only if you see someone.",
+      "narration": "Load trailing now, and the end cap's coming up. Pick the sequence you'd actually run.",
+      "visuals": "Operator's view (load trailing) approaching the aisle 9 end cap, with a floor-marked stop line visible [CLIENT TO CONFIRM: floor markings].",
+      "interaction": "Branching single choice. A and C: Try again. B: Next to M2-S08.",
+      "feedback": "A (incorrect): 'The horn's right, but at full speed you've got almost no time to react to what you see when you look. Slow down first, then the rest of the sequence. Try again.'\nB (correct): 'Right. That's the full sequence. You slow down, sound the horn and start to look.'\nC (incorrect): 'The horn isn't for the people you can see. It's for the ones you can't, behind the end cap or the pallet stack. Sound it every time. Try again.'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "ALT TEXT: 'Operator's view approaching the aisle 9 end cap, with a stop line on the floor.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M2-S08",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Your Call 3: Someone Steps Out",
+      "screen_type": "scenario",
+      "on_screen_text": "You start through. Luis steps out from behind the end cap, reading his scanner. He hasn't seen you.\n\nA) Sound the horn again and keep rolling slowly. He'll step back.\nB) Stop. Sound the horn, wait until he's seen you and is clear, then proceed.\nC) Steer around him so you keep moving.",
+      "narration": "Halfway in, there's Luis, head down over his scanner. What's your move?",
+      "visuals": "Operator's-view still: Luis about 10 feet ahead, half out from behind the end cap, head down over his scanner.",
+      "interaction": "Single choice. Every option shows its feedback layer and then continues to M2-S09 (the pedestrian's-view replay), so every learner sees the replay.",
+      "feedback": "A (incorrect): 'He heard a horn, but hearing isn't seeing. The safe response is to stop, sound the horn, wait until he has seen you and is clear, then proceed. Let's look at that moment from Luis's side.'\nB (correct): 'Right call. You stop, he looks up, you get a nod, he steps clear. Three seconds. Now look at the other version from his side.'\nC (incorrect): 'Startled people move unpredictably, often into the space you're steering for. The safe response is to stop, sound the horn, wait until he has seen you and is clear, then proceed. Let's see it from Luis's side.'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "ALT TEXT: 'Dock lead Luis steps out from behind the end cap about 10 feet ahead of the truck, looking down at his scanner.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M2-S09",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "From Luis's Side",
+      "screen_type": "content",
+      "on_screen_text": "From the pedestrian's side.\n\nA horn means 'a truck is somewhere.'\nIt doesn't mean 'they've seen me.'",
+      "narration": "Same moment, from Luis's side, when the operator trusts the horn. Luis hears horns all day. He's checking a pick count. When he looks up, the forks are six feet away. Two people, each sure the other had it handled.",
+      "visuals": "Short POV video (about 20 seconds) from Luis's eye level: scanner screen in hand, a horn in the background, he looks up to see forks and a load emerging from behind the end cap, and the truck stops about six feet away. No contact, no injury, nothing shocking. Ends on a freeze frame of Luis stepping back.",
+      "interaction": "Video with play, pause and replay. Next enabled.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO3",
+        "LO4"
+      ],
+      "notes": "Revision 3: narration trimmed to about 40 words.\nCAPTIONS: [distant horn], [truck motor getting closer], [truck stops].\nALT TEXT (poster frame): 'Pedestrian's view: forklift forks and a load appear from behind a racking end cap and stop about six feet away.'\nNo flashing; keep camera motion gentle (no rapid shake).\nEst. time: 0:20."
+    },
+    {
+      "id": "M2-S10",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Dock Drill 1 of 2",
+      "screen_type": "knowledge check",
+      "on_screen_text": "A truck driver steps off his trailer at door 4, right into your lane.\nWho has the right of way, and what's your move?\n\nA) You do. Sound the horn so he steps back.\nB) He does, but you can pass behind him if there's room.\nC) He does. Stop, make eye contact, let him clear your path, then proceed.",
+      "narration": "Two quick ones at the dock. Decide who has the right of way, and what you do next.",
+      "visuals": "Photo: a truck driver in a visitor vest stepping off the trailer edge at door 4 into the travel lane, seen from a truck about 20 feet away.",
+      "interaction": "Single choice, one attempt, immediate feedback, then Next. CORRECT ANSWER: C.",
+      "feedback": "Correct (C): 'Correct. Pedestrians have the right of way [CLIENT TO CONFIRM]. Stop, get eye contact, and let him clear your path before you move.'\nIncorrect (A or B): 'Not quite. The correct answer is C: he has the right of way [CLIENT TO CONFIRM]. Passing behind him or hoping the horn moves him depends on him staying where you expect, and drivers don't know your floor. Stop, get eye contact, let him clear, then proceed.'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "DESIGN DEVIATION (a), pending written sign-off (see M0-S01): drills reduced from 3 to 2 (M2-S12 retired). Restore-ready text for the third drill is in the M2-S11 notes.\nNot scored or reported (formative). Answer order fixed.\nALT TEXT: 'A truck driver steps off a trailer at dock door 4 into the forklift travel lane.'\n[CLIENT TO CONFIRM: pedestrian right-of-way rule and any visitor or driver safe-zone rules at the docks.]\nEst. time: 0:25."
+    },
+    {
+      "id": "M2-S11",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Dock Drill 2 of 2",
+      "screen_type": "knowledge check",
+      "on_screen_text": "You're about to enter the trailer at door 7. It's dark inside, and you can hear someone moving.\nWhat do you do?\n\nA) Stop at the dock edge and sound the horn. Don't enter until you know where they are, they know you're coming, and the trailer is secured.\nB) Enter slowly with your lights on. They'll hear the truck.\nC) Enter, then sound the horn once you're inside.",
+      "narration": "",
+      "visuals": "Photo: view from the dock edge into a dim trailer interior, with a silhouette of a worker partly visible behind stacked cartons.",
+      "interaction": "Single choice, one attempt, immediate feedback, then Next to M2-S13. CORRECT ANSWER: A.",
+      "feedback": "Correct (A): 'Correct. In a dark trailer, neither of you can see the other. Stop outside, sound the horn, and confirm where they are before you go in. Only enter a trailer that's secured [CLIENT TO CONFIRM: restraint or chocks, dock plate in place].'\nIncorrect (B or C): 'Not quite. The correct answer is A. Lights and engine noise don't tell you where the person is, and once you're inside there's no room to stop safely. Stop at the dock edge, sound the horn, confirm where they are and that the trailer is secured, then enter.'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "No narration on this screen (drill pace). Screen readers read the on-screen text.\nALT TEXT: 'View from the dock edge into a dark trailer, with a worker partly visible behind stacked cartons.'\nSME TO VERIFY: trailer entry steps per the SOP (brief, in context only).\nRESTORE-READY TEXT FOR RETIRED M2-S12 (build only if the design owner does not approve deviation (a); adds about 0:25 to M2, so re-time and apply the alpha cut list if needed):\nTitle: 'Dock Drill 3 of 3'. Stem: 'A dock worker is hand-stacking cartons between pallets in the staging lane you need to drive through. What do you do?' Options (fixed order): A) Sound the horn and drive through slowly. They'll step aside. B) Stop at the lane entrance, sound the horn, get eye contact and wait until they've stepped clear or waved you through. C) Squeeze past on the far side of the lane. CORRECT: B. Correct feedback: 'Correct. In a narrow staging lane there's no room for either of you to react. Stop, get eye contact and go only when they're clear.' Incorrect feedback: 'Not quite. The correct answer is B. A horn and a slow roll still put a truck next to someone with nowhere to go. Stop at the entrance, sound the horn, get eye contact and wait until they're clear.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M2-S13",
+      "module": "M2: Intersections and Dock Doors: Seeing People First",
+      "title": "Intersections and Docks: What to Take Back",
+      "screen_type": "summary",
+      "on_screen_text": "Intersections and dock doors:\n- View blocked? Load trailing, slow down, horn.\n- Slow, horn, look, yield, eye contact, proceed.\n- No eye contact? Stop and wait.\n\nOur site controls: [CLIENT TO CONFIRM]\n[Back to menu]",
+      "narration": "If you can't see past the load, turn it around. Run the full sequence even when the aisle looks empty. A horn only says you're near, so without eye contact, you wait. Our site controls, [CLIENT TO CONFIRM: for example walkways and mirrors], back you up. They don't replace the sequence.",
+      "visuals": "Photo of the aisle 14 intersection with Tasha's truck stopped and Luis giving a nod. Site controls shown as small photos with live-text labels if they exist (walkway markings, mirror, blue spot light) [CLIENT TO CONFIRM].",
+      "interaction": "Learner selects Back to menu. Trigger: set M2_Done = true when the timeline starts; Back to menu jumps to M0-S04.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO3",
+        "LO4"
+      ],
+      "notes": "Revision 3: narration rewritten to extend the bullets rather than read them.\n[CLIENT TO CONFIRM: which controls exist and whether they are the same at all three DCs. If they differ, use general wording.]\nALT TEXT: 'Tasha's reach truck stopped at the intersection while Luis nods and crosses.'\nEst. time: 0:25.\nM2 TOTAL EST.: about 5:50: S01 0:30, S02 0:35, S03 0:40, S04 0:35, S05 0:35, S06 0:30, S07 0:25, S08 0:25, S09 0:20, S10 0:25, S11 0:25, S13 0:25."
+    },
+    {
+      "id": "M3-S01",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "4:50 p.m., Last Pallet",
+      "screen_type": "scenario",
+      "on_screen_text": "4:50 p.m. Last pallet of the shift.\nAndre Cole: 9 years on counterbalance trucks.",
+      "narration": "Ten to five. Andre Cole, nine years on counterbalance trucks, pulls his last pallet off the second beam and heads for the aisle end, load still at chest height. He turns without much braking. The truck leans hard. One wheel lifts, and for half a second it could go either way. It comes back down. Here's why.",
+      "visuals": "Realistic 3D reconstruction or staged video (about 25 seconds): Andre removes a pallet from the second beam level, travels with the load at chest height, turns at the aisle end, the truck leans and one wheel lifts. Freeze frame at the wheel lift, then the truck settles. No impact, no injury shown.",
+      "interaction": "Video with play, pause and replay. Next enabled.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO5"
+      ],
+      "notes": "Revision 3: narration trimmed to about 58 words so it fits the video.\nCAPTIONS: [tires scrub on the floor], [truck thuds back onto all wheels].\nALT TEXT (poster frame): 'A counterbalance forklift with a pallet raised to chest height leans in a turn at the end of an aisle, with one wheel off the floor.'\nNo flashing; slow motion on the freeze is acceptable.\nSME TO VERIFY: the scare scenario is representative of the client's described patterns (fictionalized).\nEst. time: 0:30."
+    },
+    {
+      "id": "M3-S02",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "The Stability Triangle",
+      "screen_type": "content",
+      "on_screen_text": "The stability triangle:\n- Three points: two front wheels and the steer axle pivot\n- Truck + load = one combined center of gravity\n- Inside the triangle: upright\n- Higher load, faster, tighter turn: closer to the edge",
+      "narration": "Most counterbalance trucks rest on three points: the two front wheels and the pivot in the middle of the steer axle. That's the stability triangle. Truck and load share one combined center of gravity, and while it stays inside the triangle, you stay upright. Raise the load and that point climbs, so it takes less to push it sideways. A turn pushes it out; speed and rough floor push harder. Past the edge, the truck goes over. Reach trucks have a different base, but the rule is the same.",
+      "visuals": "Animated diagram, synced to the narration: top-down truck outline with the stability triangle drawn as a bold dashed outline, and the combined center of gravity as a circle marker with the live-text label 'CG'. A side view shows the CG rising as the load rises. In the turn, the CG marker slides toward the triangle edge, with an arrow and live-text label 'Turn'. When it crosses, the edge outline thickens and the live-text label 'Outside: tip-over' appears. Plain-language labels only, no formulas, no text baked into the animation.",
+      "interaction": "Animation with play, pause and replay. Next enabled.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO5"
+      ],
+      "notes": "ALT TEXT (summary): 'Diagram of a counterbalance truck seen from above with the stability triangle between the front wheels and the steer axle pivot. The combined center of gravity marker moves up as the load rises and toward the outside edge in a turn; when it crosses the edge, the truck tips sideways.'\nState changes use outline weight and text labels, not color alone. Motion is slow and smooth.\nSME TO VERIFY: the stability triangle explanation and the reach truck statement for the fleet models.\nEst. time: 0:45."
+    },
+    {
+      "id": "M3-S03",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Try It: Stability Simulator",
+      "screen_type": "interaction",
+      "on_screen_text": "Try it. Change the settings and watch the center of gravity.\nAfter each change, the result appears below the settings.\n\nLoad height: Floor (travel height) | Knee | Chest | Overhead\nSpeed: Walking | Moderate | Fast\nTurn: Gentle | Tight\n\nResult: [result text]\nSimplified model for illustration.",
+      "narration": "Now try it. Change the load height, speed and turn, and watch the center of gravity. Find what takes it over the edge, then what keeps it centered.",
+      "visuals": "Same top-down triangle diagram as M3-S02, with the CG marker moving to one of three positions: center (Stable), near the edge (Reduced margin) or outside (Tip-over). A side-view truck shows the load at the selected height. Three rows of segmented buttons for the settings. The result panel sits directly beneath the settings on the base slide: a headline with an icon per state (circle = Stable, triangle with exclamation mark = Reduced margin, crossed circle = Tip-over) and up to two factor lines below it, all live text.",
+      "interaction": "Three button sets (radio-style, one selected per set). Default: Floor, Walking, Gentle. Every change updates the result immediately. Sim_Tries adds 1 per change; Next enables after 3 changes.\nRESULT PANEL BUILD (revision 3): the result is on the BASE SLIDE, not a layer. The headline is one text box with four states (STABLE-1, STABLE-2, REDUCED, TIP-OVER); each factor line is a text box shown or hidden by its condition. A change of setting only changes these states. FOCUS STAYS ON THE BUTTON JUST SELECTED: no trigger moves focus and no layer opens (WCAG 3.2.2 On Input).\nFOCUS ORDER: title, instruction line ('After each change, the result appears below the settings.'), Load height set, Speed set, Turn set, result headline, factor lines, diagram (alt text), Next. So the result is always the next thing after the settings for keyboard and screen reader users.\nRESULT LOGIC (Dana to approve). Conditions use the selected state of each button, not extra variables.\nFLOOR (travel height): Walking + Gentle = STABLE-1; Moderate + Gentle = STABLE-1; Walking + Tight = STABLE-2; Moderate + Tight = REDUCED; Fast + Gentle = REDUCED; Fast + Tight = TIP-OVER.\nKNEE: Walking + Gentle = REDUCED; Walking + Tight = REDUCED; Moderate + Gentle = REDUCED; Moderate + Tight = REDUCED; Fast + Gentle = TIP-OVER; Fast + Tight = TIP-OVER.\nCHEST: Walking + Gentle = REDUCED; Walking + Tight = REDUCED; Moderate + Gentle = REDUCED; Moderate + Tight = TIP-OVER; Fast + Gentle = TIP-OVER; Fast + Tight = TIP-OVER.\nOVERHEAD: Walking + Gentle = REDUCED; every other combination = TIP-OVER.\nRules this table enforces: any height above Floor is never Stable; 'how you want to travel' appears only for Floor with Walking or Moderate and a Gentle turn; Fast into a Tight turn is always Tip-over.\nFACTOR LINES (each text box shown only when its condition is true, stacked under the headline):\nF-HEIGHT (Knee, Chest or Overhead; one state per height)\nF-FAST (Speed = Fast; one state for Gentle, one for Tight)\nF-MODTIGHT (Speed = Moderate and Turn = Tight)",
+      "feedback": "HEADLINES:\nSTABLE-1: 'Stable. Load at travel height, controlled speed, gentle turn. The center of gravity stays well inside the triangle. This is how you want to travel.'\nSTABLE-2: 'Stable. Load at travel height and walking speed, so the center of gravity stays inside the triangle, even in a tight turn.'\nREDUCED: 'Reduced margin. The center of gravity is close to the edge of the triangle. A floor joint, a sudden steer or a bit more speed could push it over.'\nTIP-OVER: 'Tip-over. The center of gravity has crossed the edge of the triangle, and the truck tips toward the outside of the turn.'\nFACTOR LINES:\nF-HEIGHT: 'Load raised to knee height.' / 'Load raised to chest height.' / 'Load raised overhead.' Each followed by: 'Never travel with the load raised. Raise and lower only when stopped.'\nF-FAST (Gentle): 'You're traveling fast. Get your speed down on the straight, before the turn.'\nF-FAST (Tight): 'Fast into a tight turn. That can tip a truck even with the load at travel height. Slow down on the straight.'\nF-MODTIGHT: 'Moderate speed into a tight turn. Slow to walking speed before a tight turn.'",
+      "objective_ids": [
+        "LO5",
+        "LO6"
+      ],
+      "notes": "Revision 3 (QA major finding 5): the Result layer and its automatic focus move are removed. The result now updates in place on the base slide while focus stays on the selected button.\nSLIDE PROPERTY: When revisiting: Reset to initial state.\nSCREEN READER ANNOUNCEMENT: at alpha, test with NVDA and JAWS whether Storyline announces the updated headline without a focus move. If it does not, keep the build as specified: the learner reaches the result with one Tab after the Turn set, as the instruction line says. Do not add an automatic focus move.\nACCESSIBILITY: button sets, not sliders, for keyboard operation. Each button's accessible name includes its set and selected state (for example 'Load height: Chest, selected'). The result never relies on marker position or color alone; the text and icon always state it. Diagram alt text updates with the state, for example 'Center of gravity marker is outside the stability triangle.'\nSME TO VERIFY: Dana to approve the full logic table and all result text before build, including the Floor + Fast + Tight = Tip-over rule.\nEst. time: 0:50."
+    },
+    {
+      "id": "M3-S04",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Carry It Right",
+      "screen_type": "content",
+      "on_screen_text": "Carry it right:\n- Forks low, tilted back [CLIENT TO CONFIRM: travel height]\n- Raise and lower only when stopped\n- Slow down before the turn, not in it\n- Load within data plate capacity and load center\n\nReach truck: [CLIENT TO CONFIRM: travel position]",
+      "narration": "So here's how to carry it. Forks low and tilted back, load against the backrest, at our SOP travel height. Raise and lower only when stopped. Get your speed off on the straight, then take the turn without more braking. Check the data plate: the capacity at the load center you're actually carrying. On a reach truck, travel with [CLIENT TO CONFIRM: mast retracted and load at travel height].",
+      "visuals": "Short real video or 3D clip (about 30 seconds) of correct carrying: forks low and tilted back, the operator stopping to lower before traveling, braking on the straight, a smooth turn. Reach truck clip showing the travel position [CLIENT TO CONFIRM]. Then a GENERIC DATA PLATE built in Storyline as a shape group: field labels and values are live text, for example 'Rated capacity: [CLIENT TO CONFIRM: example value from a fleet data plate]' and 'Load center: [CLIENT TO CONFIRM: example value]', with both fields outlined (double stroke). No photo of real plate text.",
+      "interaction": "Video with play, pause and replay. Next enabled.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO6"
+      ],
+      "notes": "Revision 3: narration trimmed to about 68 words.\nSME TO VERIFY: SOP travel height; load tilted back and raised only as far as needed; speed reduced for turns (1910.178(n)(15)); loads within rated capacity (1910.178(o)(2)); reach truck travel position for the fleet models. Dana to confirm the citations and SOP sections.\nALT TEXT (poster frame): 'Operator carrying a pallet low with the mast tilted back, slowing down on the straight before a turn.' Data plate: the plate is live text, so screen readers read the values directly; group alt text: 'Example truck data plate with the rated capacity and load center fields highlighted.'\nEst. time: 0:35."
+    },
+    {
+      "id": "M3-S05",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Andre's Turn, Replayed",
+      "screen_type": "content",
+      "on_screen_text": "Andre's turn, replayed.\n\nWhat led to it: load raised, speed held, late braking, tight turn.\n\nWhat would have prevented it: lower at the rack, slow on the straight, wide smooth turn.",
+      "narration": "Andre's turn again, with the diagram on. Load high, speed held, late braking, tight turn: the marker slides to the edge. Now the other version: lowered at the rack, slowed on the straight, a wide, smooth turn. About four seconds slower, and the marker never gets near the edge.",
+      "visuals": "Worked-example split replay, about 20 seconds: the M3-S01 footage with the stability triangle overlay from M3-S02. LEFT, live-text label 'What happened': the CG marker climbs and slides to the edge, with numbered live-text callouts. RIGHT, live-text label 'What would have prevented it': the alternate version, with the CG marker staying central and matching callouts.",
+      "interaction": "Video with play, pause and replay. Next enabled.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO5",
+        "LO6"
+      ],
+      "notes": "ALT TEXT (poster frame): 'Side-by-side replay of the same turn. Left: raised load, speed and a tight turn push the center of gravity to the edge of the stability triangle. Right: lowered load, slower speed and a wide turn keep it centered.'\nCAPTIONS as in M3-S01.\nItem (ii) on the alpha cut list (global note 12).\nEst. time: 0:25."
+    },
+    {
+      "id": "M3-S06",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Your Call 1: The Pallet's Still Up",
+      "screen_type": "scenario",
+      "on_screen_text": "Aisle 22. You've just picked a pallet from the third beam level. It's still up at beam height. The aisle end is 40 feet away, then a left turn.\nWhat do you do first?\n\nA) Back out and lower as you go, to save time.\nB) Back out just enough to clear the rack, stop, lower to travel height, tilt back, then travel.\nC) Leave it up. You're setting it down at the dock anyway.",
+      "narration": "Your turn, and Priya's chasing this one.\n\nVOICE B (Priya, on radio): Door 3's waiting on that pallet. How long?",
+      "visuals": "Operator's-view photo: forks raised at the third beam level with a pallet just picked, aisle stretching ahead to a visible aisle end. Small stability triangle inset showing the current CG position (high, at center).",
+      "interaction": "Branching single choice. A and C: consequence layer (inset shows the CG moving toward or past the edge), then Try again. B: Next to M3-S07.",
+      "feedback": "A (incorrect): 'Lowering while you travel means two things are changing at once. As you back out, a wheel drops into a floor joint and the raised load sways. You stop it in time, but the pallet has shifted on the forks. Stop first, then lower. Try again.'\nB (correct): 'Right. It costs a few seconds and puts the center of gravity back where it belongs.'\nC (incorrect): 'With the load at third-beam height, the center of gravity is about as high as it gets. Forty feet and one left turn later, the marker is outside the triangle. That's how Andre's scare started. Lower before you travel. Try again.'",
+      "objective_ids": [
+        "LO6"
+      ],
+      "notes": "Priya's radio line is VOICE B, captioned [Priya on radio].\nALT TEXT: 'Operator's view: forks raised to the third beam level holding a pallet, with the aisle end ahead.' Inset: 'Stability triangle with the center of gravity marker high.'\nSME TO VERIFY: reach truck retract-then-lower order if the SOP specifies one [CLIENT TO CONFIRM].\nEst. time: 0:35."
+    },
+    {
+      "id": "M3-S07",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Your Call 2: The Turn",
+      "screen_type": "scenario",
+      "on_screen_text": "Load's low and tilted back. The aisle end is coming up and the main lane is busy.\nHow do you take the turn?\n\nA) Hold your speed and brake hard at the corner.\nB) Brake on the straight, enter slowly, steer smoothly, and run the intersection sequence.\nC) Swing wide at the same speed so the turn is gentler.",
+      "narration": "You're rolling now, and there's traffic both ways on the lane ahead. How do you take it?",
+      "visuals": "Operator's view approaching the aisle 22 end with the load low, and a busy main travel lane visible ahead. Stability triangle inset.",
+      "interaction": "Branching single choice. A and C: consequence layer with the inset moving, then Try again. B: Next to M3-S08.",
+      "feedback": "A (incorrect): 'Braking hard at the corner throws the load forward just as the turn pushes it sideways. The marker slides to the edge. Get your speed off while you're still going straight. Try again.'\nB (correct): 'Right call. Speed off on the straight, a smooth turn, and the intersection sequence. The pallet gets to door 3 about five seconds later than it would have. Nobody notices.'\nC (incorrect): 'A wider turn helps, but speed matters most. At that speed the turn still pushes the center of gravity hard toward the edge, and you're swinging into a busy lane you haven't checked. Try again.'",
+      "objective_ids": [
+        "LO6",
+        "LO5"
+      ],
+      "notes": "ALT TEXT: 'Operator's view: load carried low approaching the end of aisle 22, with a busy travel lane ahead.' Inset state text as in M3-S03.\nNext from M3-S07 goes to M3-S08.\nEst. time: 0:25."
+    },
+    {
+      "id": "M3-S08",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "If It Starts to Tip",
+      "screen_type": "content",
+      "on_screen_text": "If it starts to tip:\n\nSit-down counterbalance:\n- Don't jump\n- Stay in the seat, belt on\n- Grip the wheel, brace your feet\n- Lean away from the fall\n\nReach truck: [CLIENT TO CONFIRM: SOP response for the fleet's reach truck models]\n\nFALLBACK TEXT if not confirmed by script lock: 'Reach truck: follow the tip-over response in your SOP and your truck's operator's manual. Your supervisor will review it with you.'",
+      "narration": "Everything so far is about never getting here. If a truck starts to tip, you have about a second, and instinct usually says jump. On a sit-down counterbalance, don't. Stay in the seat with your belt on, grip the wheel, brace your feet and lean away from the fall. Inside the overhead guard is the safest place to be, and operators who jump are often caught by it. On a reach truck, the right response depends on the truck's design. [CLIENT TO CONFIRM: SOP response for the fleet's reach truck models.]\n\nFALLBACK closing sentence (record instead of the last two sentences if the gating item misses its date): On a reach truck, follow the response in your SOP and your truck's operator's manual. Your supervisor will go through it with you.",
+      "visuals": "Two-panel 3D render. LEFT: operator in a sit-down counterbalance truck, belted, gripping the wheel, feet braced, leaning away from the direction of tip (arrow with live-text label 'Lean away'). RIGHT: reach truck operator showing the confirmed response, rendered on the confirmed fleet model with its confirmed stance and entry position [CLIENT TO CONFIRM; render only after Dana approves]. FALLBACK RIGHT PANEL: a photo of a reach truck operator's manual and the site SOP binder on a supervisor's desk, with the fallback text as live text. No crash or injury shown.",
+      "interaction": "None. Learner selects Next.\nBRANCHING (sets the order of the tip-over checks): Next jumps to M3-S10 if TruckType = RT; otherwise to M3-S09. Under the fallback, Next always jumps to M3-S09.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "SAFETY-CRITICAL. DANA MUST VERIFY ALL CONTENT ON THIS SCREEN BEFORE VO RECORDING.\nGATING ITEM (global note 11a): reach truck models, stance, entry position and SOP response due from Dana by [CLIENT TO CONFIRM: date, no later than the end of project week 3, before VO scripts lock].\nFALLBACK (revision 3, QA major finding 7): if not confirmed by that date, build the fallback on-screen text, narration and right panel above, remove M3-S10 and M4-S21, use M4-S21F, and record deviation (d) on M0-S01. LO7 practice and assessment are then counterbalance only; the design owner and the client must be told in writing that reach truck operators get the response through supervisor review instead. When Dana confirms later, swap the confirmed content back in (a small re-record).\nREACH TRUCK CONSISTENCY: the reach truck response, stance and entry position must be one confirmed description used identically here and in M2-S02, M3-S10, M4-S21, all renders and the quick-reference PDF.\nFor Dana's review: the response commonly taught for stand-up, rear-entry trucks is to step off backward through the operator entrance, away from the direction of the tip, and keep clear. The safe direction depends on stance and entry design, which differ by manufacturer and model, so the course will use only the SOP and manufacturer wording for the fleet.\nALT TEXT left: 'Operator in a sit-down forklift, seatbelt on, gripping the steering wheel with feet braced, leaning away from the side the truck is tipping toward.' Right: [to be written after the response is confirmed]. Fallback right: 'A reach truck operator's manual and the site SOP binder on a desk.'\nEst. time: 0:40."
+    },
+    {
+      "id": "M3-S09",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Quick Check: Sit-Down Counterbalance",
+      "screen_type": "knowledge check",
+      "on_screen_text": "You're on a sit-down counterbalance truck, belted in. In a turn, the truck starts to tip to the right.\nWhat do you do?\n\nA) Jump clear to the left, away from the truck.\nB) Stay in the seat, grip the wheel, brace your feet and lean left, away from the fall.\nC) Lean right, into the fall, to push it back down.\nD) Unbuckle so you can get out fast once it stops.",
+      "narration": "Quick check: sit-down counterbalance.",
+      "visuals": "Still: operator's-seat view of a counterbalance truck mid-turn, tilted slightly to the right. Non-graphic.",
+      "interaction": "Single choice, 2 attempts, formative (not scored). CORRECT ANSWER: B. Answer order fixed.\nNEXT ROUTING: if TruckType = CB, Next jumps to M3-S10 (reach truck check second). If TruckType = RT (learner has already done M3-S10), Next jumps to M3-S11. Under the fallback (M3-S10 removed), Next always jumps to M3-S11.",
+      "feedback": "Correct (B): 'Correct. Belted in, gripping the wheel, feet braced, leaning away from the fall: that keeps you inside the overhead guard, the safest place to be.'\nA (first try): 'Not quite. Jumping is the instinct, but operators who jump or are thrown are often caught by the overhead guard as the truck goes over. Stay in the seat. Try again.'\nC (first try): 'Not quite. Leaning into the fall won't stop the truck and moves you toward where it lands. Lean away from the fall. Try again.'\nD (first try): 'Not quite. The belt is what keeps you inside the overhead guard. Keep it on. Try again.'\nSecond incorrect: 'The correct response is B: stay in the seat with your belt on, grip the wheel, brace your feet and lean away from the direction of the fall.'",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "Dana to verify.\nALT TEXT: 'Operator's view from a sit-down forklift in a turn, tilting to the right.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M3-S10",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Quick Check: Reach Truck",
+      "screen_type": "knowledge check",
+      "on_screen_text": "You're operating a reach truck and it starts to tip.\nWhat do you do?\n\nA) Hold on with one arm outside the compartment to steady yourself.\nB) [DANA TO CONFIRM: SOP and manufacturer tip-over response for the fleet's reach truck models]\nC) Jump off toward the side it's tipping.\nD) Keep your foot on the operator presence pedal and steer against the tip.",
+      "narration": "And the reach truck.",
+      "visuals": "Still: reach truck operator compartment matching the confirmed fleet model, showing the confirmed stance and entry position [CLIENT TO CONFIRM]. Non-graphic.",
+      "interaction": "Single choice, 2 attempts, formative (not scored). CORRECT ANSWER: B (pending Dana's confirmation). Answer order fixed.\nNEXT ROUTING: if TruckType = RT, Next jumps to M3-S09 (counterbalance check second). If TruckType = CB (learner has already done M3-S09), Next jumps to M3-S11.",
+      "feedback": "Correct (B): 'Correct. [CLIENT TO CONFIRM: rationale from SOP and manufacturer guidance for the confirmed stance and entry position.]'\nA (first try): 'Not quite. An arm outside the compartment can be caught as the truck goes over. Try again.'\nC (first try): 'Not quite. Jumping toward the side it's tipping puts you where the truck will land. Try again.'\nD (first try): 'Not quite. Once a tip starts, steering won't stop it. Try again.'\nSecond incorrect: 'The correct response is B: [CLIENT TO CONFIRM: SOP wording].'",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "SAFETY-CRITICAL, DRAFT. Gated on global note 11a.\nFALLBACK: if the reach truck response is not confirmed by script lock, this screen is not built. M3-S08 and M3-S09 route straight on, LO7 practice is counterbalance only, and deviation (d) is recorded on M0-S01 with the design owner and client told in writing.\nDana must also confirm that distractors A, C and D are wrong for the fleet models. If any distractor overlaps the confirmed response (for example, if the SOP says to stay in the compartment and hold on), rewrite it so the confirmed response is the only correct answer.\nALT TEXT: 'Reach truck operator compartment showing where the operator stands and the entrance.' (Finalize once the model is confirmed.)\nEst. time: 0:25."
+    },
+    {
+      "id": "M3-S11",
+      "module": "M3: Loads, Turns and Tip-Overs",
+      "title": "Loads and Turns: What to Take Back",
+      "screen_type": "summary",
+      "on_screen_text": "Loads, turns, tip-overs:\n- Low and tilted back. Raise and lower only when stopped.\n- Slow down before the turn.\n- Know your load and your data plate.\n- Know the tip-over response for your truck.\n\n[Back to menu]",
+      "narration": "Height is the multiplier: the higher the load, the less it takes to tip you. Lower first, scrub off speed while you're still straight, and know your truck's tip-over response before you ever need it. Next, the final check.",
+      "visuals": "Photo of a counterbalance truck carrying a pallet low and tilted back through a smooth turn, with a small stability triangle icon showing the CG centered.",
+      "interaction": "Learner selects Back to menu. Trigger: set M3_Done = true when the timeline starts; Back to menu jumps to M0-S04 (Final Check now unlocked).",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO5",
+        "LO6",
+        "LO7"
+      ],
+      "notes": "Revision 3: narration rewritten to extend the bullets rather than read them.\nALT TEXT: 'Forklift carrying a pallet low and tilted back, turning smoothly at an aisle end.'\nEst. time: 0:15.\nM3 TOTAL EST.: about 5:50: S01 0:30, S02 0:45, S03 0:50, S04 0:35, S05 0:25, S06 0:35, S07 0:25, S08 0:40, S09 0:25, S10 0:25, S11 0:15. (Under the fallback, about 5:25.)"
+    },
+    {
+      "id": "M4-S01",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Final Check: How It Works",
+      "screen_type": "final assessment",
+      "on_screen_text": "Final check:\n- 10 situations from the floor\n- Pass: 8 of 10 (80%) [CLIENT TO CONFIRM: plus both safety-critical questions]\n- Reasons shown after you submit\n- No timer. Up to 3 attempts, new questions each time\n\nAttempts left: %AttemptsLeft%\n[Start]",
+      "narration": "Last part: ten situations, and you make the call. Eight of ten to pass [CLIENT TO CONFIRM: 'and both safety-critical questions right']. Reasons come after you submit. No timer, and up to three attempts, with fresh questions each time.",
+      "visuals": "Photo of an operator at the start of a shift, looking down a clear aisle. Rules as a live-text list.",
+      "interaction": "ON TIMELINE START (in order):\n1) Jump to M4-S23 if M4_Passed = true OR Attempts >= 3 (guard; the hub already routes these learners away).\n2) Set AttemptsLeft = 3, then subtract the value of Attempts from AttemptsLeft.\n3) Change state of Start to Disabled if AttemptsLeft = 0.\nSTART BUTTON TRIGGERS (in this order):\n1) Reset Results: M4-S22 (clears last attempt's answers and forces a new bank draw).\n2) Reset Results: M4-S22a (only if the must-pass rule is approved).\n3) Add 1 to Attempts.\n4) Set AttemptsLeft = 3, then subtract the value of Attempts from AttemptsLeft.\n5) Set ReviewMode = false.\n6) Jump to the first drawn question.\nDRAW (7 question banks; each bank draws its items at random without repeats; items are shuffled within each bank's draw): Bank LO1 (M4-S02 to S04) draw 2; Bank LO2 (S05 to S07) draw 1; Bank LO3 (S08 to S09) draw 1; Bank LO4 (S10 to S12) draw 2; Bank LO5 (S13 to S15) draw 1; Bank LO6 (S16 to S18) draw 2; Bank LO7 (S19 to S21, or S19, S20 and S21F under the fallback) draw 1. Total 10 of 20.\nORDER: grouped by objective, LO1 to LO7. Storyline presents each bank's draw as a block, so order is not shuffled across banks. Any 2 of the 3 LO1 items always include at least one select-all-defects item (S02 or S03).\nANSWER SHUFFLE: on for every single-choice item without lettered images (S04 to S07, S10 to S21F), so the correct answer's position varies. For shuffled items, the letters A to D in this storyboard are reviewer labels only and are not shown on screen, and every Why text names the answer by its content, not its letter. Shuffle off only for items whose image carries letter labels (S02, S03, S08, S09).",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1",
+        "LO2",
+        "LO3",
+        "LO4",
+        "LO5",
+        "LO6",
+        "LO7"
+      ],
+      "notes": "Revision 3 (QA major finding 2): Reset Results is now the first Start trigger, the guard prevents a fourth attempt or a retake after passing, and Start is disabled when AttemptsLeft = 0. Narration now carries the must-pass placeholder (minor finding).\n[CLIENT TO CONFIRM: pass mark of 80%, 3 attempts, must-pass rule for the LO2 and LO7 items. If the must-pass rule is not approved, delete the bracketed text from both the on-screen text and the narration before VO recording.]\nQuestion slides have no VO, which keeps the check fast and avoids reading answer options aloud. [CLIENT TO CONFIRM: whether to add an optional 'Listen' button that reads each scenario aloud for operators who prefer audio support before the Spanish version; this would add about 1 minute to M4 and would need the alpha cut list.]\nREVIEW FEEDBACK BUILD (applies to every M4 item, revision 3): question feedback is set to None during the attempt. Each item has ONE result-neutral 'Why' layer, written in that item's feedback field, which states the correct answer and the reason. Trigger: show layer Why when the timeline starts if ReviewMode = true. No Correct or Incorrect layers are needed. In review, Storyline's own review marks show the learner's choice and the correct answer (results slide: Allow user to review quiz, Show correct answers).\nM4-S21 is not released to the LO7 bank until Dana confirms the reach truck response (see its notes).\nALT TEXT: 'Operator standing at the end of a clear warehouse aisle at the start of a shift.'\nEst. time: 0:20."
+    },
+    {
+      "id": "M4-S02",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO1, Item 1: Truck 11 Findings",
+      "screen_type": "final assessment",
+      "on_screen_text": "Pre-shift check, counterbalance truck 11. Select every finding that affects safe operation.\n\n[ ] A) Hydraulic fluid dripping from a hose fitting on the mast\n[ ] B) Seatbelt webbing cut halfway through near the buckle\n[ ] C) Scuffed paint on the counterweight\n[ ] D) A kinked, rust-stiffened link in a lift chain\n[ ] E) Seat cushion cover worn at the edge",
+      "narration": "",
+      "visuals": "Photo of counterbalance truck 11 with small inset close-ups for each finding, with live-text letters beside each inset.",
+      "interaction": "Multiple response, scored, 1 point, all-or-nothing. CORRECT ANSWERS: A, B, D. Shuffle answers: off (letters on the image must match the options).",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is A, B and D. A hydraulic leak can mean a drifting load or a failed lift, a cut belt may not hold in a tip-over, and a kinked chain can fail under load. Scuffed paint and a worn seat cover don't affect safe operation; handle them as minor items under the SOP. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Select-all-defects item.\nALT TEXT: 'Counterbalance truck 11 with close-ups of each finding listed in the options.'\nEst. time: 0:30."
+    },
+    {
+      "id": "M4-S03",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO1, Item 2: Reach Truck R04 Findings",
+      "screen_type": "final assessment",
+      "on_screen_text": "Pre-shift check, reach truck R04. Select every finding that affects safe operation.\n\n[ ] A) Scratches in the paint on the mast\n[ ] B) Hydraulic fluid on the floor under the reach mechanism\n[ ] C) Data plate faded, but every value readable\n[ ] D) Travel alarm silent when you move off\n[ ] E) Load wheel with a chunk out of the tread",
+      "narration": "",
+      "visuals": "Photo of reach truck R04 with inset close-ups for A, B, C and E, each with a live-text letter; D is described in text only (operational finding).",
+      "interaction": "Multiple response, scored, all-or-nothing. CORRECT ANSWERS: B, D, E. Shuffle off (lettered image).",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is B, D and E. A hydraulic leak can mean a drifting load or a failed reach or lift, a silent travel alarm leaves people unwarned, and a damaged load wheel reduces stability. Scratched paint and a faded data plate you can still read don't affect safe operation. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Select-all-defects item. Revision 3: options reordered so the correct answers are not A, B and C (the same pattern as M4-S09 and M4-S15 in revision 2). 'Travel alarm' per the glossary.\n[CLIENT TO CONFIRM: fleet reach trucks have travel alarms.]\nALT TEXT: 'Reach truck R04 with close-ups of scratched mast paint, fluid under the reach mechanism, a faded data plate and a damaged load wheel.'\nEst. time: 0:30."
+    },
+    {
+      "id": "M4-S04",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO1, Item 3: Operational Test",
+      "screen_type": "final assessment",
+      "on_screen_text": "Your truck passed the walk-around. Now the operational tests. Which result means the truck fails the check?\n\nA) The parking brake holds the truck in place\nB) The brake pedal sinks almost to the floor before the truck slows\nC) Headlights and the [CLIENT TO CONFIRM: beacon or strobe] light both work when switched on\nD) The mast lifts and tilts smoothly with no unusual noise",
+      "narration": "",
+      "visuals": "Photo of an operator's foot on a brake pedal in a counterbalance truck.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The failing result is the brake pedal sinking almost to the floor before the truck slows. That means the brakes aren't working properly, which affects safe operation. A parking brake that holds, working headlights and beacon, and a mast that lifts and tilts smoothly are what a passing truck looks like. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO1"
+      ],
+      "notes": "Revision 3 (QA major finding 6): distractor C no longer says 'warning light', which could be read as a dashboard fault light. It now describes working lights, so B is the only defensible answer. [CLIENT TO CONFIRM: the fleet's term for the beacon or strobe light; add it to the glossary.]\nALT TEXT: 'Operator's foot pressing the brake pedal of a forklift.'\nEst. time: 0:20."
+    },
+    {
+      "id": "M4-S05",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO2, Item 1: Which Truck Gets Tagged?",
+      "screen_type": "final assessment",
+      "on_screen_text": "Four trucks, four findings from this morning's checks. Which truck must be tagged out of service before anyone drives it?\n\nA) Truck 12: seat cover torn along one edge, seat secure\nB) Truck 14: seatbelt buckle won't latch\nC) Truck 16: scuffed paint on the counterweight\nD) Truck 18: data plate faded, every value readable",
+      "narration": "",
+      "visuals": "Four small photo tiles, one per truck finding, each with the truck number as live text: torn seat cover, unlatched seatbelt buckle, scuffed counterweight paint, faded but readable data plate.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B (truck 14). Shuffle on. SAFETY-CRITICAL ITEM: tracked by the hidden results slide M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is truck 14. On a sit-down truck, the belt keeps you inside the overhead guard in a tip-over, so a buckle that won't latch affects safe operation: tag the truck out, report it to [CLIENT TO CONFIRM: contact] and use another truck. The torn cover, scuffed paint and faded but readable plate don't affect safe operation, so those trucks are operate and report. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO2"
+      ],
+      "notes": "Revision 3 (QA major finding 4): rewritten as a discriminating decision. No option uses tag-out wording; the learner must tell the one tag-out defect from three operate-and-report findings.\nSafety-critical item. SME TO VERIFY: a seatbelt that won't latch is tag out, and the other three findings are operate and report, under the SOP.\nALT TEXT (tile group): 'Four findings: truck 12, torn seat cover; truck 14, seatbelt buckle not latched; truck 16, scuffed counterweight paint; truck 18, faded but readable data plate.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S06",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO2, Item 2: Soft Brakes Mid-Shift",
+      "screen_type": "final assessment",
+      "on_screen_text": "Mid-shift, your brakes start to feel soft and the truck takes longer to stop. Your shift ends in 40 minutes. What do you do?\n\nA) Finish the last 40 minutes at low speed, then tag it out and report it\nB) Stop using it now, park it safely, tag it out and report it\nC) Report it now and keep working until maintenance swaps the truck\nD) Tag it out at shift end and warn the next operator",
+      "narration": "",
+      "visuals": "Photo of a counterbalance truck parked in an aisle, forks lowered, operator stepping off.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on. SAFETY-CRITICAL ITEM: tracked by M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: stop using it now, park it safely, tag it out and report it. A defect that affects stopping takes the truck out of service the moment you find it. Finishing the shift first, waiting for maintenance, or passing a warning to the next operator all mean driving on brakes you can't trust. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO2"
+      ],
+      "notes": "Revision 3 (QA major finding 4): three options now mention tagging or reporting, so the learner has to judge when the truck comes out of service, not spot the word 'tag'. Options are similar in length.\nSafety-critical item. [CLIENT TO CONFIRM: mid-shift defect procedure, including where to park a defective truck.]\nALT TEXT: 'Forklift parked in an aisle with the forks lowered as the operator steps off.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S07",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO2, Item 3: Two Findings on Truck 15",
+      "screen_type": "final assessment",
+      "on_screen_text": "Truck 15's pre-shift check finds two things: the seat cover is torn, and fluid is dripping from a hose on the tilt cylinder. Maintenance isn't in until 8:00. What do you do?\n\nA) Operate, and report both findings when maintenance arrives\nB) Tag it out for the leak, report both findings and take another truck\nC) Put absorbent down, operate, and tag it out at 8:00 if it's still leaking\nD) Operate with loads kept low, and report the leak as a minor defect",
+      "narration": "",
+      "visuals": "Two inset photos: fluid dripping from a tilt cylinder hose with a small puddle on the floor beneath, and a seat cover torn along one edge. Truck number 15 as live text.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on. SAFETY-CRITICAL ITEM: tracked by M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: tag it out for the leak, report both findings and take another truck. On its own, the torn cover would be operate and report. An active hydraulic leak affects how the truck lifts and tilts, and the fluid is a slip hazard, so the truck comes out of service now. One tag-out defect takes the whole truck out, whatever else is minor. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO2"
+      ],
+      "notes": "Revision 3 (QA major finding 4): the learner must decide which of two findings drives the decision. Tag-out wording appears in a distractor (C), and one distractor misclassifies the leak as minor (D).\nSafety-critical item. SME TO VERIFY: an active hydraulic leak is tag out and a torn seat cover is operate and report under the SOP.\nALT TEXT: 'Truck 15: hydraulic fluid drips from a tilt cylinder hose onto a small puddle, and the seat cover is torn along one edge.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S08",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO3, Item 1: Blind Corner",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're approaching this cross aisle. Which spot could put a person in your path without you seeing them until the last moment?\n\n( ) A) Main aisle ahead\n( ) B) Personnel door beside the end cap\n( ) C) Marked walkway on the far side\n( ) D) Fire extinguisher station",
+      "narration": "",
+      "visuals": "Photo or 3D still of a cross aisle: a long open main aisle ahead, a personnel door right beside a racking end cap, a marked pedestrian walkway on the far side in full view, and a fire extinguisher station on a column. Live-text letter labels A, B, C and D sit on the image at each of the four areas (circle shapes with the letter inside, double stroke), matching the answer options.",
+      "interaction": "A standard Storyline Multiple Choice question slide, scored. The scene image with live-text letter labels sits above four native radio-button options. This works the same way for mouse, touch, keyboard and screen reader users, so no separate list view is needed. CORRECT ANSWER: B. Shuffle off (letters on the image must match the options).",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is B, the personnel door beside the end cap. A door next to an end cap lets someone step straight into your path from a spot you can't see. The main aisle and the walkway are in full view, and the extinguisher won't put anyone in your path. Slow down, sound the horn and look there every time. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO3"
+      ],
+      "notes": "ALT TEXT: 'Cross aisle scene with four labeled areas: A, an aisle ahead; B, a personnel door beside a racking end cap; C, a marked walkway on the far side; D, a fire extinguisher on a column.'\nEst. time: 0:20."
+    },
+    {
+      "id": "M4-S09",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO3, Item 2: Dock Door 5 Conflict Points",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're approaching dock door 5 with an empty truck. Select every conflict point.\n\n[ ] A) Edge of the open trailer\n[ ] B) Engaged trailer restraint\n[ ] C) Pallet staging lane\n[ ] D) Closed neighboring door\n[ ] E) Inside the open trailer",
+      "narration": "",
+      "visuals": "Photo of dock door 5 with an open trailer and its restraint engaged (indicator showing), a staging lane with stacked pallets, and the neighboring door closed with no trailer. Door numbers repeated as live-text labels. Live-text letter labels A to E (circle shapes, double stroke) sit on the image at each area, matching the options.",
+      "interaction": "Multiple response, scored, all-or-nothing. CORRECT ANSWERS: A, C, E. Shuffle off (lettered image).",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is A, C and E. Drivers step off at the trailer edge, pallets hide people in the staging lane, and workers inside a trailer can be out of sight. An engaged trailer restraint is what you want before entering, and a closed door with no trailer won't put anyone in your path. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO3"
+      ],
+      "notes": "Revision 3 (minor finding): options are neutral labels without the repeated 'at door 5', a plausible non-conflict distractor (engaged trailer restraint) was added, and answers were reordered so the correct set isn't A, B, C.\n[CLIENT TO CONFIRM: trailer restraint type at each DC.]\nALT TEXT: 'Dock door 5 with labeled areas: A, the edge of the open trailer; B, the engaged trailer restraint; C, a staging lane of stacked pallets; D, the closed neighboring door with no trailer; E, inside the open trailer.'\nEst. time: 0:30."
+    },
+    {
+      "id": "M4-S10",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO4, Item 1: Approach Sequence",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're carrying a low load toward a blind corner where the dock office door meets the main lane. Which sequence do you run?\n\nA) Sound the horn, look, and go through at normal speed if you hear nothing\nB) Slow down, sound the horn, look both ways, yield, make eye contact, proceed\nC) Look both ways, go through, and sound the horn only if you see someone\nD) Slow down, look, and go through; use the horn only if the lane is busy",
+      "narration": "",
+      "visuals": "Operator's view approaching a blind corner beside a dock office door, with a low load.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: slow down, sound the horn, look both ways, yield, make eye contact, proceed. Slowing first gives you time to react, and the horn is for the people you can't see, so it's used every time, busy lane or not. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "ALT TEXT: 'Operator's view approaching a blind corner beside a dock office door, carrying a low load.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S11",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO4, Item 2: Pedestrian in Your Lane",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're crossing the main lane with an empty truck. A temp worker walks out from between two pallet stacks into your lane, talking to a driver, facing away from you. What do you do?\n\nA) Sound the horn twice and keep moving at a crawl\nB) Stop, sound the horn and hold until they've seen you and moved clear\nC) Ease around them on the open side of the lane at walking pace\nD) Flash your lights and keep moving slowly so they notice you",
+      "narration": "",
+      "visuals": "Operator's view: a worker in a hi-vis vest steps out between two pallet stacks about 12 feet ahead, turned away and talking to a truck driver.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: stop, sound the horn and hold until they've seen you and moved clear. Someone facing away can't make eye contact, and hearing a horn isn't the same as seeing you. Don't keep rolling or steer around them: startled people move unpredictably. Continue only once they're clear. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "Revision 3 (minor finding): the correct option now includes sounding the horn, matching M2-S05 and M2-S08. Distractors lengthened to similar length.\nALT TEXT: 'A worker turned away and talking to a driver steps out between pallet stacks about 12 feet ahead of the forklift.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S12",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO4, Item 3: Load Blocks Your View",
+      "screen_type": "final assessment",
+      "on_screen_text": "You need to move a tall stack of empty totes across the dock staging area. The stack blocks your view ahead. What do you do?\n\nA) Travel forward, leaning out to check around the stack\nB) Travel with the load trailing, looking the way you're going\nC) Travel forward slowly; people will see a load that big\nD) Raise the stack until you can see under it",
+      "narration": "",
+      "visuals": "Operator's view with a tall stack of totes blocking most of the forward view, and the dock staging area beyond.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: travel with the load trailing, looking the way you're going, then slow down and sound the horn at the crossing. Leaning out puts you outside the overhead guard, relying on others to see you is an assumption, and raising the load raises the center of gravity. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO4"
+      ],
+      "notes": "Option D also reinforces LO5 (raised load).\nALT TEXT: 'Operator's view: a tall stack of totes blocks the view ahead toward the dock staging area.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S13",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO5, Item 1: Why a Raised Load Tips",
+      "screen_type": "final assessment",
+      "on_screen_text": "Why is turning with a raised load more likely to cause a tip-over than turning with the load low?\n\nA) Raising the load moves the center of gravity forward, so the truck tips forward in the turn\nB) Raising the load lifts the combined center of gravity, so the turn can push it outside the triangle more easily\nC) Raising the load takes weight off the front wheels, so they lose grip and slide in the turn\nD) Raising the load moves the center of gravity toward the counterweight, so the rear swings out",
+      "narration": "",
+      "visuals": "Side-view diagram of a counterbalance truck with the load raised and the combined CG marker shown high (live-text label 'CG').",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: raising the load lifts the combined center of gravity, so the turn can push it outside the triangle more easily. Raising the load doesn't shift the center of gravity forward or back, or change grip at the wheels. The higher it is, the less sideways force it takes to push it past the edge. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO5"
+      ],
+      "notes": "SME TO VERIFY: distractors A, C and D are clearly incorrect as explanations for lateral tip-over.\nALT TEXT: 'Side view of a forklift with the load raised and the combined center of gravity marked high above the truck.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S14",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO5, Item 2: Closest to the Edge",
+      "screen_type": "final assessment",
+      "on_screen_text": "Which combination moves the combined center of gravity closest to the edge of the stability triangle?\n\nA) Load low, slow speed, gentle turn\nB) Load low, moderate speed, traveling straight\nC) Load raised, moderate speed, tight turn\nD) No load, slow speed, gentle turn",
+      "narration": "",
+      "visuals": "Top-down stability triangle diagram with the CG marker at the center (no answer shown).",
+      "interaction": "Single choice, scored. CORRECT ANSWER: C. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: load raised, moderate speed, tight turn. Height, speed and a tight turn each push the center of gravity toward the edge, and together they add up fast. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO5"
+      ],
+      "notes": "ALT TEXT: 'Top-down diagram of the stability triangle with the center of gravity marker in the middle.'\nEst. time: 0:20."
+    },
+    {
+      "id": "M4-S15",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO5, Item 3: Ray's Wheel Lift",
+      "screen_type": "final assessment",
+      "on_screen_text": "On nights, Ray's counterbalance truck lifts a wheel turning out of aisle 30. Which factors pushed the center of gravity toward the edge? Select all that apply.\n\n[ ] A) The pallet was raised to shoulder height\n[ ] B) He held his speed into the turn\n[ ] C) He steered sharply at the aisle end\n[ ] D) The mast was tilted back\n[ ] E) The load was centered on the forks",
+      "narration": "",
+      "visuals": "Still: a counterbalance truck leaning in a turn at the end of an aisle at night, one wheel just off the floor, pallet at shoulder height. Non-graphic. Aisle number repeated in live text. No letter labels on the image.",
+      "interaction": "Multiple response, scored, all-or-nothing. CORRECT ANSWERS: raised pallet, held speed, sharp steer (A, B, C in this storyboard). Shuffle on (no lettered image), so the correct answers appear in varying positions.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The factors were the pallet raised to shoulder height, speed held into the turn and a sharp steer at the aisle end. Each moves the center of gravity toward the edge, and together they lifted the wheel. A mast tilted back and a load centered on the forks are safe practices. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO5"
+      ],
+      "notes": "Revision 3: shuffle turned on and Why text written without letters, so the correct set no longer sits in a fixed A, B, C pattern.\nALT TEXT: 'Forklift with a pallet at shoulder height leaning in a turn at an aisle end, one wheel off the floor.'\nEst. time: 0:30."
+    },
+    {
+      "id": "M4-S16",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO6, Item 1: Off the Block Stack",
+      "screen_type": "final assessment",
+      "on_screen_text": "You've lifted a pallet off the top of a two-high block stack and backed out just far enough to clear it. The forks are at head height. What next?\n\nA) Start toward the dock and lower gradually as you go\nB) Stay stopped, lower to travel height and tilt back, then drive off\nC) Drive at walking pace with it up, since it's a short trip\nD) Keep it up until the turn, then lower before turning",
+      "narration": "",
+      "visuals": "Photo of a counterbalance truck in a bulk storage area, forks at head height holding a pallet just lifted off a two-high block stack.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: stay stopped, lower to travel height and tilt back, then drive off. Raise and lower only when you're stopped, and never travel with the load up, even slowly or for a short trip. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO6"
+      ],
+      "notes": "ALT TEXT: 'Forklift with its forks at head height holding a pallet just lifted from a two-high block stack.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S17",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO6, Item 2: When to Slow Down",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're carrying a pallet down aisle 18 toward a right turn onto the main travel lane. When should you slow down?\n\nA) In the turn, braking as you steer\nB) Before the turn, while you're still traveling straight\nC) After the turn, once you can see the lane\nD) Only if there are pedestrians in the lane",
+      "narration": "",
+      "visuals": "Operator's view along aisle 18 toward the aisle end and the main travel lane, with the load carried low.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: before the turn, while you're still traveling straight. Get your speed off on the straight so the turn needs no extra braking. Braking in the turn throws the load forward while the turn pushes it sideways. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO6"
+      ],
+      "notes": "ALT TEXT: 'Operator's view of the end of aisle 18 ahead, with the load carried low.'\nEst. time: 0:20."
+    },
+    {
+      "id": "M4-S18",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO6, Item 3: Heavy, Long Load",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're asked to move a pallet that looks heavier and longer than usual. Before you lift it, which check tells you whether your truck can safely carry it?\n\nA) The rated capacity at that load center, as shown on the data plate\nB) Whether the truck can lift it off the floor\nC) Whether it looks balanced from the seat\nD) Whether the last operator moved one like it",
+      "narration": "",
+      "visuals": "Photo of an oversized, long pallet load on the floor with a counterbalance truck approaching.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: A. Shuffle on.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is the rated capacity at that load center, as shown on the data plate. A longer load moves the center of gravity forward and lowers what the truck can safely carry. A truck can lift a load it can't carry safely, and how a load looks doesn't tell you its weight or load center. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO6"
+      ],
+      "notes": "SME TO VERIFY: the load center explanation. [CLIENT TO CONFIRM: what operators do when weight is unknown, for example ask a supervisor; add to the Why text if required.]\nALT TEXT: 'A long, heavy pallet load on the floor with a forklift approaching it.'\nEst. time: 0:20."
+    },
+    {
+      "id": "M4-S19",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO7, Item 1: Broken Floor in a Turn",
+      "screen_type": "final assessment",
+      "on_screen_text": "In a turn, a wheel drops into a broken section of floor and your sit-down counterbalance truck starts to go over to the left. You're belted in. What do you do?\n\nA) Unbuckle and step off on the right as it goes\nB) Stay seated and belted, hold the wheel, plant your feet and lean right\nC) Reach out and grab the overhead guard post on the left\nD) Brake hard to stop the truck before it goes over",
+      "narration": "",
+      "visuals": "Still: sit-down counterbalance truck with a front wheel in a broken floor section, tilting left. Non-graphic.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on. SAFETY-CRITICAL ITEM: tracked by M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: stay seated and belted, hold the wheel, plant your feet and lean right, away from the fall. That keeps you inside the overhead guard. Operators who unbuckle, step off or reach out are often caught by the guard as the truck goes over, and braking won't stop a tip that's already started. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "Safety-critical item. Dana to verify.\nALT TEXT: 'Sit-down forklift with a front wheel in a broken section of floor, tilting to the left.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S20",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO7, Item 2: Not Belted In",
+      "screen_type": "final assessment",
+      "on_screen_text": "On a sit-down counterbalance truck, a turn goes wrong and the truck starts to tip. You realize you didn't fasten your seatbelt. What do you do?\n\nA) Jump, since you're not held in anyway\nB) Stay in the seat, grip the wheel, brace your feet and lean away from the fall\nC) Grab the overhead guard with one hand outside the cab\nD) Try to fasten the belt before it goes over",
+      "narration": "",
+      "visuals": "Still: sit-down counterbalance truck mid-turn with the seatbelt visibly unfastened. Non-graphic.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B. Shuffle on. SAFETY-CRITICAL ITEM: tracked by M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: stay in the seat, grip the wheel, brace your feet and lean away from the fall. Even unbelted, the safest place is inside the overhead guard. Don't jump, don't put a hand outside the cab and don't fumble with the buckle. And always belt up before you move. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "Safety-critical item. Dana to verify the guidance for an unbelted operator.\nALT TEXT: 'Sit-down forklift in a turn with the operator's seatbelt hanging unfastened.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S21",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO7, Item 3: Reach Truck Tipping",
+      "screen_type": "final assessment",
+      "on_screen_text": "Night shift. You're turning your reach truck out of a narrow aisle when it lurches and starts to tip. What do you do?\n\nA) Reach out and brace a hand against the racking\nB) [DANA TO CONFIRM: SOP response for the fleet's reach truck models, worded differently from M3-S10]\nC) Jump toward the side the truck is leaning\nD) Steer hard against the lean to bring it back",
+      "narration": "",
+      "visuals": "Still: reach truck at the mouth of a narrow aisle, starting to lean, drawn on the confirmed fleet model with its confirmed stance and entry position [CLIENT TO CONFIRM]. Non-graphic.",
+      "interaction": "Single choice, scored. CORRECT ANSWER: B (pending Dana's confirmation). Shuffle on. SAFETY-CRITICAL ITEM: tracked by M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: [CLIENT TO CONFIRM: SOP wording]. [CLIENT TO CONFIRM: rationale from SOP and manufacturer guidance for the confirmed stance and entry position.] Bracing against the racking puts your arm where it can be caught, jumping toward the lean puts you where the truck lands, and steering won't stop a tip that's started. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "SAFETY-CRITICAL, DRAFT. The correct option must state the same confirmed response as M3-S08 and M3-S10, but in different words.\nRELEASE RULE: do not release this item to the LO7 bank until Dana confirms the reach truck models, stance, entry position and response (global note 11a), and confirms that distractors A, C and D are wrong for those models. If not confirmed by the gating date, do not build this item; build M4-S21F in its place so the LO7 bank still has 3 items, and record deviation (d) on M0-S01.\nALT TEXT: 'Reach truck starting to lean as it turns out of a narrow aisle.' (Finalize once the model is confirmed.)\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S21F",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Bank LO7, Item 3 (Fallback): Load Shifts in a Turn",
+      "screen_type": "final assessment",
+      "on_screen_text": "You're turning a sit-down counterbalance truck when the load shifts sideways on the forks and the truck starts to tip to the right. You're belted in. What do you do?\n\nA) Put your right foot out to steady the truck\nB) Stay seated and belted, grip the wheel, brace your feet and lean left\nC) Release the belt so you can jump clear to the left\nD) Raise the forks to shift the weight back",
+      "narration": "",
+      "visuals": "Still: sit-down counterbalance truck mid-turn, pallet slid toward the right fork, truck tilting right. Non-graphic.",
+      "interaction": "FALLBACK ONLY: build and add to the LO7 bank only if M4-S21 is not released (see its release rule). Single choice, scored. CORRECT ANSWER: B. Shuffle on. SAFETY-CRITICAL ITEM: tracked by M4-S22a if the must-pass rule is approved.",
+      "feedback": "WHY LAYER (review only; same text whatever the learner answered): 'The answer is: stay seated and belted, grip the wheel, brace your feet and lean left, away from the fall. That keeps you inside the overhead guard. A foot outside the truck can be caught under it, operators who jump are often caught by the guard, and raising the forks lifts the center of gravity and makes the tip worse. SOP ref: [CLIENT TO CONFIRM: section].'",
+      "objective_ids": [
+        "LO7"
+      ],
+      "notes": "NEW in revision 3 (QA major finding 7): fallback counterbalance variant, with a different cause (shifting load), direction (right) and distractors from M4-S19 and M4-S20, so the three LO7 items don't repeat each other.\nSafety-critical item. Dana to verify.\nALT TEXT: 'Sit-down forklift in a turn with its pallet slid to one side, tilting to the right.'\nEst. time: 0:25."
+    },
+    {
+      "id": "M4-S22",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Your Results",
+      "screen_type": "final assessment",
+      "on_screen_text": "PASS layer: 'You passed. Your score: %Results.ScorePercent%%. Review your answers to see the reason behind each one.' [Review answers] [Continue]\n\nFAIL layer: 'Not this time. Your score: %Results.ScorePercent%%. You need 80% [CLIENT TO CONFIRM: and both safety-critical questions right]. Attempts left: %AttemptsLeft%.' [Review answers] [Back to menu] [Try again]\n\nFINAL FAIL layer: 'You've used all 3 attempts. [CLIENT TO CONFIRM: next step, for example your supervisor will set up a coaching session].' [Review answers] [Continue]",
+      "narration": "PASS layer: You passed. Review your answers if you'd like the reasoning, then continue.\n\nFAIL layer: Not this time. Review your answers, revisit any part from the menu, then try again with new questions.\n\nFINAL FAIL layer: You've used all three attempts. [CLIENT TO CONFIRM: next step.] Continue to finish.",
+      "visuals": "Clean results panel with the score as live text. Pass: check icon plus the word 'Passed'. Fail and final fail: an information icon plus the words 'Not yet passed' (non-punitive tone). No red/green-only cues.",
+      "interaction": "Storyline Results slide tracking all 10 drawn questions, pass at 80%. Settings: Allow user to review quiz; Show correct answers.\nLAYER LOGIC (without must-pass): PASS if Results.ScorePercent >= 80. FAIL if Results.ScorePercent < 80 AND AttemptsLeft > 0. FINAL FAIL if Results.ScorePercent < 80 AND AttemptsLeft = 0.\nLAYER LOGIC (with must-pass, only if approved): PASS if Results.ScorePercent >= 80 AND Results1.ScorePercent = 100 (Results1 is the hidden safety-critical results slide M4-S22a). FAIL or FINAL FAIL otherwise, split by AttemptsLeft as above. If Results.ScorePercent >= 80 but Results1.ScorePercent < 100, the FAIL or FINAL FAIL layer also shows: 'You scored %Results.ScorePercent%%, but one of the safety-critical questions (tag-out or tip-over) was wrong. Both must be right to pass.'\nPASS LAYER TIMELINE START: set M4_Passed = true. (If must-pass is approved: also Complete course, reported as passed.)\nREVIEW ANSWERS: set ReviewMode = true, then Review Results. Each question shows Storyline's review marks plus its Why layer.\nTRY AGAIN (FAIL layer only; shown when AttemptsLeft > 0): set ReviewMode = false, jump to M4-S01. Reset Results runs on Start there, so answers are always cleared and a new draw is made, whichever way the learner returns.\nBACK TO MENU: jump to M0-S04 (modules 1 to 3 open for review; tile 4 returns to M4-S01 for the next attempt).\nCONTINUE (PASS and FINAL FAIL layers): jump to M4-S23.\nLMS REPORTING (SCORM 1.2): publish with reporting set to Passed/Incomplete, so a failed attempt with attempts remaining reports incomplete and the Cornerstone registration stays open for the next attempt. On a pass, the results slide reports passed with cmi.core.score.raw. When the FINAL FAIL layer opens, a Complete course trigger reports failed with the score [developer to confirm the exact trigger and status option in the current Storyline 360 update]. With must-pass approved, track using the M4-S22 results slide for score and triggers for status [developer to confirm the tracking option combination].",
+      "feedback": "See the layer text in on-screen text and narration. Item-level reasons are in each question's Why layer.",
+      "objective_ids": [
+        "LO1",
+        "LO2",
+        "LO3",
+        "LO4",
+        "LO5",
+        "LO6",
+        "LO7"
+      ],
+      "notes": "Revision 3 (QA major findings 2 and 3): M4_Passed added; Try again no longer resets results itself (Start on M4-S01 always does); must-pass now uses Results1.ScorePercent from M4-S22a instead of per-item variables, which needed Correct layers that don't exist.\nPERCENT SIGN: in each score line, place the literal % sign in a separate text box right after the %Results.ScorePercent% reference so Storyline doesn't misread it as part of the variable reference.\nCORNERSTONE TEST CASES (alpha): pass on attempt 1; fail then pass; fail, Back to menu, reopen the Final Check tile (fresh draw, no carried-over answers, Attempts = 2); pass, then reopen the tile (goes to M4-S23, no new attempt, status stays passed); fail 3 times (status ends as failed, not incomplete; tile then goes to M4-S23); resume after a mid-quiz exit; must-pass case (score 90 with a safety-critical item wrong) if approved; confirm Results1 updates without the learner visiting M4-S22a. Confirm that an incomplete status after a failed attempt does not close the registration.\n[CLIENT TO CONFIRM: pass mark, attempts, must-pass rule, and what happens after 3 failed attempts.]\nFocus moves to the result heading when each layer opens. Score text is live text, so screen readers read it.\nEst. time: 0:10 plus optional review."
+    },
+    {
+      "id": "M4-S22a",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Safety-Critical Results (Hidden Tracking Slide)",
+      "screen_type": "final assessment",
+      "on_screen_text": "None. Learners never see this slide.",
+      "narration": "",
+      "visuals": "None.",
+      "interaction": "BUILD ONLY IF THE MUST-PASS RULE IS APPROVED. A second Storyline Results slide (Storyline names its variables Results1 by default) that tracks only the LO2 bank draw and the LO7 bank draw (2 questions per attempt). It is never navigated to and is not used for LMS reporting. Results1.ScorePercent = 100 means both safety-critical items were answered correctly; M4-S22 reads it. Reset Results for this slide runs on M4-S01 Start.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO2",
+        "LO7"
+      ],
+      "notes": "NEW in revision 3 (QA major finding 3): replaces the SafetyCritical_LO2 and SafetyCritical_LO7 variables, which depended on Correct layers that don't exist when question feedback is set to None. It also saves suspend_data space.\nPlace it in its own hidden scene, or at the end of the M4 scene with no navigation into it. Exclude it from the player Menu.\nDeveloper to verify at alpha that Results1.ScorePercent updates as the tracked questions are submitted, without the slide being visited. If it does not in the current Storyline 360 update, raise it with the storyboard writer before inventing another mechanism.\nEst. time: 0:00 (not seen)."
+    },
+    {
+      "id": "M4-S23",
+      "module": "M4: Final Check: Your Shift, Your Calls",
+      "title": "Your Shift, Your Calls",
+      "screen_type": "summary",
+      "on_screen_text": "Your shift, your calls:\n- Inspect for real. Tag out what isn't safe.\n- Treat every intersection and dock door as if someone's there.\n- Carry low. Slow down before you turn.\n\n[Download quick reference (PDF)]\nThis course supports, but doesn't replace, your hands-on evaluation.\n[Exit]",
+      "narration": "That's the course. Pin the quick reference on your huddle board, and keep making these calls the way you just did. Remember, this doesn't replace your hands-on evaluation on the truck. Thanks for your time.",
+      "visuals": "Photo of an operator at the end of a shift, parking a truck correctly (forks lowered). The three habits as large live text. A button with a document icon for the PDF.",
+      "interaction": "Download quick reference opens the accessible one-page PDF in a new window (also in Resources). Exit closes the course (Exit course trigger). Completion status is already sent from M4-S22.",
+      "feedback": "None.",
+      "objective_ids": [
+        "LO1",
+        "LO2",
+        "LO3",
+        "LO4",
+        "LO5",
+        "LO6",
+        "LO7"
+      ],
+      "notes": "Revision 3: narration trimmed and rewritten so it doesn't read the three habits.\nREACHED FROM: the PASS layer (Continue), the FINAL FAIL layer (Continue), and the hub's Final Check tile once M4_Passed = true or Attempts >= 3. So every learner, including those who used all attempts, sees the quick reference and the hands-on evaluation reminder, and nobody can start a new scored attempt from here.\nQUICK REFERENCE PDF: tagged, accessible PDF (reading order, headings, alt text, 4.5:1 contrast), one page, sized for printing on huddle boards. Content: the pre-shift check rule and the three outcomes (operate; operate and report; tag out); the six-step approach sequence; load travel rules; tip-over response by truck type, using exactly the reach truck wording Dana confirms (global note 11a), or under the fallback, 'Reach truck: follow your SOP and operator's manual'; SOP references [CLIENT TO CONFIRM]. Glossary terms only (global note 14). Spanish version in phase 2.\nCOMPLIANCE: wording on the practical evaluation reflects 29 CFR 1910.178(l); Dana to verify.\nALT TEXT: 'Operator parking a forklift at the end of a shift with the forks lowered to the floor.'\nEst. time: 0:20.\nM4 TOTAL EST.: about 5:00 (intro 0:20; 10 items at about 25 seconds each, 4:10; results 0:10; wrap-up 0:20). Deviation (b) on M0-S01: design allocation is 4:00, pending design owner sign-off. COURSE TOTAL: about 24:20 (global note 12)."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Render Blueprint: creates the whole Modulo service in one go.
+# In Render: New, Blueprint, pick this repository. Render asks for the values marked sync: false.
+services:
+  - type: web
+    name: modulo
+    runtime: python
+    plan: starter            # about USD 7 a month, always on (the free plan sleeps and has no disk)
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    disk:                    # keeps briefs, designs and storyboards safe across restarts
+      name: modulo-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: ANTHROPIC_API_KEY     # your Claude API key (platform.claude.com)
+        sync: false
+      - key: RESEND_API_KEY        # your Resend API key (resend.com)
+        sync: false
+      - key: NOTIFY_EMAIL          # where approval and delivery emails go: the email you signed up to Resend with
+        sync: false
+      - key: DASHBOARD_KEY         # secret part of your dashboard link, made up by Render
+        generateValue: true
+      - key: DATA_DIR
+        value: /var/data
+      - key: CLAUDE_CONFIG_DIR
+        value: /var/data/claude-config
+      - key: MAX_BRIEFS_PER_DAY    # safety limit on new briefs per 24 hours
+        value: "10"

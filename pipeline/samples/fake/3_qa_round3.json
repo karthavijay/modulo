@@ -1,0 +1,91 @@
+{
+  "pass": false,
+  "summary": "Revision 3 is close to ready. All seven objectives are taught, practised and assessed, and the modules match the approved design. The fixes from revision 2 have mostly been made well: LO2 now tests a real decision, the Final Check routes correctly, review feedback works the same for every answer, and there is a fallback for the reach truck tip-over content. Most of the accessibility spec is thorough, the tone suits experienced operators, and client-specific facts are marked [CLIENT TO CONFIRM]. There are no em dashes.\n\nFive major problems remain, so this does not pass yet:\n1. **M1-S08 states the OSHA inspection rule incompletely.** It says \"at least daily\". These sites run night shifts, so the rule is a check after every shift, and \"at least daily\" works against the course's \"check every shift\" message.\n2. **The counterbalance inspection mostly repeats the worked example.** Three of its four defects were shown on the same truck about a minute earlier, so it tests memory rather than inspection skill.\n3. **The simulator (M3-S03) may not announce its result to screen reader users.** The storyboard accepts that risk, which would fail WCAG 4.1.3.\n4. **LMS reporting may record the wrong status.** The planned settings probably can't send \"failed\" to Cornerstone. If the must-pass rule is approved, a learner who scores 80% but gets a safety-critical item wrong would probably still be reported as passed.\n5. **The player menu stays available during the Final Check.** A learner who leaves attempt 3 through it ends up with an incomplete record and no way to finish.\n\n**Seat time:** about 24:20 as estimated. It could realistically reach 25:00 to 25:30 because the inspection timing is optimistic, so pre-approve the planned cuts now.\n\n**Before client release:** the four design changes listed on M0-S01 still need written sign-off from the design owner.",
+  "estimated_seat_time_minutes": 24.5,
+  "findings": [
+    {
+      "severity": "major",
+      "screen_id": "M1-S08",
+      "issue": "The screen says OSHA requires the check 'before use, at least daily'. That is incomplete for these sites. 1910.178(q)(7) also requires a check after each shift where trucks run around the clock, and the storyboard itself has night shifts (Ray on M1-S10). The course's message is 'check before every shift'. 'At least daily' gives an operator grounds to skip a check on a truck already checked that day, which is the very behavior the client wants to stop. The OSHA detail only appears in the developer notes.",
+      "fix": "On-screen: 'OSHA 29 CFR 1910.178(q)(7): examine before use, at least daily, and after every shift where trucks run around the clock. Site SOP: before every shift [CLIENT TO CONFIRM: section].' Narration, last sentence: 'OSHA requires that check before the truck goes into service, and after every shift where trucks run around the clock. Our SOP says every shift [CLIENT TO CONFIRM]. An unsafe truck stays out of service until it's repaired.' Use the same wording in the quick reference PDF and add it to Dana's review list."
+    },
+    {
+      "severity": "major",
+      "screen_id": "M1-S06",
+      "issue": "The counterbalance inspection uses the same truck (07) and three of the same four defects as the worked example on M1-S03: the left fork heel crack, the hydraulic leak at the mast and the silent reverse alarm. The worked example names and outlines all three about a minute earlier. Most operators run counterbalance trucks and will take this path, so for them the LO1 practice tests short-term memory, not inspection judgment.",
+      "fix": "Use a different counterbalance truck number for M1-S06 (for example truck 10). Replace at least two of the repeated defects with ones not shown on M1-S03, for example a tire with a chunk out of the tread and a missing fork locking pin, or an illegible data plate. Keep the seatbelt defect. Keep 4 defects and 4 normal items. Update the inspect descriptions, feedback, results layer, alt text and Dana's verification list. Seat time does not change."
+    },
+    {
+      "severity": "major",
+      "screen_id": "M3-S03",
+      "issue": "The simulator result changes on the slide while focus stays on the setting button. The notes say that if NVDA or JAWS do not announce the change, the build stays as it is and the learner tabs to the result. A result that changes after a learner action is a status message under WCAG 4.1.3 (AA in 2.1 and 2.2). It must be announced without a focus move, so the stated fallback fails the client's minimum.",
+      "fix": "Add a learner-activated 'Show result' button after the three setting groups. Changing a setting only updates the setting. Activating 'Show result' updates the result and moves focus to the result headline. Moving focus after a button press is allowed under 3.2.2, so this works whether or not Storyline announces the change. Count Sim_Tries on 'Show result' activations and enable Next after 3. Update the instruction line and remove the 'keep the build as specified' fallback."
+    },
+    {
+      "severity": "major",
+      "screen_id": "M4-S22",
+      "issue": "Two parts of the LMS reporting plan probably won't work. (1) With reporting set to Passed/Incomplete, Storyline reports a failed quiz as incomplete, so the Complete course trigger on the FINAL FAIL layer is likely to send incomplete, not failed. The design asks for lesson_status passed/failed. (2) If the must-pass rule is approved and M4-S22 is still the tracked results slide, Storyline reports passed automatically at 80% or above, even when the FAIL layer shows because a safety-critical item was wrong. Both are left as '[developer to confirm]' until alpha, which is too late for compliance records.",
+      "fix": "Run a SCORM 1.2 test in the Cornerstone test environment during weeks 2 to 3, before the storyboard locks, and write the result into this screen. Expected spec: if must-pass is approved, track by the Complete course trigger only (on the PASS layer and the FINAL FAIL layer), not by the results slide. Send the final-fail status and, if needed, cmi.core.score.raw with a JavaScript trigger that sets cmi.core.lesson_status = failed. Confirm with the client whether a failed status closes the Cornerstone registration. Keep the existing test case (90% with a safety-critical item wrong must not report passed)."
+    },
+    {
+      "severity": "major",
+      "screen_id": "M4-S02 to M4-S21F",
+      "issue": "Global note 1 keeps the player Menu ('Course menu', which goes to M0-S04) on every slide, including the question slides. A learner who opens it during an attempt loses that attempt without being told. During attempt 3, Attempts is already 3, so tile 4 sends them to M4-S23. No FINAL FAIL status is ever sent, Cornerstone stays incomplete, and they cannot finish the course.",
+      "fix": "In slide properties for M4-S01 to M4-S21F, turn off the player Menu (and Prev) so a learner can only leave an attempt by finishing it or closing the window (resume returns them to the question). Add a Cornerstone test case: start attempt 3, close mid-quiz, relaunch, and confirm the learner returns to the question and gets a final status."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M4-S01",
+      "issue": "The LO7 bank draws 1 of 3 items at random without using TruckType. LO7 says 'for the truck type being operated', but a reach-truck-only operator will be assessed on the counterbalance response two times in three. If the must-pass rule is approved, this item decides pass or fail, so it should test the operator's own truck. This follows the approved design but has not been recorded as a decision.",
+      "fix": "Add it as decision (e) on M0-S01 for the design owner and Dana. Either accept a truck-agnostic LO7 item and record that, or specify how to assess the learner's own truck in a way that doesn't count a skipped bank as wrong. One option is a single LO7 question slide whose stem and options switch by TruckType. Test this at alpha."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M3-S04",
+      "issue": "The 'load within rated capacity' part of LO6 is only told (the data plate on M3-S04). It is never practised, but M4-S18 assesses it.",
+      "fix": "Add a one-tap check to the generic data plate on M3-S04, for example 'This pallet: [weight] at [load center]. Within capacity? Yes / No', with one sentence of feedback (about 0:15). Values must come from a fleet data plate Dana confirms. Offset the time with alpha cut (ii) on M3-S05 if needed."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M4-S13",
+      "issue": "The Why text says 'Raising the load doesn't shift the center of gravity forward or back.' That is not true in general: mast tilt and deflection do shift it. Distractor A (tips forward) also describes a real raised-load risk, so experienced operators could argue it is partly correct.",
+      "fix": "Why text: 'The main effect of raising the load is to lift the combined center of gravity. The higher it sits, the less sideways force a turn needs to push it past the edge of the triangle.' Replace A with a clearly wrong option, for example 'Raising the load makes the truck heavier, so it slides more in the turn.' Dana to verify."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M1-S06",
+      "issue": "The 24:20 estimate leaves only 40 seconds against the client's hard 25:00 limit, and some timings are optimistic. Opening, reading, choosing, reading feedback and closing an inspection item takes nearer 15 to 18 seconds than 12, which adds 0:25 to 0:50. Returning to the hub between modules is not counted. New hires exploring M1-S04 will run over.",
+      "fix": "Time M1-S06 or M1-S07 with 2 to 3 operators on a prototype in weeks 2 to 3, not at alpha. Add about 0:15 for hub transitions. Get the design owner to approve cut list items (i) to (iv) in advance so they can be applied at alpha without another sign-off round."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M4-S22",
+      "issue": "A learner who passes but missed items (possibly including a safety-critical one if must-pass is not approved) only sees the reasons by choosing Review answers. The design asks for feedback with the reason on every item after submission.",
+      "fix": "On the PASS layer, when Results.ScorePercent < 100, add: 'You missed some questions. Select Review answers to see the right call and why.' Put Review answers first in the focus order."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M2-S11",
+      "issue": "The correct option A is about twice as long as B and C, and it is the only option with multiple conditions, which gives the answer away. M4-S18 has the same cue: option A is the longest and the only one that uses technical terms.",
+      "fix": "M2-S11: A) 'Stop at the dock edge, sound the horn, and enter only once you know where they are and the trailer is secured.' B) 'Switch your lights on and enter slowly, so they hear and see you coming.' C) 'Enter at a crawl and sound the horn once you're inside, where they'll hear it.' M4-S18: lengthen the distractors to match, for example 'Whether the truck lifts it without the rear getting light.'"
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M2-S10",
+      "issue": "The restore note for the retired third drill (held in the M2-S11 notes) does not mention that the M2-S10 narration says 'Two quick ones' or that the titles say '1 of 2' and '2 of 2'. If deviation (a) is rejected, these will be wrong.",
+      "fix": "Add to the M2-S11 restore note: change the M2-S10 narration to 'Three quick ones at the dock', retitle M2-S10 and M2-S11 as '1 of 3' and '2 of 3', and send Next on M2-S11 to the restored M2-S12."
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M0-S03",
+      "issue": "Narration nearly repeats the on-screen text word for word ('one quick question, not scored... Which of these do you see most often on your shift?'). M2-S03 (the 'Find every spot where a person and a truck could meet...' instruction) and M1-S06 and M1-S07 ('Select each item, inspect it, then decide') do the same.",
+      "fix": "M0-S03: 'Before we start, pick the one you run into most. There's no wrong answer.' M2-S03: 'Here's the end of aisle 14 from Tasha's seat. Think about who could be just out of sight.' M1-S06 and M1-S07: 'Take it the way you would on the floor. Each item is your call.'"
+    },
+    {
+      "severity": "minor",
+      "screen_id": "M0-S01",
+      "issue": "Design deviations (a) to (d) are still unsigned, and the screen notes say not to send the storyboard to the client until they are. The notes also include the internal revision change log and references to QA findings, which should not go to the client.",
+      "fix": "Get the design owner's signature and date for (a) to (d), plus (e) if it is added. Move the change log and the sign-off block to an internal cover sheet. Keep the global build notes for development, and keep the client-facing notes to the [CLIENT TO CONFIRM] items."
+    }
+  ]
+}

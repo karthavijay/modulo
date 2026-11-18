@@ -1,0 +1,21 @@
+Course brief from the Modulo website chat (SAMPLE, fictional client)
+
+Paige: Hi, welcome to Modulo. What course do you have in mind?
+Client: We need a forklift safety refresher for our warehouse operators. We run three distribution centers.
+Iris: Great. Who takes it, and roughly how many people?
+Client: About 220 certified forklift operators, mostly counterbalance and reach trucks. Many have 5+ years of experience, some are new hires. English is the main language but about 30% are more comfortable in Spanish.
+Iris: What business result would make this a success?
+Client: Fewer near misses and incidents. Last year most of our near misses were pedestrian conflicts at intersections and dock doors, plus a couple of tip-over scares from carrying loads raised while turning. We also want operators to actually do the pre-shift inspection properly instead of pencil-whipping the checklist.
+Sam: Do you have existing source material or an SME?
+Client: We have our forklift SOP (12 pages), the pre-shift inspection checklist, and our EHS manager Dana can review content. We follow OSHA 1910.178.
+Dev: Any preference on authoring tool?
+Client: Storyline is fine. Our LMS is Cornerstone, SCORM 1.2.
+Mila: Voiceover?
+Client: Yes, professional English voiceover. Spanish version later, phase 2.
+Theo: Tone?
+Client: Respectful of experienced operators. No cartoonish stuff, they hate being talked down to. Realistic warehouse scenarios.
+Quinn: Accessibility requirements?
+Client: WCAG 2.1 AA at minimum, captions on everything.
+Paige: Seat time and timing?
+Client: 20 to 25 minutes max, it has to fit in a shift huddle window. Pilot in about 8 weeks. Budget is mid range, we can discuss.
+Paige: Summary of your brief: a 20 to 25 minute Storyline forklift safety refresher for ~220 experienced and new operators across 3 DCs, focused on pedestrian conflicts at intersections and docks, load handling and tip-over prevention, and real pre-shift inspections. Scenario-based, respectful tone, English VO with captions, Spanish in phase 2, SCORM 1.2 on Cornerstone, WCAG 2.1 AA, SME review by the EHS manager, pilot in 8 weeks.

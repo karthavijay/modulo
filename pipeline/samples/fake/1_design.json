@@ -1,0 +1,197 @@
+{
+  "title": "Forklift Safety Refresher: Inspect, Yield, Stay Stable",
+  "summary": "This is a 24-minute, scenario-based Storyline refresher for about 220 certified counterbalance and reach truck operators across three distribution centers. It targets the three problems the client named: pedestrian conflicts at intersections and dock doors, tip-over risk from carrying raised loads while turning, and pre-shift inspections that get signed without being done. Operators work through realistic warehouse scenarios in which they make the call themselves: they inspect a truck and find the defects, they choose how to approach a blind intersection or a busy dock door, and they decide how to carry a load through a turn. The course respects the experience of long-tenured operators and still gives new hires the reasons behind each rule. Content follows the client's forklift SOP, the client's pre-shift checklist and OSHA 29 CFR 1910.178. The client's EHS manager (Dana) will verify all of it. Professional English voiceover, captions throughout, WCAG 2.2 AA (which also meets the client's 2.1 AA minimum), SCORM 1.2 on Cornerstone, and a build that is ready for the phase 2 Spanish version.",
+  "audience": "About 220 certified forklift operators across three distribution centers. Most drive counterbalance or reach trucks. Many have 5 or more years of experience and some are new hires. English is the main language, and about 30% are more comfortable in Spanish (Spanish version planned for phase 2). They will take the course in a shift huddle window, probably on shared devices in or near the warehouse floor. They dislike being talked down to and expect realistic warehouse content.",
+  "business_goal": "Cut near misses and incidents, especially (1) pedestrian conflicts at intersections and dock doors and (2) tip-over scares from carrying raised loads while turning. Also get operators doing real pre-shift inspections instead of pencil-whipping the checklist. Suggested measures, to be agreed with the client: near-miss and incident counts by category at each DC for 6 months before and after rollout, the rate of defects found and trucks tagged out on pre-shift checklists (an increase at first is a good sign), and supervisor floor observations at intersections and docks.",
+  "seat_time_minutes": 24,
+  "approach": "The core method is scenario-based learning with consequence feedback, plus short worked examples where operators need a model first. It fits this audience for these reasons:\n1) Experienced operators already know the rules. Their risk is habit and shortcuts, not missing knowledge. Scenarios that ask them to make the call in a realistic situation, and then show the realistic outcome, test judgment without lecturing. Each scenario opens with the situation, not with a rule slide.\n2) Each of the client's three problem areas gets one anchor scenario based on the near-miss patterns the client described. Short \"why it works\" explanations serve new hires, and experienced operators can move through them quickly.\n3) Consequences are shown in a believable, non-graphic way, for example a near miss replayed from the pedestrian's point of view, or the stability triangle shifting as the mast rises during a turn. Nothing cartoonish or shocking. The tone treats operators as professionals.\n4) The inspection module asks learners to do the inspection themselves: they examine a truck and find planted defects, rather than reading the checklist. This goes straight at pencil-whipping by showing what a real check finds and why each item matters.\n5) Media: real photography or video from the client's DCs if available, otherwise realistic stock or 3D renders of matching truck types. Professional English voiceover, kept short. All on-screen text is kept out of images so the Spanish version is cheap to produce.\n6) The course has one module per problem area, each 6 minutes or less, plus bookmarking. If a huddle is cut short, operators can finish across two sessions.",
+  "objectives": [
+    {
+      "id": "LO1",
+      "text": "Inspect a counterbalance or reach truck using the site pre-shift checklist and identify defects that make it unsafe to operate (for example damaged forks, chains, hydraulic leaks, brakes, horn, lights or alarms, tires, seatbelt or operator restraint).",
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "LO2",
+      "text": "Decide whether a truck with an identified defect can be operated or must be taken out of service, tagged and reported according to the site SOP.",
+      "bloom_level": "Evaluate"
+    },
+    {
+      "id": "LO3",
+      "text": "Identify pedestrian conflict points and blind spots at intersections, aisle ends and dock doors in a realistic warehouse scene.",
+      "bloom_level": "Analyze"
+    },
+    {
+      "id": "LO4",
+      "text": "Select the correct approach sequence at an intersection or dock door (reduce speed, sound horn, look, yield, establish eye contact, proceed) and the correct response when a pedestrian enters the travel path.",
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "LO5",
+      "text": "Explain how raising a load, turning and speed shift the combined center of gravity and increase tip-over risk.",
+      "bloom_level": "Understand"
+    },
+    {
+      "id": "LO6",
+      "text": "Choose safe load travel and turning practices: load low and tilted back, reduced speed before and through turns, no raising or lowering while traveling, and load within rated capacity.",
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "LO7",
+      "text": "Select the correct self-protection response if a tip-over starts, for the truck type being operated, as defined in the site SOP and manufacturer guidance.",
+      "bloom_level": "Apply"
+    }
+  ],
+  "modules": [
+    {
+      "id": "M0",
+      "title": "Why We're Here: Your Floor, Your Numbers",
+      "duration_minutes": 2,
+      "objective_ids": [],
+      "topics": [
+        "Respectful opening: acknowledges operator experience and frames the course as a refresher on judgment, not a rules lecture",
+        "The three issues behind last year's near misses at the DCs: pedestrian conflicts at intersections and docks, raised-load turns, skipped inspections (high-level summary only; client to confirm whether any real figures can be shared)",
+        "Course map, the time each part takes, how bookmarking works",
+        "Optional short message from site leadership or the EHS manager (to be confirmed)"
+      ],
+      "interactions": [
+        "Quick confidence poll (not scored): 'Which of these do you see most on your shift?' Results shown as a comparison with peers if the LMS allows, otherwise for reflection only",
+        "Menu that sets the module order, with modules unlocking in sequence on first attempt"
+      ]
+    },
+    {
+      "id": "M1",
+      "title": "The Pre-Shift Inspection That Actually Counts",
+      "duration_minutes": 6,
+      "objective_ids": [
+        "LO1",
+        "LO2"
+      ],
+      "topics": [
+        "Why the daily pre-use check exists, linked in general terms to OSHA 29 CFR 1910.178 requirements to examine trucks before they are placed in service and to remove defective trucks from service (SME to verify)",
+        "Walk-around and operational checks from the client's checklist, covering both counterbalance and reach truck items",
+        "Items that are easy to skip and why they matter: forks and heel wear, chains, hydraulic leaks, tires, horn, lights or travel alarm, brakes, seatbelt or operator restraint, data plate legibility, battery or LPG connections (final list from the client's checklist)",
+        "Defect decision: operate, report and monitor, or tag out and remove from service, according to the site SOP",
+        "Worked example: a 60-second pencil-whipped check compared with a real check of the same truck, showing what the first one missed"
+      ],
+      "interactions": [
+        "Interactive truck inspection: learner examines a photo or 3D truck by selecting hotspots, with 4 to 5 planted defects among normal items. Feedback names each missed defect and its risk. Keyboard-accessible list alternative provided",
+        "Branching decision: 'You found X. What now?' Choices are operate, tell the next shift, or tag out and report. Consequences shown",
+        "Short case: a coworker asks you to skip the check because the line is backed up. Choose how to respond"
+      ]
+    },
+    {
+      "id": "M2",
+      "title": "Intersections and Dock Doors: Seeing People First",
+      "duration_minutes": 6,
+      "objective_ids": [
+        "LO3",
+        "LO4"
+      ],
+      "topics": [
+        "Where pedestrian conflicts happen at the client's DCs: blind intersections, aisle ends, racking end caps, dock doors, staging lanes (site specifics to be confirmed by the client)",
+        "Blind spots for counterbalance and reach trucks, including the obstructed forward view with bulky loads and when to travel in reverse",
+        "Approach sequence at intersections and obstructed views: slow down, sound horn, look, yield, make eye contact, proceed. Linked in general terms to OSHA 1910.178 travel requirements (SME to verify)",
+        "Dock door hazards involving pedestrians: drivers, dock workers and visitors stepping out near doors and trailers, and congestion in staging lanes",
+        "What to do when a pedestrian walks into your path, and why assuming they have seen you is the root of most near misses",
+        "Site controls to reinforce if they exist: floor markings, mirrors, blue lights, pedestrian walkways (client to confirm)"
+      ],
+      "interactions": [
+        "Hazard-spotting scene: learner finds the conflict points and blind spots in a warehouse intersection and a dock area image. Accessible list-based alternative provided",
+        "Branching scenario from the operator's seat: approaching a blind intersection with a raised-view obstruction during a busy shift. Learner chooses actions in sequence. A near miss is replayed from the pedestrian's point of view",
+        "Quick decision drill (3 fast items): at the dock door, who has right of way and what is your next move?"
+      ]
+    },
+    {
+      "id": "M3",
+      "title": "Loads, Turns and Tip-Overs",
+      "duration_minutes": 6,
+      "objective_ids": [
+        "LO5",
+        "LO6",
+        "LO7"
+      ],
+      "topics": [
+        "Stability triangle and combined center of gravity, explained with a simple animated diagram, not physics jargon",
+        "How a raised load, turning, speed and uneven surfaces work together to push the center of gravity outside the stability triangle (lateral tip-over)",
+        "Safe load travel: forks low and tilted back, no raising or lowering while moving, slow before the turn rather than during it, stay within the data plate capacity including load center",
+        "Reach truck specifics: mast extended or retracted when traveling, raised-load positioning (SME to confirm)",
+        "Tip-over response by truck type: for sit-down counterbalance trucks, stay in the seat, keep the seatbelt on, brace, lean away from the direction of fall. The response for stand-up and reach trucks follows the manufacturer and site SOP. Dana must verify all tip-over response content",
+        "Worked example: replay of a tip-over scare similar to the patterns the client described, with the decisions that led to it and the decisions that would have prevented it"
+      ],
+      "interactions": [
+        "Interactive stability simulator: learner adjusts load height, speed and turn tightness and watches the center of gravity marker move toward or outside the stability triangle. Includes a text description of the result for screen reader users",
+        "Branching scenario: carrying a raised pallet toward a turn at the end of an aisle under time pressure. Choose when and how to lower, slow and turn",
+        "Tip-over response check: given the truck type, select the correct body response (single-choice, no timed elements)"
+      ]
+    },
+    {
+      "id": "M4",
+      "title": "Final Check: Your Shift, Your Calls",
+      "duration_minutes": 4,
+      "objective_ids": [
+        "LO1",
+        "LO2",
+        "LO3",
+        "LO4",
+        "LO5",
+        "LO6",
+        "LO7"
+      ],
+      "topics": [
+        "Scored scenario assessment covering all seven objectives",
+        "Recap card: inspect for real, approach every intersection and dock door as if someone is there, carry loads low and turn slowly",
+        "Reminder that this course supports, and does not replace, the hands-on evaluation required by OSHA 1910.178"
+      ],
+      "interactions": [
+        "10 scenario-based questions drawn from a randomized bank (see assessment)",
+        "Feedback on every item with the reason, shown after submission",
+        "Downloadable or printable one-page quick reference (accessible PDF) for huddle boards"
+      ]
+    }
+  ],
+  "assessment": {
+    "description": "Summative scenario-based assessment in M4. Each item opens with a short realistic situation (photo or short description of a truck, intersection, dock or load) and asks the operator to make a decision. Ten items are drawn at random from a bank of 20 (2 to 3 variants per objective) so that retakes and coworkers sitting side by side see different questions. Objective coverage per attempt: LO1 inspection defect identification (2 items, including one hotspot or select-all-defects item), LO2 operate or tag-out decision (1), LO3 identify conflict points or blind spots (1), LO4 intersection or dock approach and pedestrian response (2), LO5 center of gravity and tip-over cause (1), LO6 safe load travel and turning (2), LO7 tip-over response for the stated truck type (1). Item types are single choice, multiple select and accessible hotspot with list alternative. No timed items. Feedback explains the correct decision and points to the relevant SOP section. Up to 2 additional attempts with a new random draw, and the formative module interactions remain available for review. Items on safety-critical behaviors (LO2 tag-out decision and LO7 tip-over response) should be considered for a must-pass rule: client and Dana to decide. Scores and pass or fail status are reported to Cornerstone via SCORM 1.2.",
+    "pass_mark": "80% (8 of 10 correct). Recommended addition: both safety-critical items (LO2 and LO7) must be answered correctly, pending client and EHS approval.",
+    "item_count": 10
+  },
+  "delivery_notes": [
+    "Authoring tool: Articulate Storyline 360. Responsive player settings to be confirmed once the delivery devices are known.",
+    "LMS: Cornerstone, SCORM 1.2. Report completion and pass or fail status with score (lesson_status passed/failed). Keep bookmarking and branching state small because of the SCORM 1.2 suspend_data limit of about 4,096 characters. Test early in the client's Cornerstone test environment.",
+    "Accessibility: build to WCAG 2.2 AA, which meets the client's WCAG 2.1 AA minimum. This covers full keyboard operation with visible focus, logical focus order, alt text for all meaningful images, screen-reader-friendly text alternatives for hotspot, hazard-spotting and simulator interactions, color never used as the only cue (hazard highlights also use shape or labels), contrast of at least 4.5:1 for text, minimum target sizes, and no flashing content.",
+    "Captions: closed captions on all voiceover and video, synchronized and editable, plus a full transcript available from the player. Captions matter twice over here because warehouse areas are noisy and headphones may not be available.",
+    "Voiceover: professional English VO, one or two voices, calm and peer-to-peer tone. Learner controls for play, pause and replay, and no audio that autoplays for more than 3 seconds without controls.",
+    "Seat time: 24 minutes total (M0 2, M1 6, M2 6, M3 6, M4 4). Modules of 6 minutes or less with bookmarking, so the course can be completed across two huddles if needed.",
+    "Phase 2 Spanish readiness: no text baked into images, about 30% text expansion space in layouts, captions and VO scripts kept in separate exportable files, Storyline translation export used for on-screen text, and Spanish VO and caption files swapped per language.",
+    "Visual style: realistic photography, video or 3D of counterbalance and reach truck types that match the client's fleet. No cartoon characters. Workers shown in correct PPE and site-appropriate attire.",
+    "Compliance positioning: this eLearning supports refresher training under OSHA 29 CFR 1910.178(l). It does not replace the practical, observed performance evaluation that the standard requires. All safety content must be verified by the client's EHS manager (Dana) before build sign-off.",
+    "Review cycle to fit the 8-week pilot (suggested): week 1 design sign-off, weeks 2 to 3 scripts and storyboard with SME review, weeks 4 to 6 alpha and beta builds with accessibility and LMS testing, week 7 final fixes, week 8 pilot launch."
+  ],
+  "assumptions": [
+    "The course is a refresher for already certified operators. It does not deliver initial certification training, and the practical evaluation is handled separately on site.",
+    "The fleet in scope is counterbalance (sit-down) trucks and reach trucks only. Other truck types (order pickers, pallet jacks, tuggers) are out of scope unless the client says otherwise.",
+    "The client's 12-page forklift SOP and pre-shift checklist are the authoritative sources. Where they differ from general practice, the course follows the SOP after Dana confirms.",
+    "Seat time target is 24 minutes, within the client's 20 to 25 minute maximum, including the assessment.",
+    "Learners take the course individually on a shared PC, kiosk or tablet during a huddle window, not as a facilitator-led group session.",
+    "Pass mark of 80% with up to 3 total attempts is acceptable to the client, pending confirmation.",
+    "WCAG 2.2 AA is the build target because it meets and exceeds the client's 2.1 AA requirement at no meaningful extra cost.",
+    "Near-miss and incident details will be fictionalized into representative scenarios. No real names, dates or incident specifics will be shown unless the client provides and approves them.",
+    "Dock door scope focuses on pedestrian conflicts. Trailer-related hazards (trailer creep, restraints or chocks, dock plates) appear only briefly in context unless the client wants them expanded.",
+    "Spanish version (phase 2) is a translation and re-voice of the English course, not a redesign."
+  ],
+  "open_questions": [
+    "Can we see the SOP, the pre-shift checklist and any near-miss summaries (anonymized) in week 1? Are there separate checklists for counterbalance and reach trucks, or electric and LPG trucks?",
+    "What is the site rule for each defect category: tag out immediately, or operate and report? Who does the operator report to, and what is the tag-out process?",
+    "What tip-over response does the SOP specify for reach trucks and any stand-up trucks? (Dana to confirm with the manufacturer guidance for the specific models in the fleet.)",
+    "What makes and models of truck are in the fleet? Can we photograph or film real trucks, intersections and dock doors at one of the DCs, or should we use stock and 3D?",
+    "Which site controls exist at intersections and docks (pedestrian walkways, mirrors, blue or red zone lights, stop signs, speed limits, horn rules) and are they the same at all three DCs?",
+    "Can we share real figures from last year's near misses in the intro, or should we keep it general?",
+    "What devices will operators use during huddles (shared PCs, kiosks, tablets), and will headphones be available? Is mobile delivery through Cornerstone required?",
+    "Do you want a must-pass rule for the safety-critical items (tag-out decision and tip-over response), and what happens if an operator fails all attempts (for example supervisor coaching)?",
+    "Should experienced operators be able to test out of modules, or must everyone complete the full course? (We recommend full completion for a compliance refresher.)",
+    "Would site leadership or Dana like to record a short opening message for M0?",
+    "How should completion data be reported in Cornerstone (by DC, by shift, by supervisor), and is there a due date for all 220 operators after the pilot?",
+    "How many review rounds does Dana have time for within the 8-week window, and who gives final sign-off?",
+    "Which DC and how many operators will take part in the pilot, and how will pilot feedback be collected?"
+  ]
+}
