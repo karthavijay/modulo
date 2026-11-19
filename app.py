@@ -152,24 +152,103 @@ async def health(_: Request):
 # ---------------------------------------------------------------- pages
 
 CSS = """
-:root{--bg:#f7f7fb;--fg:#1c1f2e;--muted:#5d6275;--line:#e1e3ee;--card:#fff;--accent:#2f3e9e;--soft:#eef0fb;--ok:#1d7a46;--bad:#b3261e}
-@media (prefers-color-scheme:dark){:root{--bg:#12131a;--fg:#ecedf3;--muted:#a3a7b8;--line:#2b2d3a;--card:#1b1c25;--accent:#9aa7ff;--soft:#252845;--ok:#62d394;--bad:#ff8a80}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{max-width:860px;margin:0 auto;padding:28px 16px 60px}h1{font-size:26px;margin:0 0 4px}h2{font-size:20px;margin:28px 0 8px}
-.muted{color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
-.pill{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--accent)}
-.pill.done{color:var(--ok)}.pill.failed{color:var(--bad)}
-button,.btn{display:inline-block;font:600 15px/1 inherit;font-family:inherit;padding:12px 20px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;text-decoration:none}
-.btn.ghost,button.ghost{background:transparent;color:var(--accent)}
-textarea,input{width:100%;font:15px/1.4 inherit;font-family:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg)}
+:root{--bg:#F3F6F4;--fg:#13201B;--muted:#56655E;--line:#D3DDD7;--card:#fff;--surface-2:#E8EEEA;--accent:#0E7A6C;--accent-fg:#fff;
+--soft:#E3F1EE;--mark:#F4C53D;--ok:#15803D;--ok-soft:#E3F4E8;--bad:#B3261E;--bad-soft:#FBE9E7;--warn:#9A5B00;--warn-soft:#FDF1D8;
+--display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;--body:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+--shadow:0 1px 2px rgba(19,32,27,.05),0 8px 24px -16px rgba(19,32,27,.18)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1412;--fg:#E4EDE8;--muted:#97A8A0;--line:#2A3A33;--card:#15201C;--surface-2:#1C2924;
+--accent:#3CC2AE;--accent-fg:#0D1412;--soft:#16332D;--ok:#5FD38B;--ok-soft:#173022;--bad:#FF8A80;--bad-soft:#3A1D1B;--warn:#F2B55A;--warn-soft:#3A2C12;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D1412;--fg:#E4EDE8;--muted:#97A8A0;--line:#2A3A33;--card:#15201C;--surface-2:#1C2924;
+--accent:#3CC2AE;--accent-fg:#0D1412;--soft:#16332D;--ok:#5FD38B;--ok-soft:#173022;--bad:#FF8A80;--bad-soft:#3A1D1B;--warn:#F2B55A;--warn-soft:#3A2C12;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+main{max-width:1040px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-left,0px)) 60px}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(26px,3.4vw,34px);font-weight:800;margin:0 0 6px}h2{font-size:20px;font-weight:700;margin:28px 0 10px}h3{font-size:17px;margin:0 0 6px}
+.muted{color:var(--muted)}.small{font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin:16px 0;box-shadow:var(--shadow)}
+.card>h2:first-child,.card>h3:first-child{margin-top:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--soft);color:var(--accent);white-space:nowrap;line-height:1.3}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.done{background:var(--ok-soft);color:var(--ok)}.pill.failed{background:var(--bad-soft);color:var(--bad)}.pill.wait{background:var(--warn-soft);color:var(--warn)}
+.pill.plain::before{display:none}
+button,.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 15px/1.2 var(--body);padding:11px 18px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg);cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .12s,background .12s}
+button:hover,.btn:hover{transform:translateY(-1px)}
+.btn.ghost,button.ghost{background:var(--card);color:var(--fg);border-color:var(--line)}
+.btn.ghost:hover,button.ghost:hover{border-color:var(--fg)}
+.btn.sm,button.sm{padding:8px 14px;font-size:14px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+textarea,input{width:100%;font:15px/1.45 var(--body);padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg)}
+textarea:focus,input:focus,select:focus{border-color:var(--accent);outline:none}
 textarea{min-height:120px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}tr:last-child td{border-bottom:0}
 .design h1{font-size:22px}.design h2{font-size:18px}.design h3{font-size:16px}.design{overflow-wrap:anywhere}
-:target{outline:3px solid var(--accent);outline-offset:4px;border-radius:14px}
-.topnav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;padding:0 0 14px;margin:0 0 18px;border-bottom:1px solid var(--line)}
-.topnav a{color:var(--accent)}button.link{background:none;border:0;padding:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
-.err{color:var(--bad)}.ok{color:var(--ok)}label{font-weight:600;display:block;margin:10px 0 4px}select{font:inherit;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+:target{outline:3px solid var(--accent);outline-offset:4px;border-radius:16px}
+.err{color:var(--bad)}.ok{color:var(--ok)}label{font-weight:600;display:block;margin:10px 0 4px}
+select{font:inherit;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);max-width:100%}
+button.link{background:none;border:0;padding:0;color:var(--muted);font:inherit;font-weight:500;cursor:pointer}button.link:hover{color:var(--fg);transform:none}
+/* top bar */
+.topbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:1040px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:18px;min-height:62px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font:800 19px/1 var(--display);text-decoration:none;color:var(--fg);letter-spacing:-.02em}
+.logo-mark{width:26px;height:26px;display:grid;grid-template-columns:1fr 1fr;gap:3px}.logo-mark i{border-radius:3px;background:var(--fg)}
+.logo-mark i:nth-child(2){background:var(--mark)}.logo-mark i:nth-child(3){background:var(--accent)}
+.tabsnav{display:flex;gap:4px;flex-wrap:wrap}.tabsnav a{white-space:nowrap;padding:7px 12px;border-radius:999px;text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
+.tabsnav a:hover{color:var(--fg);background:var(--surface-2)}.tabsnav a.on{color:var(--fg);background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.me{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted)}.me a{color:var(--muted);text-decoration:none;font-weight:500}.me a:hover{color:var(--fg)}
+.me a.avatar{color:var(--accent-fg)}.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:700;font-size:13px}
+@media (max-width:760px){.topbar .in{gap:8px;padding-top:10px;padding-bottom:8px}.tabsnav{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap}.me .who{display:none}}
+/* page header */
+.crumb{font-size:14px;margin:0 0 10px}.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--fg)}
+.head{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:8px}.head .row{flex-wrap:wrap}
+.lede{color:var(--muted);margin:0}
+/* notices */
+.note{display:flex;gap:12px;align-items:flex-start;border-radius:14px;padding:14px 16px;margin:12px 0;border:1px solid var(--line);background:var(--card);font-size:15px}
+.note .ic{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--soft);color:var(--accent)}
+.note.bad{background:var(--bad-soft);border-color:transparent}.note.bad .ic{background:var(--bad);color:#fff}
+.note.warn{background:var(--warn-soft);border-color:transparent}.note.warn .ic{background:var(--warn);color:#fff}
+.note.good{background:var(--ok-soft);border-color:transparent}.note.good .ic{background:var(--ok);color:#fff}
+.note p{margin:0}
+/* summary tiles */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.tile b{display:block;font:800 30px/1.1 var(--display)}.tile span{color:var(--muted);font-size:14px}
+.tile.hot{border-color:var(--warn);background:var(--warn-soft)}.tile.hot b{color:var(--warn)}
+@media (max-width:560px){.tiles{gap:8px}.tile{padding:12px}.tile b{font-size:24px}.tile span{font-size:12px}}
+/* course list */
+.group{margin-top:30px}.group>h2{font-size:15px;font-family:var(--body);letter-spacing:0;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+.course{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:0 0 12px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:10px 20px}
+.course.hot{border-left:5px solid var(--warn)}.course.bad{border-left:5px solid var(--bad)}
+.course h3{margin:0;font-size:18px}.course h3 a{color:var(--fg);text-decoration:none}.course h3 a:hover{text-decoration:underline}
+.course .meta{font-size:14px;color:var(--muted)}
+.course .next{grid-column:1/-1;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--bg);border-radius:12px;padding:10px 12px}
+.course .next p{margin:0;font-size:15px}.course .next b{font-weight:600}
+.course .more{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:14px}.course .more a{color:var(--muted);font-weight:500}.course .more a:hover{color:var(--fg)}
+@media (max-width:560px){.course{grid-template-columns:1fr;padding:16px}.course .side{order:-1}}
+/* progress steps */
+.steps{display:flex;list-style:none;padding:0;margin:4px 0 0;gap:4px;grid-column:1/-1}
+.steps li{flex:1;min-width:0;font-size:12px;color:var(--muted);padding-top:10px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps li::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;border-radius:3px;background:var(--line)}
+.steps li.done::before{background:var(--accent)}.steps li.now{color:var(--fg);font-weight:600}
+.steps li.now::before{background:linear-gradient(90deg,var(--accent) 50%,var(--line) 50%)}.steps li.you::before{background:var(--warn)}.steps li.you{color:var(--warn)}
+.steps li.stop::before{background:var(--bad)}.steps li.stop{color:var(--bad)}
+@media (max-width:560px){.steps li{font-size:0}.steps li.now,.steps li.you,.steps li.stop{font-size:12px;overflow:visible}}
+/* course page */
+.next-card{border:2px solid var(--accent)}.next-card.hot{border-color:var(--warn)}.next-card.bad{border-color:var(--bad)}
+.eyebrow+h2{margin-top:0}.eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 4px}
+details.card>summary{cursor:pointer;font:700 18px/1.3 var(--display);list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"Show";font:600 14px var(--body);color:var(--accent)}details.card[open]>summary::after{content:"Hide"}
+details.card[open]>summary{margin-bottom:12px}details.card>summary .muted{font:400 14px var(--body)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.foot{margin-top:40px;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 """
+
+FONTS = ("<link rel=preconnect href='https://fonts.googleapis.com'><link rel=stylesheet href='https://fonts.googleapis.com/css2?"
+         "family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap'>")
 
 STATUS_TEXT = {
     "designing": "Iris is writing the design",
@@ -184,33 +263,120 @@ STATUS_TEXT = {
 
 
 def nav(request: Request | None) -> str:
-    """The bar at the top for signed-in team members."""
+    """The bar at the top: the Modulo logo, and for signed-in team members the main sections and their name."""
     u = auth.current_user(request) if request is not None else None
+    logo = "<a class=logo href='/dashboard'><span class=logo-mark aria-hidden=true><i></i><i></i><i></i><i></i></span>Modulo</a>"
     if not u:
-        return ""
-    links = ["<a href='/dashboard'>Courses</a>"]
+        return f"<header class=topbar><div class=in>{logo}</div></header>"
+    path = request.url.path
+    items = [("/dashboard", "Courses", ("/dashboard", "/review", "/course-files", "/builder"))]
     if auth.can(u, "designer"):
-        links.append("<a href='/team'>Talk to the team</a>")
+        items.append(("/team", "Talk to the team", ("/team",)))
     if auth.can(u, "admin"):
-        links += ["<a href='/admin/team'>Team members</a>", "<a href='/admin/system'>System</a>"]
-    return (f"<nav class=topnav><span>{' · '.join(links)}</span><span class=muted>{html.escape(u['name'])} "
-            f"({auth.ROLE_NAMES[u['role']]}) · <a href='/account'>Account</a> · "
-            "<form method=post action='/logout' style='display:inline'><button class=link>Sign out</button></form></span></nav>")
+        items += [("/admin/team", "Team members", ("/admin/team",)), ("/admin/system", "System", ("/admin/system",))]
+    links = "".join(f"<a href='{href}'{' class=on aria-current=page' if path.startswith(pre) else ''}>{label}</a>"
+                    for href, label, pre in items)
+    initial = html.escape((u["name"] or "?").strip()[:1].upper())
+    return (f"<header class=topbar><div class=in>{logo}<nav class=tabsnav aria-label='Main'>{links}</nav>"
+            f"<div class=me><span class=who>{html.escape(u['name'])} · {auth.ROLE_NAMES[u['role']]}</span>"
+            f"<a href='/account' title='Your account' class=avatar aria-label='Your account'>{initial}</a>"
+            "<form method=post action='/logout' style='display:inline'><button class=link>Sign out</button></form></div></div></header>")
 
 
 def page(title: str, body: str, refresh: bool = False, request: Request | None = None) -> HTMLResponse:
     meta = '<meta http-equiv="refresh" content="30">' if refresh else ""
     return HTMLResponse(
         f"<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
-        f"<meta name=robots content=noindex>{meta}<title>{html.escape(title)}</title><style>{CSS}</style></head>"
-        f"<body><main>{nav(request)}{body}<p class=muted style='margin-top:40px;font-size:12px'>Version {VERSION}</p></main></body></html>",
+        f"<meta name=robots content=noindex>{meta}<title>{html.escape(title)} · Modulo</title>{FONTS}<style>{CSS}</style></head>"
+        f"<body>{nav(request)}<main>{body}<p class=foot>Modulo · version {VERSION}</p></main></body></html>",
         headers={"cache-control": "no-store", "referrer-policy": "same-origin"},
     )
 
 
 def pill(status: str) -> str:
-    cls = "done" if status == "done" else "failed" if status == "failed" else ""
+    cls = {"done": "done", "failed": "failed", "awaiting_approval": "wait"}.get(status, "")
     return f'<span class="pill {cls}">{html.escape(STATUS_TEXT.get(status, status))}</span>'
+
+
+def note(kind: str, text: str) -> str:
+    """A coloured notice box. kind: bad, warn, good or info."""
+    icon = {"bad": "!", "warn": "!", "good": "✓"}.get(kind, "i")
+    return f"<div class='note {kind}'><span class=ic aria-hidden=true>{icon}</span><div>{text}</div></div>"
+
+
+STEP_NAMES = ["Design", "Your OK", "Storyboard", "Course built", "Shared with client"]
+
+
+def progress(job: dict) -> tuple[int, str]:
+    """Where a course is on the five big steps: (index of the current step, its state).
+    State is now (the team is on it), you (waiting for a person), stop (stopped with a problem) or all_done."""
+    out = jobs.job_dir(job["id"]) / "output"
+    st = job["status"]
+    sample = job.get("source") == "sample"
+    if st in {"designing", "revising"}:
+        return 0, "now"
+    if st == "awaiting_approval":
+        return 1, "you"
+    if st == "storyboarding":
+        return 2, "now"
+    if st == "building":
+        return 3, "now"
+    if st == "failed":
+        if (out / "storyboard.json").exists():
+            return 3, "stop"
+        if (out / "1_design_APPROVED.txt").exists():
+            return 2, "stop"
+        return (1 if (out / "1_design.json").exists() else 0), "stop"
+    # done or packing: the storyboard is finished
+    if not jobs.course_ready(job):
+        return 3, "todo" if sample else "you"
+    if sample:
+        return 4, "all_done"
+    if tracking.is_shared(job):
+        return 5, "all_done"
+    return 4, "you"
+
+
+def steps_html(job: dict) -> str:
+    i, state = progress(job)
+    names = STEP_NAMES[:4] if job.get("source") == "sample" else STEP_NAMES
+    items = []
+    for n, name in enumerate(names):
+        cls = "done" if n < i else (state if n == i and state != "all_done" else "")
+        items.append(f"<li class='{cls}' title='{name}'>{name}</li>")
+    return f"<ol class=steps aria-label='Progress'>{''.join(items)}</ol>"
+
+
+def next_step(job: dict, work: bool) -> tuple[str, str, str, str]:
+    """What should happen next, in plain words: (group, sentence, button label, button link).
+    group is you (needs a person), team (the agents are on it) or done."""
+    jid = job["id"]
+    st = job["status"]
+    page_ = jobs.page_url(job)
+    if st == "awaiting_approval":
+        if work:
+            return "you", "<b>Your turn:</b> read Iris's design, then approve it or ask for changes.", "Review the design", f"{page_}#approve"
+        return "you", "<b>Waiting for approval.</b> Read the design and send changes if needed.", "Read the design", f"{page_}#changes"
+    if st == "failed":
+        if work:
+            return "you", "<b>Stopped with a problem.</b> Open it to see what happened and try again.", "See the problem", page_
+        return "you", "<b>Stopped with a problem.</b> A Designer or Admin needs to fix it and try again.", "Open", page_
+    if st in jobs.WORKING:
+        what = {"designing": "Iris is writing the course design.", "revising": "Iris is updating the design with your changes.",
+                "storyboarding": "Theo is writing the storyboard and Quinn is checking it.",
+                "packing": "The team is writing the production pack.", "building": "Dev is building the course."}[st]
+        return "team", f"<b>Nothing to do.</b> {what} You'll get an email when it's done.", "", ""
+    if job.get("source") == "sample":
+        return "done", "<b>Demo course</b> to explore. Try it, chat with the team about it, or open the files.", "Open", page_
+    if not jobs.course_ready(job):
+        if work:
+            return "you", "<b>Storyboard ready.</b> Next: turn it into a real course.", "Build the course", f"{page_}#build"
+        return "done", "<b>Storyboard ready</b> to download.", "Open", page_
+    if not tracking.is_shared(job):
+        if work:
+            return "you", "<b>Course built.</b> Check it in the editor, then share it with the client.", "Share with client", f"{page_}#client"
+        return "done", "<b>Course built.</b> Try it from the course page.", "Open", page_
+    return "done", "<b>All done.</b> The client can see and try the course.", "Open", page_
 
 
 def get_job(request: Request) -> dict | None:
@@ -252,66 +418,87 @@ async def review(request: Request):
     jid = job["id"]
     st = job["status"]
     out = jobs.job_dir(jid) / "output"
+    signed_in = bool(auth.current_user(request))
+    tools = []
+    if work and signed_in:
+        tools.append(f"<a class='btn ghost sm' href='/team?course={jid}'>Talk to the team</a>")
+    if signed_in:
+        tools.append(f"<a class='btn ghost sm' href='/course-files/{jid}'>All files</a>")
     parts = [
-        f"<p class=muted><a href='{html.escape(dashboard_url())}'>All courses</a> · "
-        f"<a href='/team?course={jid}'>Talk to the team about this course</a> · "
-        f"<a href='/course-files/{jid}'>Course files</a></p>",
-        f"<h1>{html.escape(job.get('title') or 'New course brief')}</h1>",
-        f"<p class=muted>Client: {html.escape(job['client_name'])} ({html.escape(job['client_email'])})</p>",
-        f"<p>{pill(st)} <span class=muted>{html.escape(job.get('step', ''))}</span></p>",
+        f"<p class=crumb><a href='{html.escape(dashboard_url())}'>← All courses</a></p>" if signed_in else "",
+        f"<div class=head><div><h1>{html.escape(job.get('title') or 'New course brief')}</h1>"
+        f"<p class=lede>For {html.escape(job['client_name'])} ({html.escape(job['client_email'])}) · "
+        f"received {time.strftime('%d %b %Y', time.gmtime(job['created']))}</p></div>"
+        f"<div class=row>{''.join(tools)}</div></div>",
+        f"<div class=card style='padding:16px 20px'><div class=row style='justify-content:space-between'>"
+        f"<div class=row>{pill(st)} <span class='muted small'>{html.escape(job.get('step', '')) if job.get('step', '') != STATUS_TEXT.get(st) else ''}</span></div></div>"
+        f"{steps_html(job)}</div>",
     ]
     if request.query_params.get("m"):
-        parts.append(f"<p class=ok><b>{html.escape(request.query_params['m'][:300])}</b></p>")
+        parts.append(note("good", f"<p><b>{html.escape(request.query_params['m'][:300])}</b></p>"))
     track_card = tracking.admin_card(job, t) if work and job.get("source") != "sample" else ""
+    changes_form = f"""<form method=post action="/review/{jid}/changes?t={t}"><label for=fb>What should Iris change?</label>
+<textarea id=fb name=feedback required placeholder="For example: make it 15 minutes and add a module on reporting near misses"></textarea>
+<p style="margin:12px 0 0"><button class=ghost>Send changes to Iris</button></p></form>"""
     if st == "awaiting_approval" and not work:
-        parts.append(f"""<div class=card id=changes><h2 style="margin-top:0">Request changes</h2>
-<p class=muted>Write what you'd like Iris to change, in your own words. Approving the design is for Designers and Admins.</p>
-<form method=post action="/review/{jid}/changes?t={t}"><textarea name=feedback required placeholder="For example: make it 15 minutes and add a module on reporting near misses"></textarea>
-<p><button class=ghost>Send changes to Iris</button></p></form></div>""")
+        parts.append(f"""<div class='card next-card hot' id=changes><p class=eyebrow>Next step</p><h2>Request changes</h2>
+<p class=muted>Read the design below. If something should change, write it here in your own words. Approving the design is for Designers and Admins.</p>
+{changes_form}</div>""")
     elif st == "awaiting_approval":
-        parts.append(f"""
-<div class=card id=approve><h2 style="margin-top:0">Happy with this design?</h2>
-<p>Approving starts the full storyboard. It takes about an hour and costs roughly $7 in Claude usage. You'll get an email with the Word storyboard when it's done.</p>
+        parts.append(f"""<div class='card next-card hot'><p class=eyebrow>Your turn</p><h2>Happy with this design?</h2>
+<p>Read Iris's design below. Then either approve it, or tell Iris what to change.</p>
+<div class=grid2><div id=approve style="padding:4px 0"><h3>Approve it</h3>
+<p class=muted>Starts the full storyboard. Takes about an hour and costs roughly $7 in Claude usage. You'll get an email with the Word storyboard when it's done.</p>
 <form method=post action="/review/{jid}/approve?t={t}"><button>Approve and start the storyboard</button></form></div>
-<div class=card id=changes><h2 style="margin-top:0">Request changes</h2>
-<p class=muted>Write what you'd like Iris to change, in your own words. You'll get a new email with the revised design in a few minutes.</p>
-<form method=post action="/review/{jid}/changes?t={t}"><textarea name=feedback required placeholder="For example: make it 15 minutes and add a module on reporting near misses"></textarea>
-<p><button class=ghost>Send changes to Iris</button></p></form></div>""")
+<div id=changes style="padding:4px 0"><h3>Or ask for changes</h3>
+<p class=muted>You'll get a new email with the revised design in a few minutes.</p>{changes_form}</div></div></div>""")
     elif st in jobs.WORKING:
-        parts.append("<div class=card><p style='margin:0'>The team is working on it. This page refreshes by itself, "
-                     "and you'll get an email when there's something to look at. You can close this page.</p></div>")
+        parts.append(note("info", f"<p><b>The team is working on it.</b> {html.escape(STATUS_TEXT.get(st, ''))}. "
+                          "This page refreshes by itself, and you'll get an email when there's something to look at. You can close this page.</p>"))
     elif st == "failed":
-        parts.append(f"""<div class=card><h2 style="margin-top:0">Something went wrong</h2>
-<pre style="white-space:pre-wrap">{html.escape(job.get('error', ''))}</pre>
+        parts.append(f"""<div class='card next-card bad'><p class=eyebrow>Needs attention</p><h2>Something went wrong</h2>
 <p>Common causes: the Claude account ran out of credit or hit its spending limit, or the API key is wrong. Fix that, then try again. Finished steps are kept.</p>
-{f'<form method=post action="/review/{jid}/retry?t={t}"><button>Try again</button></form>' if work else ''}</div>""")
+{f'<form method=post action="/review/{jid}/retry?t={t}" style="margin-bottom:14px"><button>Try again</button></form>' if work else ''}
+<details><summary class='muted small' style='cursor:pointer'>Technical details</summary>
+<pre style="white-space:pre-wrap;font-size:13px">{html.escape(job.get('error', ''))}</pre></details></div>""")
     if st == "done":
         s = job.get("summary", {})
-        parts.append(f"""<div class=card><h2 style="margin-top:0">Downloads</h2>
-<p>{s.get('screens', '?')} screens. Final QA {'passed' if s.get('passed') else 'has open points, see the QA report'}. Cost ${job.get('cost_usd', 0):.2f}.</p>
-<p class=row><a class=btn href="{html.escape(file_link('storyboard.docx'))}">Storyboard (Word)</a>
-<a class="btn ghost" href="{html.escape(file_link('qa_report.md'))}">QA report</a>
-{f'<a class="btn ghost" href="{html.escape(file_link("production_pack.docx"))}">Production pack (Word)</a>' if (out / "production_pack.docx").exists() else ""}</p></div>""")
-        if jobs.course_ready(job):
-            parts.append(f"""<div class=card id=course><h2 style="margin-top:0">The course</h2>
+        ready = jobs.course_ready(job)
+        if not ready and work:
+            parts.append(builder_routes.build_card(job, qkey()).replace(
+                "<div class=card id=build><h2 style=\"margin-top:0\">",
+                "<div class='card next-card hot' id=build><p class=eyebrow>Next step</p><h2>", 1))
+        if ready:
+            if work and job.get("source") != "sample" and not tracking.is_shared(job):
+                parts.append(note("warn", "<p><b>Next step:</b> try the course and fix anything in the editor. "
+                                  "When you're happy, press <a href='#client'>Share with client</a> below.</p>"))
+            parts.append(f"""<div class=card id=course><h2>The course</h2>
 <p>Built and ready to edit. Try it like a learner, change anything without code, and download it for your LMS (SCORM 1.2 or 2004).</p>
 <p class=row>{f'<a class=btn href="/builder/{jid}">Open the course editor</a>' if work else ''}
 <a class="btn ghost" href="{html.escape(jobs.preview_url(job))}" target=_blank rel=noopener>Try the course</a></p></div>""")
-        elif work:
-            parts.append(builder_routes.build_card(job, qkey()))
-        if not job.get("pack_done") and work:
-            team = "".join(f"<li><b>{n}</b>, {r}: {t.lower()}</li>" for _, n, r, _, t in jobs.pipeline.PACK_AGENTS)
-            parts.append(f"""<div class=card id=pack><h2 style="margin-top:0">Optional: the production pack</h2>
+        qa = "passed" if s.get("passed") else "has open points (see the QA report)"
+        parts.append(f"""<div class=card><h2>Documents</h2>
+<p class=muted>{s.get('screens', '?')} screens · final quality check {qa} · ${job.get('cost_usd', 0):.2f} spent</p>
+<p class=row><a class=btn href="{html.escape(file_link('storyboard.docx'))}">Storyboard (Word)</a>
+<a class="btn ghost" href="{html.escape(file_link('qa_report.md'))}">QA report</a>
+{f'<a class="btn ghost" href="{html.escape(file_link("production_pack.docx"))}">Production pack (Word)</a>' if (out / "production_pack.docx").exists() else ""}</p></div>""")
+    parts.append(track_card)
+    if st == "done" and not job.get("pack_done") and work:
+        team = "".join(f"<li><b>{n}</b>, {r}: {t_.lower()}</li>" for _, n, r, _, t_ in jobs.pipeline.PACK_AGENTS)
+        parts.append(f"""<details class=card id=pack><summary><span>Optional: the production pack <span class=muted>· documents from the rest of the team</span></span></summary>
 <p>The rest of the team writes their documents from this storyboard:</p><ul>{team}</ul>
 <p>It takes about 20 to 30 minutes and costs {html.escape(jobs.PACK_ESTIMATE)} in Claude usage. You'll get an email with one Word file when it's ready. They write documents only: no voice recording, image generation or LMS upload happens.</p>
-<form method=post action="/review/{jid}/pack?t={t}"><button>Start the production pack</button></form></div>""")
-    parts.append(track_card)
+<form method=post action="/review/{jid}/pack?t={t}"><button>Start the production pack</button></form></details>""")
     if (out / "1_design.md").exists():
-        parts.append(f"<div class='card design'>{jobs.design_html(job)}</div>")
-    parts.append("<h2>History</h2><table>" + "".join(
+        parts.append(f"<details class='card design' id=design{' open' if st == 'awaiting_approval' else ''}>"
+                     f"<summary><span>Course design <span class=muted>· by Iris</span></span></summary>{jobs.design_html(job)}</details>")
+    parts.append("<details class=card id=history><summary><span>History <span class=muted>· every step, newest first</span></span></summary><table>" + "".join(
         f"<tr><td class=muted style='white-space:nowrap'>{time.strftime('%d %b %H:%M UTC', time.gmtime(h['at']))}</td>"
         f"<td>{html.escape(h['text'])}{' <span class=muted>(' + html.escape(h['by']) + ')</span>' if h.get('by') else ''}</td></tr>"
-        for h in reversed(job.get("history", []))) + "</table>")
+        for h in reversed(job.get("history", []))) + "</table></details>")
+    # Links from emails (like #pack) can point inside a closed section: open it.
+    parts.append("<script>function o(){var e=location.hash&&document.getElementById(location.hash.slice(1));"
+                 "var d=e&&e.closest('details');if(d){d.open=true;e.scrollIntoView();}}o();addEventListener('hashchange',o);</script>")
     return page(job.get("title") or "Course", "".join(parts), refresh=st in jobs.WORKING, request=request)
 
 
@@ -383,47 +570,93 @@ async def claude_key_status() -> tuple[bool, str]:
     return result
 
 
+def course_row(j: dict, work: bool) -> tuple[str, str]:
+    """One course on the dashboard: its group and its card."""
+    group, sentence, label, href = next_step(j, work)
+    _, state = progress(j)
+    cls = "bad" if j["status"] == "failed" else "hot" if group == "you" else ""
+    jid = j["id"]
+    more = []
+    if j.get("course_built") and work:
+        more.append(f"<a href='/builder/{jid}'>Course editor</a>")
+    if work:
+        more.append(f"<a href='/team?course={jid}'>Talk to the team</a>")
+    more.append(f"<a href='/course-files/{jid}'>Files</a>")
+    if work and j.get("source") != "sample":
+        more.append(f"<a href='/review/{jid}#client'>Client tracking page</a>")
+    button = (f"<a class='btn sm{'' if group == 'you' else ' ghost'}' href='{html.escape(href)}'>{label}</a>" if label else "")
+    cost = j.get("cost_usd", 0)
+    card = f"""<article class='course {cls}'>
+<div><h3><a href='{html.escape(jobs.page_url(j))}'>{html.escape(j.get('title') or 'New brief')}</a></h3>
+<div class=meta>{html.escape(j['client_name'])} · received {time.strftime('%d %b %Y', time.gmtime(j['created']))}{f' · ${cost:.2f} spent' if cost else ''}</div></div>
+<div class=side>{pill(j['status'])}</div>
+{steps_html(j)}
+<div class=next><p>{sentence}</p>{button}</div>
+<nav class=more aria-label='More for this course'>{''.join(more)}</nav></article>"""
+    return group, card
+
+
 async def dashboard(request: Request):
     if blocked := gate(request, "reviewer"):
         return blocked
     k = qkey()
     work = auth.can(auth.current_user(request), "designer")
     all_jobs = jobs.all_jobs()
-    rows = "".join(
-        f"<tr><td><a href='{html.escape(jobs.page_url(j))}'>{html.escape(j.get('title') or 'New brief')}</a>"
-        f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
-        f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td>"
-        f"<td>{'<a href=/team?course=' + j['id'] + '>Talk to the team</a><br>' if work else ''}<a href='/course-files/{j['id']}'>Course files</a>"
-        f"{'<br><a href=/builder/' + j['id'] + '>Course editor</a>' if j.get('course_built') and work else ''}"
-        f"{'<br><a href=/review/' + j['id'] + '#client>Client tracking</a>' if work and j.get('source') != 'sample' else ''}"
-        f"{' <span class=pill>shared</span>' if j.get('shared_at') else ''}</td></tr>"
-        for j in all_jobs) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
-    email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
-        "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
-        "under your service's Environment page, to get approval emails.</div>")
+    groups: dict[str, list[str]] = {"you": [], "team": [], "done": []}
+    for j in all_jobs:
+        g, card = course_row(j, work)
+        groups[g].append(card)
+
+    notes = []
+    if not (os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL")):
+        notes.append(note("bad", "<p><b>Emails are switched off.</b> You won't get approval emails until you add "
+                          "RESEND_API_KEY and NOTIFY_EMAIL in Render (your service, then Environment).</p>"))
     ok, why = await claude_key_status()
-    key_note = ("<p class=muted>Claude key: working.</p>" if ok else
-                f"<div class=card style='border-color:var(--bad)'><b>The Claude key is not working</b>, so the agents can't reply. "
-                f"Claude said: {html.escape(why)}. Put a new key in Render (your service, Environment, ANTHROPIC_API_KEY), save, "
-                "wait until it says Live, then reload this page.</div>")
-    fake_note = "<div class=card><b>Test mode is on</b> (MODULO_FAKE). Courses use the sample forklift answers and cost nothing.</div>" if os.environ.get("MODULO_FAKE") else ""
+    if not ok:
+        notes.append(note("bad", f"<p><b>The Claude key is not working</b>, so the team can't do any work. Claude said: {html.escape(why)}. "
+                          "Put a new key in Render (your service, Environment, ANTHROPIC_API_KEY), save, wait until it says Live, "
+                          "then reload this page.</p>"))
+    if os.environ.get("MODULO_FAKE"):
+        notes.append(note("info", "<p><b>Test mode is on.</b> Courses use the sample forklift answers and cost nothing.</p>"))
     q = jobs.queue_state()
-    queue_note = (f"<p class=muted>Work queue: {len(q['running'])} running, {len(q['waiting'])} waiting "
-                  f"(up to {q['parallel']} at a time).</p>") if q["running"] or q["waiting"] else ""
-    if not work:
-        body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Open a course to read it, download files or request changes.</p>
-{queue_note}<div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th><th></th></tr>{rows}</table></div>"""
-        return page("Modulo courses", body, refresh=bool(q["running"] or q["waiting"]), request=request)
-    body = f"""<h1>Modulo courses</h1><p class=muted>Every brief and where it is. Bookmark this page.</p>
-<p><a class=btn href="/team">Talk to the team</a> <span class=muted>Chat one-on-one with Iris, Theo or Quinn about a course.</span></p>
-<p>{sample_button(k)} <span class=muted>A finished demo course to explore, free.</span></p>{email_note}{key_note if not ok else ''}{fake_note}{queue_note}
-<div class=card><table><tr><th>Course</th><th>Status</th><th>Received (UTC)</th><th>Cost</th><th></th></tr>{rows}</table></div>
-<div class=card><h2 style="margin-top:0">Start a course from a brief you received elsewhere</h2>
-<p class=muted>Paste a brief from an email or a document. It goes through the same steps as a website brief.</p>
-<form method=post action="/dashboard/new"><div class=row><input name=name placeholder="Client name" required style="flex:1;min-width:180px">
-<input name=email type=email placeholder="Client email" required style="flex:1;min-width:180px"></div>
-<p><textarea name=transcript required placeholder="Paste the brief here"></textarea></p><button>Start</button></form></div>"""
-    return page("Modulo courses", body, refresh=any(j["status"] in jobs.WORKING for j in all_jobs), request=request)
+    if q["waiting"]:
+        notes.append(note("info", f"<p><b>{len(q['waiting'])} course{'s' if len(q['waiting']) != 1 else ''} waiting in line.</b> "
+                          f"The team works on up to {q['parallel']} at a time; the next one starts by itself.</p>"))
+
+    tiles = (f"<div class=tiles><div class='tile{' hot' if groups['you'] else ''}'><b>{len(groups['you'])}</b><span>Need you</span></div>"
+             f"<div class=tile><b>{len(groups['team'])}</b><span>Team working on it</span></div>"
+             f"<div class=tile><b>{len(groups['done'])}</b><span>Done</span></div></div>")
+
+    def section(key: str, title: str, empty: str = "") -> str:
+        if not groups[key]:
+            return f"<section class=group><h2>{title}</h2><p class=muted>{empty}</p></section>" if empty else ""
+        return f"<section class=group><h2>{title} · {len(groups[key])}</h2>{''.join(groups[key])}</section>"
+
+    if all_jobs:
+        lists = (section("you", "Needs you", "Nothing needs you right now.")
+                 + section("team", "The team is working on it") + section("done", "Done"))
+    else:
+        lists = ("<div class=card style='text-align:center;padding:40px 22px'><h2 style='margin-top:0'>No courses yet</h2>"
+                 "<p class=muted>Briefs that clients send from your website appear here by themselves.</p>"
+                 + (f"<p class=row style='justify-content:center;margin-top:16px'>{sample_button(k)}"
+                    "<a class=btn href='#new'>Paste a brief</a></p>" if work else "") + "</div>")
+
+    actions = ""
+    new_form = ""
+    if work:
+        actions = (f"<div class=row><a class='btn' href='#new'>+ New course</a>"
+                   f"{sample_button(k, 'Add the free sample course') if all_jobs else ''}</div>")
+        new_form = f"""<div class=card id=new><h2>Start a course from a brief</h2>
+<p class=muted>Got a brief by email or in a document? Paste it here. It goes through the same steps as a brief sent from your website.</p>
+<form method=post action="/dashboard/new"><div class=grid2><div><label for=nn>Client name</label><input id=nn name=name required></div>
+<div><label for=ne>Client email</label><input id=ne name=email type=email required></div></div>
+<label for=nt>The brief</label><textarea id=nt name=transcript required placeholder="Paste the brief here: who the course is for, what they should learn, how long it should be..."></textarea>
+<p style="margin:12px 0 0"><button>Start the course</button></p></form></div>"""
+    intro = ("Every course and what happens next. Courses that need you are at the top." if work else
+             "Every course and where it is. Open a course to read it, download files or request changes.")
+    body = f"""<div class=head><div><h1>Courses</h1><p class=lede>{intro}</p></div>{actions}</div>
+{''.join(notes)}{tiles if all_jobs else ''}{lists}{new_form}"""
+    return page("Courses", body, refresh=any(j["status"] in jobs.WORKING for j in all_jobs) or bool(q["waiting"]), request=request)
 
 
 async def dashboard_new(request: Request):
@@ -537,7 +770,7 @@ async def team_page(request: Request):
     all_jobs = jobs.all_jobs()
     k = qkey()
     if not all_jobs:
-        return page("Talk to the team", f"<p class=muted><a href='/dashboard'>All courses</a></p><h1>Talk to the team</h1>"
+        return page("Talk to the team", f"<p class=crumb><a href='/dashboard'>← All courses</a></p><h1>Talk to the team</h1>"
                     "<div class=card><p style='margin-top:0'><b>There's nothing to talk about yet.</b> The agents chat about a specific course, "
                     "and you don't have any courses yet.</p>"
                     "<p>To try it now, add the finished forklift sample course. It's free and takes a second. "
@@ -552,7 +785,7 @@ async def team_page(request: Request):
         f"{html.escape((j.get('title') or 'New brief')[:70])} ({html.escape(j['client_name'][:30])})</option>" for j in all_jobs)
     sel = next((j for j in all_jobs if j["id"] == want), all_jobs[0])
     body = f"""<style>{TEAM_CSS}</style>
-<p class=muted><a href='/dashboard'>All courses</a></p><h1>Talk to the team</h1>
+<p class=crumb><a href='/dashboard'>← All courses</a></p><h1>Talk to the team</h1>
 <p class=muted>A private chat with one team member about one course. When Iris or Theo suggest a change, nothing is saved until you press <b>Save to course</b>. Saving keeps a backup and rebuilds the Word storyboard.</p>
 <p class=row><select id=course aria-label="Course">{opts}</select> <a id=open class="btn ghost" href="{html.escape(jobs.page_url(sel))}">Open course page</a> {sample_button(k, "Add sample course")}</p>
 <div class=tabs role=tablist><button data-a=iris>Iris · design</button><button data-a=theo>Theo · storyboard</button><button data-a=quinn>Quinn · QA</button>
@@ -693,7 +926,7 @@ async def course_files_page(request: Request):
             f"<tr><td><b>{html.escape(rel)}</b><div class=muted>{html.escape(_help(rel))}</div></td>"
             f"<td class=muted style='white-space:nowrap'>{size_txt}<br>{time.strftime('%d %b %H:%M', time.gmtime(p.stat().st_mtime))} UTC</td>"
             f"<td style='white-space:nowrap'>{view}<a href='/course-files/{job['id']}/download{q}'>Download</a></td></tr>")
-    body = (f"<p class=muted><a href='/dashboard'>All courses</a> · <a href='{html.escape(jobs.page_url(job))}'>Course page</a></p>"
+    body = (f"<p class=crumb><a href='/dashboard'>All courses</a> · <a href='{html.escape(jobs.page_url(job))}'>← Back to the course</a></p>"
             f"<h1>Course files</h1><p class=muted>{html.escape(job.get('title') or 'New brief')} · {html.escape(job['client_name'])}</p>"
             "<p>Everything saved for this course. <b>Open</b> shows a file here in the browser; <b>Download</b> saves it to your computer.</p>"
             f"<div class=card><table><tr><th>File</th><th>Size and date</th><th></th></tr>{''.join(rows)}</table></div>")
@@ -724,7 +957,7 @@ async def course_file_view(request: Request):
         shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px'>{html.escape(text)}</pre>"
     else:
         shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere'>{html.escape(text)}</pre>"
-    body = (f"<p class=muted><a href='/course-files/{job['id']}'>Back to course files</a></p>"
+    body = (f"<p class=crumb><a href='/course-files/{job['id']}'>← Back to course files</a></p>"
             f"<h1 style='overflow-wrap:anywhere'>{html.escape(rel)}</h1><p class=muted>{html.escape(_help(rel))}</p>"
             f"<p><a class='btn ghost' href='/course-files/{job['id']}/download?f={html.escape(rel)}'>Download</a></p>{shown}")
     return page(rel, body, request=request)

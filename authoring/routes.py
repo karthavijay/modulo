@@ -67,7 +67,7 @@ async def builder_page(request: Request):
     k = A.qkey()
     jid = job["id"]
     out = _out(job)
-    head = (f"<p class=muted><a href='{html.escape(A.dashboard_url())}'>All courses</a> · "
+    head = (f"<p class=crumb><a href='{html.escape(A.dashboard_url())}'>All courses</a> · "
             f"<a href='{html.escape(jobs.page_url(job))}'>Course page</a> · "
             f"<a href='/course-files/{jid}'>Course files</a></p>")
     rebuild = request.query_params.get("rebuild") == "1"
