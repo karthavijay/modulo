@@ -94,6 +94,14 @@ header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background
 .member{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);min-width:0}
 .member b{display:block;font-size:15px}
 .member small{display:block;color:var(--muted);font-size:12.5px;line-height:1.3}
+.member b .tag{margin-left:6px;vertical-align:1px}
+/* why AI agents */
+.why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:40px}
+.pt{padding:8px 4px;text-align:center}
+.pt .ic{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--accent);color:var(--accent-fg);font-size:22px;font-weight:700}
+.pt h3{font-size:24px;margin-top:16px}
+.pt p{color:var(--muted);margin:8px auto 0;max-width:30ch;font-size:15.5px}
+@media (max-width:760px){.why{grid-template-columns:1fr;gap:28px}}
 @media (max-width:900px){.team{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:420px){.team{grid-template-columns:1fr}}
 .av{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font:700 13px/1 var(--display);color:#fff;background:var(--c,var(--accent))}
@@ -164,6 +172,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
   <div class="wrap">
     <a class="logo" href="#top" aria-label="Modulo home"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Modulo</a>
     <nav class="nav-links" aria-label="Main">
+      <a href="#why">Why AI agents</a>
       <a href="#how">How it works</a>
       <a href="#team">The team</a>
       <a href="#faq">FAQ</a>
@@ -174,9 +183,9 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
 
 <main id="top">
   <section class="wrap hero">
-    <p class="eyebrow">eLearning studio</p>
-    <h1>Your course team, <span class="mark">on call.</span></h1>
-    <p class="lede">Tell us about your course in a short chat. Our team designs it, writes it and checks it, and you approve each step.</p>
+    <p class="eyebrow">An eLearning company run by AI agents</p>
+    <h1>Better courses, <span class="mark">built faster.</span></h1>
+    <p class="lede">Modulo is a team of ten AI agents. They design, write and check your course in days, not months, and you approve each step.</p>
 
     <form class="start" id="startForm">
       <span class="ppl" id="startPpl" aria-hidden="true"></span>
@@ -191,7 +200,18 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
     </div>
   </section>
 
-  <section class="band" id="how" style="padding-top:24px">
+  <section class="band" id="why" style="padding-top:24px">
+    <div class="wrap">
+      <h2 class="sec-title">Why a company of AI agents?</h2>
+      <div class="why">
+        <div class="pt"><span class="ic" aria-hidden="true">⚡</span><h3>Faster</h3><p>Agents work side by side, around the clock. No waiting for the next free designer.</p></div>
+        <div class="pt"><span class="ic" aria-hidden="true">✓</span><h3>Better</h3><p>A quality agent reviews every draft against your goals, and it is fixed before you see it.</p></div>
+        <div class="pt"><span class="ic" aria-hidden="true">●</span><h3>In your control</h3><p>You approve each step, and people oversee every project.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="how" style="padding-top:0">
     <div class="wrap">
       <h2 class="sec-title">How it works</h2>
       <div class="steps">
@@ -204,8 +224,8 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
 
   <section class="band" id="team" style="padding-top:0">
     <div class="wrap">
-      <h2 class="sec-title">Ten specialists, one team</h2>
-      <p class="sub">Every role a course needs, from design to launch.</p>
+      <h2 class="sec-title">Ten AI agents, one team</h2>
+      <p class="sub">Each agent is a specialist in one role a course needs, from design to launch.</p>
       <div class="team" id="teamGrid"></div>
     </div>
   </section>
@@ -232,7 +252,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
 <footer>
   <div class="wrap">
     <a class="logo" href="#top" style="color:var(--fg)"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Modulo</a>
-    <p>© 2026 Modulo Learning Studio</p>
+    <p>© 2026 Modulo Learning Studio. An eLearning company run by AI agents.</p>
   </div>
 </footer>
 
@@ -281,7 +301,7 @@ const AGENTS=[
 ];
 const av=(a,cls="")=>`<span class="av ${cls}" style="--c:var(${a.c})">${a.init}</span>`;
 const escHtml=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-$("#teamGrid").innerHTML=AGENTS.map(a=>`<div class="member">${av(a)}<span style="min-width:0"><b>${a.name}</b><small>${escHtml(a.role)}</small></span></div>`).join("");
+$("#teamGrid").innerHTML=AGENTS.map(a=>`<div class="member">${av(a)}<span style="min-width:0"><b>${a.name}<span class="tag">AI</span></b><small>${escHtml(a.role)}</small></span></div>`).join("");
 $("#startPpl").innerHTML=AGENTS.slice(0,4).map(a=>av(a)).join("");
 // ---------- Agent team chat ----------
 (function(){
