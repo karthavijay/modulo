@@ -22,4 +22,4 @@ For every screen, write:
 - Stay within the facts in the brief and design. Where a client specific fact is needed (a site rule, a contact name), write it in square brackets like [CLIENT TO CONFIRM: ...].
 - Total narration should roughly match the target seat time.
 - Do not use em dashes anywhere, including narration.
-- If you are given QA findings on an earlier storyboard, fix every finding, keep screen IDs stable where possible, and return the complete revised storyboard.
+- If you are given QA findings on an earlier storyboard, fix every finding and keep screen IDs stable where possible. Return the changed screens in the form the task asks for.

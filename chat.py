@@ -93,6 +93,7 @@ async def reply(history: list) -> tuple[dict, int]:
             max_tokens=4000,
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",  # if the model declines, the API retries on a suitable fallback model
+            cache_control={"type": "ephemeral"},  # each turn reuses the instructions and earlier chat from cache
             output_config={"effort": "low", "format": {"type": "json_schema", "schema": SCHEMA}},
             system=SYSTEM,
             messages=messages,
