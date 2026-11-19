@@ -27,9 +27,15 @@ def notify_address() -> str:
     return os.environ.get("NOTIFY_EMAIL", "").strip()
 
 
-def send(subject: str, html: str, attachments: list[Path] | None = None) -> bool:
-    """Email the studio owner. Returns True if the email was accepted."""
-    to = notify_address()
+def can_email_clients() -> bool:
+    """Resend's shared test sender (onboarding@resend.dev) only delivers to the Resend account's own address.
+    Emails to clients need a verified domain in Resend and EMAIL_FROM set to an address on it."""
+    return bool(os.environ.get("RESEND_API_KEY", "").strip()) and "resend.dev" not in EMAIL_FROM.lower()
+
+
+def send(subject: str, html: str, attachments: list[Path] | None = None, to: str | None = None) -> bool:
+    """Email the studio owner, or `to` (a client) when given. Returns True if the email was accepted."""
+    to = to or notify_address()
     payload = {
         "from": EMAIL_FROM,
         "to": [to] if to else [],

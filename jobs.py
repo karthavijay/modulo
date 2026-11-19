@@ -129,6 +129,7 @@ def create(name: str, email: str, transcript: str, source: str = "website", who:
     job = {
         "id": f"{time.strftime('%Y%m%d-%H%M')}-{slug}-{secrets.token_hex(2)}",
         "token": secrets.token_urlsafe(24),
+        "track_token": secrets.token_urlsafe(24),  # the client's tracking page (tracking.py)
         "client_name": name,
         "client_email": email,
         "source": source,
