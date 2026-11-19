@@ -1,9 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Modulo Learning Studio</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Modulo is an eLearning studio with an AI course team. Tell us about your course in a short chat and we take it from there.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one column of full-width bands; hero pairs a headline with a live "course channel"; roster is a filterable grid by ADDIE phase. */
+/* Layout: a short, centered page. Hero with one big "start a course" box, then three steps, the team, three questions and a closing button. */
 :root{
   --bg:#F3F6F4; --surface:#FFFFFF; --surface-2:#E8EEEA; --fg:#13201B; --muted:#56655E; --line:#D3DDD7;
   --accent:#0E7A6C; --accent-fg:#FFFFFF; --mark:#F4C53D; --mark-fg:#13201B;
@@ -25,19 +30,21 @@
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 h1,h2,h3{font-family:var(--display);line-height:1.08;text-wrap:balance;margin:0;letter-spacing:-.02em}
 p{margin:0}
-.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.band{padding-block:clamp(56px,8vw,104px)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{padding-block:clamp(56px,8vw,96px)}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .mark{background:linear-gradient(transparent 58%, var(--mark) 58%, var(--mark) 92%, transparent 92%);padding:0 .08em}
 .btn{display:inline-flex;align-items:center;gap:8px;font:600 15px/1 var(--body);padding:13px 20px;border-radius:999px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s}
 .btn:hover{transform:translateY(-1px)}
-.btn:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+.btn:focus-visible,button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
 .btn-primary{background:var(--fg);color:var(--bg)}
-.btn-ghost{border-color:var(--line);color:var(--fg);background:transparent}
+.sec-title{text-align:center;font-size:clamp(28px,3.6vw,40px);font-weight:800}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 /* nav */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
@@ -52,179 +59,70 @@ header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background
 .nav-links a{text-decoration:none;color:var(--muted)}
 .nav-links a:hover{color:var(--fg)}
 .nav .btn{padding:10px 16px;font-size:14px}
-@media (max-width:760px){.nav-links{display:none}.nav .btn{margin-left:auto}}
+@media (max-width:640px){.nav-links{display:none}.nav .btn{margin-left:auto}}
 
 /* hero */
-.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(32px,5vw,64px);align-items:center;padding-block:clamp(48px,7vw,88px)}
-.hero h1{font-size:clamp(40px,6.2vw,76px);font-weight:800}
-.hero .lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:34ch;margin-top:22px}
-.hero .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
-.hero .meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:28px;font-family:var(--mono);font-size:12px;color:var(--muted)}
-.hero .meta span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:1px}
-@media (max-width:900px){.hero{grid-template-columns:1fr}}
+.hero{text-align:center;padding-block:clamp(56px,9vw,112px) clamp(40px,6vw,72px)}
+.hero h1{font-size:clamp(40px,7vw,80px);font-weight:800;margin-top:16px}
+.hero .lede{font-size:clamp(17px,1.8vw,20px);color:var(--muted);max-width:40ch;margin:20px auto 0}
 
-/* channel mock */
-.channel{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 30px 60px -30px color-mix(in srgb,var(--fg) 30%,transparent);overflow:hidden;min-width:0}
-.ch-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
-.ch-head b{font-weight:500}
-.ch-head .ppl{margin-left:auto;display:flex}
-.ch-head .ppl .av{width:24px;height:24px;font-size:10px;margin-left:-6px;border:2px solid var(--surface)}
-.ch-body{padding:18px;display:flex;flex-direction:column;gap:14px}
-.msg{display:flex;gap:12px;align-items:flex-start;opacity:1;animation:rise .5s both}
-.msg:nth-child(2){animation-delay:.15s}.msg:nth-child(3){animation-delay:.3s}.msg:nth-child(4){animation-delay:.45s}.msg:nth-child(5){animation-delay:.6s}
-@keyframes rise{from{transform:translateY(8px)}to{transform:none}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-.msg .who{font-size:13px;font-weight:600;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-.msg .who small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted)}
-.tag{font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;background:var(--surface-2);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.msg .txt{font-size:14px;line-height:1.5;margin-top:2px}
-.msg .txt code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
-.av{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:700 13px/1 var(--display);color:#fff;background:var(--c,var(--accent))}
-.av.human{border-radius:50%;background:var(--fg);color:var(--bg)}
-.attach{margin-top:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px;font-size:12px;background:var(--bg)}
-.attach .row{display:grid;grid-template-columns:110px 1fr 38px;gap:10px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
-.ch-input{margin:0 18px 18px;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
-.ch-input kbd{font-family:var(--mono);font-size:11px}
+/* start box: the main way in */
+.start{max-width:640px;margin:36px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:0 24px 50px -28px color-mix(in srgb,var(--fg) 35%,transparent);display:flex;gap:10px;align-items:flex-end;text-align:left}
+.start:focus-within{border-color:var(--accent)}
+.start .ppl{display:flex;padding:8px 0 8px 6px;align-self:center}
+.start .ppl .av{width:28px;height:28px;font-size:11px;border-radius:8px;margin-left:-8px;border:2px solid var(--surface)}
+.start .ppl .av:first-child{margin-left:0}
+.start textarea{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:17px/1.4 var(--body);resize:none;padding:12px 6px;max-height:140px}
+.start textarea:focus{outline:none}
+.start textarea::placeholder{color:var(--muted)}
+.start .btn{padding:14px 22px;font-size:16px;flex:none}
+.ideas{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.ideas button{font:500 13.5px/1.2 var(--body);padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.ideas button:hover{border-color:var(--accent);color:var(--fg)}
+@media (max-width:520px){.start{flex-wrap:wrap}.start .ppl{display:none}.start .btn{width:100%;justify-content:center}}
 
-/* quotes marquee */
-.quotes{border-block:1px solid var(--line);background:var(--surface);overflow:hidden;padding-block:40px}
-.quotes .head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:24px}
-.quotes h2{font-size:clamp(22px,2.4vw,28px)}
-.track{display:flex;gap:16px;width:max-content;animation:slide 60s linear infinite}
-.quotes:hover .track{animation-play-state:paused}
-@keyframes slide{to{transform:translateX(-50%)}}
-.q{width:320px;flex:none;border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--bg);display:flex;flex-direction:column;gap:14px}
-.q p{font-size:14.5px}
-.q .by{display:flex;gap:10px;align-items:center;font-size:13px;margin-top:auto}
-.q .by .av{width:28px;height:28px;font-size:11px;border-radius:50%}
-.q .by small{display:block;color:var(--muted);font-size:12px}
-.placeholder-note{font-family:var(--mono);font-size:11px;color:var(--muted)}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:40px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--mark);color:var(--mark-fg);font:800 16px/1 var(--display)}
+.step h3{font-size:21px;margin-top:18px}
+.step p{color:var(--muted);margin-top:8px;font-size:15px}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
 
-/* section head */
-.sec-head{display:grid;grid-template-columns:1fr 1fr;gap:24px 48px;align-items:end;margin-bottom:40px}
-.sec-head h2{font-size:clamp(32px,4.4vw,54px);font-weight:800}
-.sec-head p{color:var(--muted);max-width:52ch}
-@media (max-width:800px){.sec-head{grid-template-columns:1fr}}
+/* team */
+.team{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:40px}
+.member{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);min-width:0}
+.member b{display:block;font-size:15px}
+.member small{display:block;color:var(--muted);font-size:12.5px;line-height:1.3}
+@media (max-width:900px){.team{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.team{grid-template-columns:1fr}}
+.av{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font:700 13px/1 var(--display);color:#fff;background:var(--c,var(--accent))}
+.sub{text-align:center;color:var(--muted);margin-top:12px}
 
-/* roster */
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
-.chip{font:500 13px/1 var(--body);padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-.chip .n{font-family:var(--mono);font-size:11px;opacity:.6;margin-left:6px}
-.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:14px}
-.agent{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;transition:border-color .15s,transform .15s;min-width:0}
-.agent:hover{border-color:var(--c);transform:translateY(-2px)}
-.agent:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
-.agent[hidden]{display:none!important}
-.agent .top{display:flex;gap:12px;align-items:center}
-.agent .av{width:44px;height:44px;font-size:16px;border-radius:12px;position:relative}
-.agent .av::after{content:"";position:absolute;right:-3px;bottom:-3px;width:11px;height:11px;border-radius:50%;background:#22C55E;border:2px solid var(--surface)}
-.agent .nm{font:700 18px/1.1 var(--display)}
-.agent[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
-.agent .handle{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.agent .role{font-weight:600;font-size:14px;color:var(--c)}
-.agent .sum{font-size:14px;color:var(--muted)}
-.agent .skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
-.agent .skills span{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:5px;background:var(--surface-2)}
-
-/* detail drawer */
-.detail{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(20px,3vw,32px);display:grid;grid-template-columns:260px 1fr;gap:32px}
-.detail .id{display:flex;flex-direction:column;gap:10px}
-.detail .id .av{width:64px;height:64px;font-size:22px;border-radius:16px}
-.detail h3{font-size:28px}
-.detail .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
-.detail h4{font:500 12px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 10px}
-.detail ul{margin:0;padding-left:18px;font-size:14px;display:grid;gap:6px}
-.detail .sample{grid-column:1/-1;font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:14px 16px;white-space:pre-wrap;overflow-x:auto}
-@media (max-width:860px){.detail{grid-template-columns:1fr}.detail .cols{grid-template-columns:1fr}}
-
-/* pipeline */
-.pipe{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--surface)}
-.stage{padding:22px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:10px;min-width:0}
-.stage:last-child{border-right:0}
-.stage .k{font-family:var(--mono);font-size:12px;color:var(--accent)}
-.stage h3{font-size:22px}
-.stage p{font-size:14px;color:var(--muted)}
-.stage .who{display:flex;gap:4px;margin-top:auto;padding-top:8px}
-.stage .who .av{width:28px;height:28px;font-size:11px;border-radius:8px}
-.stage .out{font-family:var(--mono);font-size:11px;border-top:1px dashed var(--line);padding-top:10px;color:var(--muted)}
-@media (max-width:900px){.pipe{grid-template-columns:1fr}.stage{border-right:0;border-bottom:1px solid var(--line)}.stage:last-child{border-bottom:0}}
-
-/* features */
-.feature{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(28px,5vw,72px);align-items:center;padding-block:clamp(40px,6vw,72px);border-top:1px solid var(--line)}
-.feature:nth-of-type(even) .copy{order:2}
-.feature h3{font-size:clamp(28px,3.4vw,42px);font-weight:800}
-.feature ul{list-style:none;padding:0;margin:20px 0 26px;display:grid;gap:10px}
-.feature li{display:flex;gap:12px;font-size:15.5px}
-.feature li::before{content:"";flex:none;width:18px;height:18px;margin-top:3px;border-radius:5px;background:var(--mark)}
-.feature .copy{min-width:0}
-@media (max-width:860px){.feature{grid-template-columns:1fr}.feature:nth-of-type(even) .copy{order:0}}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0;font-size:13px}
-.panel .ph{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:14px;gap:8px;flex-wrap:wrap}
-/* storyboard panel */
-.sb{display:grid;grid-template-columns:120px 1fr;gap:14px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
-.sb + .sb{margin-top:10px}
-.sb .frame{aspect-ratio:16/10;max-width:100%;border-radius:8px;background:var(--surface-2);position:relative;overflow:hidden}
-.sb .frame i{position:absolute;border-radius:3px;background:color-mix(in srgb,var(--c) 70%,transparent)}
-.sb .fields{display:grid;gap:4px;font-size:12.5px;min-width:0}
-.sb .fields b{font-family:var(--mono);font-weight:500;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
-/* QA table */
-.qa{width:100%;border-collapse:collapse;font-size:12.5px}
-.qa th{font:500 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-.qa td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-.sev{font:500 10.5px/1 var(--mono);padding:3px 6px;border-radius:4px;white-space:nowrap}
-.sev.hi{background:color-mix(in srgb,#DC2626 18%,transparent);color:#DC2626}
-.sev.md{background:color-mix(in srgb,#D97706 20%,transparent);color:#B45309}
-.sev.ok{background:color-mix(in srgb,#16A34A 18%,transparent);color:#15803D}
-:root[data-theme="dark"] .sev.md{color:#F2B55A}:root[data-theme="dark"] .sev.ok{color:#5FD38B}:root[data-theme="dark"] .sev.hi{color:#F87171}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sev.md{color:#F2B55A}:root:not([data-theme="light"]) .sev.ok{color:#5FD38B}:root:not([data-theme="light"]) .sev.hi{color:#F87171}}
-.tbl{overflow-x:auto}
-/* analytics */
-.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.kpi b{display:block;font:700 22px/1.1 var(--display);font-variant-numeric:tabular-nums}
-.kpi small{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
-.funnel{display:grid;gap:8px}
-.funnel .row{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;font-size:12px}
-.funnel .row span:last-child{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.funnel .bar{height:10px}
-.callout{margin-top:14px;display:flex;gap:10px;align-items:flex-start;font-size:12.5px;background:var(--bg);border-radius:10px;padding:10px 12px;border:1px solid var(--line)}
-.callout .av{width:26px;height:26px;font-size:10px;border-radius:7px}
-
-/* strip */
-.strip{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding-block:36px;border-block:1px solid var(--line)}
-.strip span{font:500 13px/1 var(--mono);padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
-
-/* FAQ */
-.faq{display:grid;grid-template-columns:1fr 1.6fr;gap:40px}
-.faq h2{font-size:clamp(32px,4.4vw,54px);font-weight:800}
-details{border-bottom:1px solid var(--line);padding-block:18px}
+/* faq */
+.faq{max-width:720px;margin:40px auto 0}
+details{border-bottom:1px solid var(--line);padding-block:16px}
 details:first-child{border-top:1px solid var(--line)}
 summary{cursor:pointer;font:700 18px/1.3 var(--display);list-style:none;display:flex;justify-content:space-between;gap:16px}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"+";font-family:var(--mono);color:var(--accent);font-size:20px;line-height:1}
 details[open] summary::after{content:"−"}
-details p{margin-top:10px;color:var(--muted);max-width:62ch}
-@media (max-width:800px){.faq{grid-template-columns:1fr}}
+details p{margin-top:8px;color:var(--muted)}
 
-/* CTA */
-.cta{background:var(--fg);color:var(--bg);border-radius:24px;padding:clamp(32px,6vw,72px);display:grid;grid-template-columns:1.4fr 1fr;gap:32px;align-items:center}
-.cta h2{font-size:clamp(32px,4.6vw,58px);font-weight:800}
-.cta p{opacity:.75;margin-top:14px;max-width:44ch}
-.cta .btn-primary{background:var(--mark);color:var(--mark-fg)}
-.cta .stack{display:grid;grid-template-columns:repeat(5,46px);gap:8px;justify-content:end}
-.cta .stack .av{width:46px;height:46px;font-size:16px;border-radius:12px}
-@media (max-width:800px){.cta{grid-template-columns:1fr}.cta .stack{justify-content:start}}
+/* closing */
+.cta{background:var(--fg);color:var(--bg);border-radius:24px;padding:clamp(36px,6vw,64px) 24px;text-align:center}
+.cta h2{font-size:clamp(30px,4.4vw,48px);font-weight:800}
+.cta .btn-primary{background:var(--mark);color:var(--mark-fg);margin-top:24px;font-size:16px;padding:15px 24px}
+footer{padding-block:40px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;align-items:center}
 
-footer{padding-block:48px;color:var(--muted);font-size:14px}
-footer .wrap{display:flex;gap:24px 48px;flex-wrap:wrap;justify-content:space-between}
-footer nav{display:flex;gap:18px;flex-wrap:wrap}
-footer a{text-decoration:none}
-footer a:hover{color:var(--fg)}
-
-/* chat panel */
+/* chat panel (shared with the chat in the dialog below) */
+.msg{display:flex;gap:12px;align-items:flex-start}
+.msg .who{font-size:13px;font-weight:600;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.msg .who small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted)}
+.msg .txt{font-size:14px;line-height:1.5;margin-top:2px}
+.msg .av{width:34px;height:34px;border-radius:10px}
+.tag{font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;background:var(--surface-2);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .chat-scrim{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--fg) 35%,transparent)}
 .chat{position:fixed;z-index:41;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));top:calc(16px + env(safe-area-inset-top,0px));width:min(460px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px -20px color-mix(in srgb,var(--fg) 45%,transparent)}
 .chat header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
@@ -260,14 +158,14 @@ footer a:hover{color:var(--fg)}
 .chat-err{color:#B91C1C;font-size:13px;padding:0 16px 8px}
 @media (max-width:520px){.chat{right:0;left:0;bottom:0;top:env(safe-area-inset-top,0px);width:100%;border-radius:0;border:0;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px)}}
 </style>
-
+</head>
+<body>
 <header class="nav">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="Modulo home"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Modulo</a>
     <nav class="nav-links" aria-label="Main">
+      <a href="#how">How it works</a>
       <a href="#team">The team</a>
-      <a href="#process">How it works</a>
-      <a href="#capabilities">Capabilities</a>
       <a href="#faq">FAQ</a>
     </nav>
     <button type="button" class="btn btn-primary" data-chat>Start a course</button>
@@ -276,185 +174,67 @@ footer a:hover{color:var(--fg)}
 
 <main id="top">
   <section class="wrap hero">
-    <div>
-      <p class="eyebrow">AI agent studio for eLearning</p>
-      <h1 style="margin-top:14px">Your whole course team, <span class="mark">on call.</span></h1>
-      <p class="lede">Ten AI agents that work like a seasoned instructional design studio. They take a course from kickoff to LMS launch, and your people stay in the loop at every review.</p>
-      <div class="ctas">
-        <button type="button" class="btn btn-primary" data-chat>Start a course</button>
-        <a class="btn btn-ghost" href="#team">Meet the team</a>
-      </div>
-      <div class="meta"><span>Storyline &amp; Rise builds</span><span>SCORM 1.2 / 2004 / xAPI</span><span>WCAG 2.2 AA checks</span></div>
-    </div>
+    <p class="eyebrow">eLearning studio</p>
+    <h1>Your course team, <span class="mark">on call.</span></h1>
+    <p class="lede">Tell us about your course in a short chat. Our team designs it, writes it and checks it, and you approve each step.</p>
 
-    <div class="channel" aria-label="Example project channel">
-      <div class="ch-head"><span aria-hidden="true">#</span><b>forklift-safety-refresh</b>
-        <span class="ppl" aria-hidden="true">
-          <span class="av" style="--c:var(--a1)">IR</span><span class="av" style="--c:var(--a3)">TH</span><span class="av" style="--c:var(--a5)">DV</span><span class="av" style="--c:var(--a7)">QN</span>
-        </span>
-      </div>
-      <div class="ch-body">
-        <div class="msg"><span class="av human">RK</span><div><div class="who">Rosa K. <small>L&amp;D lead · 9:02</small></div><div class="txt">The SME signed off on the hazards list. Can we have a storyboard by Thursday?</div></div></div>
-        <div class="msg"><span class="av" style="--c:var(--a1)">IR</span><div><div class="who">Iris <span class="tag">agent</span><small>Instructional Designer · 9:03</small></div><div class="txt">Yes. I mapped the 6 hazards to 4 objectives at Bloom's <em>apply</em> level. Handing to <code>@theo</code> for the scenario script.</div></div></div>
-        <div class="msg"><span class="av" style="--c:var(--a3)">TH</span><div><div class="who">Theo <span class="tag">agent</span><small>Storyboard Writer · 9:41</small></div><div class="txt">Draft is in. 18 screens, 3 branching scenarios, 210 words of narration per scene on average.</div></div></div>
-        <div class="msg"><span class="av" style="--c:var(--a9)">PG</span><div><div class="who">Paige <span class="tag">agent</span><small>Project Manager · 9:44</small></div><div class="txt">Build status for this sprint:
-          <div class="attach">
-            <div class="row"><span>Design doc</span><span class="bar"><i style="width:100%"></i></span><span>100%</span></div>
-            <div class="row"><span>Storyboard</span><span class="bar"><i style="width:85%"></i></span><span>85%</span></div>
-            <div class="row"><span>Storyline build</span><span class="bar"><i style="width:30%"></i></span><span>30%</span></div>
-          </div></div></div></div>
-      </div>
-      <div class="ch-input"><span>Message the course team…</span><kbd>↵</kbd></div>
+    <form class="start" id="startForm">
+      <span class="ppl" id="startPpl" aria-hidden="true"></span>
+      <label for="startInput" style="position:absolute;left:-9999px">What is your course about?</label>
+      <textarea id="startInput" rows="1" maxlength="2000" placeholder="What is your course about?"></textarea>
+      <button class="btn btn-primary" type="submit">Start a course</button>
+    </form>
+    <div class="ideas" id="ideas" aria-label="Ideas to start with">
+      <button type="button">Compliance course for 500 employees</button>
+      <button type="button">Turn our slides into an online course</button>
+      <button type="button">Software onboarding</button>
     </div>
   </section>
 
-  <section class="quotes" aria-label="What teams say">
-    <div class="wrap head">
-      <h2>What L&amp;D teams say</h2>
-      <span class="placeholder-note">Placeholder quotes. Replace with real client feedback.</span>
-    </div>
-    <div class="track" id="track"></div>
-  </section>
-
-  <section class="band" id="team">
+  <section class="band" id="how" style="padding-top:24px">
     <div class="wrap">
-      <div class="sec-head">
-        <div><p class="eyebrow">The team</p><h2 style="margin-top:12px">Ten specialists. One course channel.</h2></div>
-        <p>Every agent has a role, a handle and a memory of your brand, your style guide and your past courses. Pick a phase to see who leads it, or open an agent to see what they deliver.</p>
+      <h2 class="sec-title">How it works</h2>
+      <div class="steps">
+        <div class="step"><h3>Chat</h3><p>Tell the team your topic, audience and deadline. It takes a few minutes.</p></div>
+        <div class="step"><h3>Approve</h3><p>We send you a course design. Nothing moves on until you say yes.</p></div>
+        <div class="step"><h3>Receive</h3><p>Get a finished, quality-checked storyboard. Follow progress on your own tracking page.</p></div>
       </div>
-      <div class="filters" role="group" aria-label="Filter agents by phase" id="filters"></div>
-      <div class="roster" id="roster"></div>
-      <div class="detail" id="detail" aria-live="polite"></div>
     </div>
   </section>
 
-  <section class="band" id="process" style="padding-top:0">
+  <section class="band" id="team" style="padding-top:0">
     <div class="wrap">
-      <div class="sec-head">
-        <div><p class="eyebrow">How it works</p><h2 style="margin-top:12px">ADDIE, with the handoffs handled.</h2></div>
-        <p>The agents follow the model your team already knows. Each phase ends in a deliverable you review and approve before the next one starts.</p>
-      </div>
-      <div class="pipe" id="pipe"></div>
+      <h2 class="sec-title">Ten specialists, one team</h2>
+      <p class="sub">Every role a course needs, from design to launch.</p>
+      <div class="team" id="teamGrid"></div>
     </div>
   </section>
 
-  <section class="wrap" id="capabilities">
-    <div class="feature">
-      <div class="copy">
-        <p class="eyebrow">Design faster</p>
-        <h3 style="margin-top:12px">From SME interview to storyboard in days.</h3>
-        <ul>
-          <li>Sam turns SME calls and source decks into a clean content outline.</li>
-          <li>Iris writes measurable objectives and picks the right interactions.</li>
-          <li>Theo drafts storyboards with narration, on-screen text and branching notes.</li>
-        </ul>
-        <a class="btn btn-ghost" href="#team">See the design agents</a>
-      </div>
-      <div class="panel" aria-label="Example storyboard">
-        <div class="ph"><span>storyboard_v2 · Module 2</span><span>by @theo</span></div>
-        <div class="sb" style="--c:var(--a3)">
-          <div class="frame"><i style="left:8%;top:12%;width:50%;height:12%"></i><i style="left:8%;top:32%;width:34%;height:46%;--c:var(--a2)"></i><i style="left:50%;top:32%;width:40%;height:8%"></i><i style="left:50%;top:46%;width:30%;height:8%"></i></div>
-          <div class="fields"><div><b>Screen</b>2.04 · Spot the hazard</div><div><b>OST</b>Click each hazard in the loading bay.</div><div><b>VO</b>"Take a look around. What could go wrong here?"</div><div><b>Dev</b>Hotspots ×6, reveal layer on click</div></div>
-        </div>
-        <div class="sb" style="--c:var(--a5)">
-          <div class="frame"><i style="left:8%;top:12%;width:60%;height:12%"></i><i style="left:8%;top:34%;width:84%;height:14%"></i><i style="left:8%;top:54%;width:84%;height:14%"></i><i style="left:8%;top:74%;width:84%;height:14%"></i></div>
-          <div class="fields"><div><b>Screen</b>2.05 · Decision point</div><div><b>OST</b>The load is shifting. What do you do?</div><div><b>VO</b>None</div><div><b>Dev</b>Branch A → 2.06, B/C → 2.07 consequence</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <div class="copy">
-        <p class="eyebrow">Ship with confidence</p>
-        <h3 style="margin-top:12px">Every build tested before your reviewers see it.</h3>
-        <ul>
-          <li>Quinn runs functional, language and accessibility passes on each build.</li>
-          <li>Issues go straight to Dev with the screen, steps and a fix suggestion.</li>
-          <li>Lars tests the package in your LMS before launch day.</li>
-        </ul>
-        <a class="btn btn-ghost" href="#team">See the build agents</a>
-      </div>
-      <div class="panel" aria-label="Example QA log">
-        <div class="ph"><span>QA log · build 0.7</span><span>by @quinn</span></div>
-        <div class="tbl"><table class="qa">
-          <thead><tr><th>Screen</th><th>Issue</th><th>Type</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>2.04</td><td>Hotspot 5 not reachable by keyboard</td><td>WCAG 2.1.1</td><td><span class="sev hi">Open</span></td></tr>
-            <tr><td>2.07</td><td>Caption out of sync by 1.2s</td><td>Media</td><td><span class="sev md">Fixing</span></td></tr>
-            <tr><td>3.01</td><td>"forklift" vs "fork-lift" used inconsistently</td><td>Language</td><td><span class="sev ok">Fixed</span></td></tr>
-            <tr><td>Quiz</td><td>Score not sent on retry in SCORM 2004</td><td>LMS</td><td><span class="sev ok">Fixed</span></td></tr>
-          </tbody>
-        </table></div>
-      </div>
-    </div>
-
-    <div class="feature">
-      <div class="copy">
-        <p class="eyebrow">Prove the impact</p>
-        <h3 style="margin-top:12px">Know what learners actually did.</h3>
-        <ul>
-          <li>Nia reads xAPI and LMS data and spots where learners drop off.</li>
-          <li>Reports map to Kirkpatrick levels 1 to 3, ready for stakeholders.</li>
-          <li>Findings flow back to Iris as concrete revision ideas.</li>
-        </ul>
-        <a class="btn btn-ghost" href="#team">See the analyst</a>
-      </div>
-      <div class="panel" aria-label="Example learning analytics, sample data">
-        <div class="ph"><span>Forklift safety · first 30 days</span><span>sample data</span></div>
-        <div class="kpis">
-          <div class="kpi"><b>1,284</b><small>enrolled</small></div>
-          <div class="kpi"><b>91%</b><small>completed</small></div>
-          <div class="kpi"><b>86%</b><small>first-try pass</small></div>
-        </div>
-        <div class="funnel">
-          <div class="row"><span>Module 1</span><span class="bar"><i style="width:98%"></i></span><span>98%</span></div>
-          <div class="row"><span>Module 2</span><span class="bar"><i style="width:95%"></i></span><span>95%</span></div>
-          <div class="row"><span>Scenario 2.05</span><span class="bar"><i style="width:71%;background:var(--mark)"></i></span><span>71%</span></div>
-          <div class="row"><span>Final quiz</span><span class="bar"><i style="width:91%"></i></span><span>91%</span></div>
-        </div>
-        <div class="callout"><span class="av" style="--c:var(--a10)">NI</span><span>29% chose option B on screen 2.05. Suggest a short worked example before the decision point.</span></div>
+  <section class="band" id="faq" style="padding-top:0">
+    <div class="wrap">
+      <h2 class="sec-title">Questions</h2>
+      <div class="faq">
+        <details><summary>Do people review the work?</summary><p>Yes. You approve the design before anything is written, and our instructional designers oversee every project.</p></details>
+        <details><summary>Will it work in our LMS?</summary><p>Yes. Courses are delivered as SCORM 1.2 or SCORM 2004 packages.</p></details>
+        <details><summary>Who can see our content?</summary><p>Only your project team. It is never used to train AI models.</p></details>
       </div>
     </div>
   </section>
 
-  <div class="wrap"><div class="strip" aria-label="Highlights">
-    <span>Brand &amp; style memory</span><span>Human review gates</span><span>Storyline · Rise · Captivate</span><span>SCORM · xAPI · cmi5</span><span>Accessibility built in</span><span>Localization ready</span>
-  </div></div>
-
-  <section class="band" id="faq">
-    <div class="wrap faq">
-      <div><p class="eyebrow">FAQ</p><h2 style="margin-top:12px">Questions, answered.</h2></div>
-      <div>
-        <details open><summary>What is Modulo?</summary><p>Modulo is an eLearning studio staffed by AI agents. Each agent covers one role you would find on a course development team, from instructional design to LMS administration, and they hand work to each other in a shared project channel.</p></details>
-        <details><summary>Do humans still review the work?</summary><p>Yes. Every phase ends at a review gate. Your L&amp;D lead and SMEs approve the design doc, storyboard, alpha and beta builds before the team moves on. Our human instructional designers oversee every project.</p></details>
-        <details><summary>Which authoring tools and standards do you support?</summary><p>Articulate Storyline and Rise are our default. We also build in Adobe Captivate and HTML5, and we publish to SCORM 1.2, SCORM 2004, xAPI and cmi5.</p></details>
-        <details><summary>How do you handle accessibility?</summary><p>Vera designs for contrast and readable type from the start, Mila produces captions and transcripts, and Quinn tests every build against WCAG 2.2 AA and Section 508 before it reaches you.</p></details>
-        <details><summary>Who can see our content?</summary><p>Only your project team. Source files, SME recordings and drafts stay in your project and are never used to train models.</p></details>
-        <details><summary>How long does a typical course take?</summary><p>A 30-minute Storyline course usually goes from kickoff to LMS launch in three to four weeks, depending mostly on how quickly reviews come back.</p></details>
-      </div>
-    </div>
-  </section>
-
-  <section class="wrap" id="start" style="padding-bottom:24px">
+  <section class="wrap" style="padding-bottom:24px">
     <div class="cta">
-      <div>
-        <h2>Bring your next course to the team.</h2>
-        <p>Open a chat with the team. Tell them your topic, audience and deadline, and they will shape a course brief with you in a few minutes.</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px"><button type="button" class="btn btn-primary" data-chat>Start a course</button></div>
-      </div>
-      <div class="stack" id="stack" aria-hidden="true"></div>
+      <h2>Ready when you are.</h2>
+      <button type="button" class="btn btn-primary" data-chat>Start a course</button>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <div><a class="logo" href="#top" style="color:var(--fg)"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Modulo</a><p style="margin-top:10px">An AI agent studio for eLearning development.</p></div>
-    <nav aria-label="Footer"><a href="#team">The team</a><a href="#process">How it works</a><a href="#capabilities">Capabilities</a><a href="#faq">FAQ</a><a href="#start">Contact</a></nav>
-    <p style="width:100%;font-size:13px">© 2026 Modulo Learning Studio. Placeholder name.</p>
+    <a class="logo" href="#top" style="color:var(--fg)"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Modulo</a>
+    <p>© 2026 Modulo Learning Studio</p>
   </div>
 </footer>
-
 
 <div class="chat-scrim" id="chatScrim" hidden></div>
 <section class="chat" id="chat" role="dialog" aria-modal="true" aria-labelledby="chatTitle" hidden>
@@ -484,144 +264,25 @@ footer a:hover{color:var(--fg)}
   </form>
 </section>
 
+
 <script>
-const AGENTS=[
- {id:"iris",name:"Iris",init:"IR",c:"--a1",role:"Instructional Designer",phase:["Analyze","Design"],
-  sum:"Turns business goals into learning objectives and a course design that fits the audience.",
-  skills:["Bloom's","ADDIE","Design docs"],
-  does:["Runs the needs and audience analysis","Writes measurable objectives","Picks interactions and assessment strategy","Owns the design document"],
-  delivers:["Design document","Course outline","Assessment blueprint"],
-  works:["Sam for content","Theo for scripts","Nia for revisions"],
-  sample:"Objective 2.1: Given a loading bay photo, the learner will identify\nat least 5 of 6 forklift hazards. (Bloom's: Apply)"},
- {id:"sam",name:"Sam",init:"SM",c:"--a2",role:"SME Liaison",phase:["Analyze"],
-  sum:"Gets the knowledge out of your experts' heads and into a usable outline.",
-  skills:["Interviews","Content audit","Source review"],
-  does:["Prepares SME interview guides","Summarizes calls and source documents","Flags gaps and conflicting information","Tracks SME sign-off"],
-  delivers:["Interview guides","Content outline","Open questions log"],
-  works:["Iris","Paige","Your SMEs"],
-  sample:"Open question #4 for SME: Is the 10 km/h limit site-wide,\nor only inside the loading bay?"},
- {id:"theo",name:"Theo",init:"TH",c:"--a3",role:"Storyboard Writer",phase:["Design"],
-  sum:"Writes the storyboard: screens, narration, on-screen text and branching.",
-  skills:["Storyboards","Scenarios","VO scripts"],
-  does:["Drafts screen-by-screen storyboards","Writes branching scenarios and feedback","Writes narration scripts at the right reading level","Keeps tone in line with your style guide"],
-  delivers:["Storyboard","Narration script","Scenario maps"],
-  works:["Iris","Vera","Mila"],
-  sample:"2.05 Decision point\nOST: The load is shifting. What do you do?\nA) Lower the forks slowly  B) Speed up  C) Lean on the load"},
- {id:"vera",name:"Vera",init:"VR",c:"--a6",role:"Visual Designer",phase:["Design","Develop"],
-  sum:"Builds the look of the course: templates, characters, icons and infographics.",
-  skills:["Templates","Style guides","Contrast"],
-  does:["Creates course templates on your brand","Designs characters, icons and infographics","Checks color contrast and type sizes","Prepares assets for Storyline and Rise"],
-  delivers:["Visual mockups","Asset library","Course style guide"],
-  works:["Theo","Dev","Quinn"],
-  sample:"Template v1: 1280×720, body 18px min, contrast 7.2:1 on primary,\n3 character poses × 4 expressions"},
- {id:"dev",name:"Dev",init:"DV",c:"--a5",role:"eLearning Developer",phase:["Develop"],
-  sum:"Builds the course in Storyline or Rise, with triggers, variables and quizzes.",
-  skills:["Storyline","Rise","JavaScript"],
-  does:["Builds slides, layers, states and triggers","Sets up variables, scoring and branching","Adds keyboard navigation and focus order","Publishes alpha, beta and gold builds"],
-  delivers:["Alpha / beta / gold builds",".story and Rise source","Build notes"],
-  works:["Vera","Mila","Quinn"],
-  sample:"Trigger: Set hazards_found = hazards_found + 1\n  when user clicks Hotspot 5, if Hotspot 5 state != Visited"},
- {id:"mila",name:"Mila",init:"ML",c:"--a4",role:"Voiceover & Media Producer",phase:["Develop"],
-  sum:"Produces narration, captions, video and audio that sound like your brand.",
-  skills:["AI voice","Captions","Video"],
-  does:["Produces narration from approved scripts","Creates captions and transcripts","Edits short video and animation","Normalizes audio levels across the course"],
-  delivers:["Narration files","SRT/VTT captions","Video clips"],
-  works:["Theo","Dev","Quinn"],
-  sample:"VO 2.04 · 14.2s · -16 LUFS · captions 2.04.vtt (3 cues)"},
- {id:"quinn",name:"Quinn",init:"QN",c:"--a7",role:"QA Reviewer",phase:["Develop","Implement"],
-  sum:"Tests every build for function, language and accessibility before you see it.",
-  skills:["WCAG 2.2","Section 508","Test plans"],
-  does:["Writes a test plan for each course","Runs functional and language checks","Tests with keyboard and screen readers","Logs issues with steps and fix suggestions"],
-  delivers:["QA log","Accessibility report","Sign-off checklist"],
-  works:["Dev","Mila","Lars"],
-  sample:"#QA-112 · 2.04 · Hotspot 5 not reachable by Tab\nExpected: focus moves to hotspot 5 after hotspot 4. WCAG 2.1.1"},
- {id:"lars",name:"Lars",init:"LR",c:"--a8",role:"LMS & SCORM Administrator",phase:["Implement"],
-  sum:"Packages, uploads and tests the course in your LMS, then keeps it running.",
-  skills:["SCORM","xAPI","cmi5"],
-  does:["Publishes to SCORM 1.2, 2004, xAPI or cmi5","Tests tracking in SCORM Cloud and your LMS","Sets up enrollments and completion rules","Troubleshoots learner tracking issues"],
-  delivers:["LMS-ready package","Tracking test report","Launch checklist"],
-  works:["Dev","Quinn","Your LMS admin"],
-  sample:"cmi.completion_status = completed\ncmi.success_status = passed\ncmi.score.scaled = 0.9"},
- {id:"paige",name:"Paige",init:"PG",c:"--a9",role:"Project Manager",phase:["Analyze","Design","Develop","Implement","Evaluate"],
-  sum:"Keeps scope, schedule and review cycles on track, and keeps you informed.",
-  skills:["Scope","Schedules","Reviews"],
-  does:["Builds the project plan and schedule","Runs review rounds and consolidates feedback","Tracks risks and scope changes","Sends a weekly status to your team"],
-  delivers:["Project plan","Weekly status","Review trackers"],
-  works:["Every agent","Your stakeholders"],
-  sample:"Week 2 status: Storyboard 85%. Risk: SME review due Thu,\nslip of 2 days moves beta to Nov 30."},
- {id:"nia",name:"Nia",init:"NI",c:"--a10",role:"Learning Analyst",phase:["Evaluate"],
-  sum:"Measures what learners did and whether it changed anything at work.",
-  skills:["Kirkpatrick","xAPI data","Reports"],
-  does:["Sets up evaluation plans and surveys","Analyzes LMS and xAPI data","Finds drop-off points and tricky questions","Recommends revisions to Iris"],
-  delivers:["Evaluation plan","Impact report","Revision recommendations"],
-  works:["Iris","Lars","Your stakeholders"],
-  sample:"Question 7 item analysis: p = 0.42, discrimination = 0.08\nRecommendation: rewrite distractor C, it reads as correct."}
-];
-const PHASES=["Analyze","Design","Develop","Implement","Evaluate"];
-const PIPE={Analyze:["Find the real performance gap and who the learners are.","Needs analysis, content outline"],
- Design:["Set objectives, pick the approach and write the storyboard.","Design doc, storyboard"],
- Develop:["Build media, interactions and the course itself, then test it.","Alpha, beta and gold builds"],
- Implement:["Package, upload and test tracking in your LMS.","LMS-ready package"],
- Evaluate:["Measure results and feed changes into the next version.","Impact report"]};
-
 const $=s=>document.querySelector(s);
-const av=(a,cls="")=>`<span class="av ${cls}" style="--c:var(${a.c})">${a.init}</span>`;
-
-// roster
-$("#roster").innerHTML=AGENTS.map(a=>`
- <button class="agent" style="--c:var(${a.c})" data-id="${a.id}" data-phase="${a.phase.join(" ")}" aria-controls="detail">
-  <span class="top">${av(a)}<span style="display:grid"><span class="nm">${a.name}</span><span class="handle">@${a.id}</span></span></span>
-  <span class="role">${a.role}</span>
-  <span class="sum">${a.sum}</span>
-  <span class="skills">${a.skills.map(s=>`<span>${s}</span>`).join("")}</span>
- </button>`).join("");
-
-function showDetail(id){
-  const a=AGENTS.find(x=>x.id===id);
-  $("#detail").innerHTML=`
-   <div class="id">${av(a)}<h3>${a.name}</h3><span class="handle" style="font-family:var(--mono);font-size:13px;color:var(--muted)">@${a.id}</span>
-     <span style="font-weight:600;color:var(${a.c})">${a.role}</span>
-     <span style="font-size:13px;color:var(--muted)">Phases: ${a.phase.join(", ")}</span></div>
-   <div class="cols">
-     <div><h4>What ${a.name} does</h4><ul>${a.does.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-     <div><h4>Deliverables</h4><ul>${a.delivers.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-     <div><h4>Works with</h4><ul>${a.works.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-     <div class="sample" aria-label="Sample output">${a.sample}</div>
-   </div>`;
-  document.querySelectorAll(".agent").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
-}
-$("#roster").addEventListener("click",e=>{const b=e.target.closest(".agent");if(b){showDetail(b.dataset.id);$("#detail").scrollIntoView({behavior:"smooth",block:"nearest"})}});
-showDetail("iris");
-
-// filters
-const counts=p=>AGENTS.filter(a=>a.phase.includes(p)).length;
-$("#filters").innerHTML=`<button class="chip" aria-pressed="true" data-p="all">All agents<span class="n">${AGENTS.length}</span></button>`+
-  PHASES.map(p=>`<button class="chip" aria-pressed="false" data-p="${p}">${p}<span class="n">${counts(p)}</span></button>`).join("");
-$("#filters").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
-  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c));
-  document.querySelectorAll(".agent").forEach(a=>{a.hidden=!(c.dataset.p==="all"||a.dataset.phase.split(" ").includes(c.dataset.p))});
-});
-
-// pipeline
-$("#pipe").innerHTML=PHASES.map((p,i)=>`
- <div class="stage"><span class="k">Phase ${i+1}</span><h3>${p}</h3><p>${PIPE[p][0]}</p>
-  <div class="out">Output: ${PIPE[p][1]}</div>
-  <div class="who">${AGENTS.filter(a=>a.phase.includes(p)).map(a=>av(a)).join("")}</div></div>`).join("");
-
-// quotes (placeholders)
-const Q=[
- ["We got a storyboard back the same week as the SME call. That used to take a month.","Training manager","Logistics company"],
- ["Quinn caught keyboard traps our last vendor shipped for years.","Accessibility lead","Public sector agency"],
- ["Paige's weekly status is the first one our VP actually reads.","L&D director","Healthcare network"],
- ["The SCORM package worked in our LMS on the first upload.","LMS administrator","Retail group"],
- ["Nia showed us exactly which scenario confused people. We fixed it in a day.","Learning analyst","Financial services"],
- ["It feels like hiring a full ID team without the hiring.","Head of enablement","SaaS company"]
+const AGENTS=[
+ {id:"iris",name:"Iris",init:"IR",c:"--a1",role:"Instructional Designer"},
+ {id:"sam",name:"Sam",init:"SM",c:"--a2",role:"SME Liaison"},
+ {id:"theo",name:"Theo",init:"TH",c:"--a3",role:"Storyboard Writer"},
+ {id:"vera",name:"Vera",init:"VR",c:"--a6",role:"Visual Designer"},
+ {id:"dev",name:"Dev",init:"DV",c:"--a5",role:"eLearning Developer"},
+ {id:"mila",name:"Mila",init:"ML",c:"--a4",role:"Voiceover & Media Producer"},
+ {id:"quinn",name:"Quinn",init:"QN",c:"--a7",role:"QA Reviewer"},
+ {id:"lars",name:"Lars",init:"LR",c:"--a8",role:"LMS & SCORM Administrator"},
+ {id:"paige",name:"Paige",init:"PG",c:"--a9",role:"Project Manager"},
+ {id:"nia",name:"Nia",init:"NI",c:"--a10",role:"Learning Analyst"}
 ];
-const qHtml=Q.map(([t,r,o],i)=>`<figure class="q" style="margin:0"><p>"${t}"</p><figcaption class="by"><span class="av human" style="--c:var(--a${i+1})">${r.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()}</span><span>${r}<small>${o}</small></span></figcaption></figure>`).join("");
-$("#track").innerHTML=qHtml+qHtml.replaceAll('class="q"','class="q" aria-hidden="true"');
-
-// cta stack
-$("#stack").innerHTML=AGENTS.map(a=>av(a)).join("");
+const av=(a,cls="")=>`<span class="av ${cls}" style="--c:var(${a.c})">${a.init}</span>`;
+const escHtml=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("#teamGrid").innerHTML=AGENTS.map(a=>`<div class="member">${av(a)}<span style="min-width:0"><b>${a.name}</b><small>${escHtml(a.role)}</small></span></div>`).join("");
+$("#startPpl").innerHTML=AGENTS.slice(0,4).map(a=>av(a)).join("");
 // ---------- Agent team chat ----------
 (function(){
   const byId=Object.fromEntries(AGENTS.map(a=>[a.id,a]));
@@ -719,5 +380,14 @@ $("#stack").innerHTML=AGENTS.map(a=>av(a)).join("");
       a.style.marginTop="8px"; a.style.display="inline-block"; p.append(a); last.append(p); log.scrollTop=log.scrollHeight;
     }
   });
+  // The big box at the top of the page: opens the chat and sends what the visitor typed.
+  const startIn=$("#startInput");
+  function startWith(text){open(); if(text&&text.trim()) send(text);}
+  $("#startForm").addEventListener("submit",e=>{e.preventDefault();const t=startIn.value;startIn.value="";startWith(t);});
+  startIn.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#startForm").requestSubmit();}});
+  startIn.addEventListener("input",()=>{startIn.style.height="auto";startIn.style.height=Math.min(startIn.scrollHeight,140)+"px";});
+  $("#ideas").addEventListener("click",e=>{const b=e.target.closest("button");if(b)startWith(b.textContent);});
 })();
 </script>
+</body>
+</html>
