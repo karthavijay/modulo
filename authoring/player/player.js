@@ -324,7 +324,10 @@
   var brand = el("div", { "class": "brand" }, [
     el("span", { "class": "mark", "aria-hidden": "true", text: (C.title || "C").trim().charAt(0).toUpperCase() }),
     el("p", { "class": "ctitle", text: C.title || "" })]);
-  var top = el("header", { "class": "top" }, [menuBtn, brand, pctLbl, progressBar]);
+  var notice = connected ? null : el("p", { "class": "notice", title: "Preview: progress is saved in this browser only" }, [el("span", { "class": "dot", "aria-hidden": "true" }),
+    el("span", null, ["Preview", el("span", { "class": "wordy", text: ", saved in this browser" })]),
+    el("button", { type: "button", text: "Start over", onclick: function () { try { localStorage.removeItem(storeKey); } catch (e) { /* ignore */ } state = { v: [], a: {}, n: 1, loc: 0, max: 0 }; visited = {}; openSec = {}; go(0, true); } })]);
+  var top = el("header", { "class": "top" + (notice ? " has-notice" : "") }, [menuBtn, brand, notice, pctLbl, progressBar]);
   var menu = el("nav", { "class": "menu", id: "menu", "aria-label": "Course menu" });
   var backdrop = el("div", { "class": "backdrop", "aria-hidden": "true", onclick: function () { toggleMenu(false); menuBtn.focus(); } });
   var main = el("main", { id: "main", tabindex: "-1" });
@@ -623,11 +626,6 @@
   function renderPage() {
     var p = pages[state.loc];
     var page = el("article", { "class": "page" });
-    if (!connected) {
-      page.appendChild(el("p", { "class": "notice" }, [el("span", { "class": "dot", "aria-hidden": "true" }),
-        el("span", null, ["Preview", el("span", { "class": "wordy", text: ": progress is saved in this browser only" }), "."]),
-        el("button", { type: "button", text: "Start over", onclick: function () { try { localStorage.removeItem(storeKey); } catch (e) { /* ignore */ } state = { v: [], a: {}, n: 1, loc: 0, max: 0 }; visited = {}; openSec = {}; go(0, true); } })]));
-    }
     if (state.loc === 0) page.appendChild(renderCover());
     var head = el("div", { "class": "page-head" });
     var eyebrow = el("div", { "class": "eyebrow-row" });
@@ -638,11 +636,20 @@
     head.appendChild(h1);
     head.appendChild(el("hr", { "class": "head-rule", "aria-hidden": "true" }));
     page.appendChild(head);
+    // A page that opens with a picture shows it beside the words on wide screens (see .split in the CSS).
+    var blocks = p.blocks || [], target = page;
+    if (blocks.length > 1 && blocks[0].type === "image" && blocks.slice(1).every(function (b) { return b.type !== "results"; })) {
+      var media = el("div", { "class": "split-media" }), body = el("div", { "class": "split-body" });
+      page.appendChild(el("div", { "class": "split" }, [media, body]));
+      page.classList.add("has-split");
+      var pic = renderBlock(blocks[0]); if (pic) media.appendChild(pic);
+      blocks = blocks.slice(1); target = body;
+    }
     var firstText = true;
-    (p.blocks || []).forEach(function (b) {
+    blocks.forEach(function (b) {
       var n = renderBlock(b, firstText && b.type === "text");
       if (b.type !== "image") firstText = false;
-      if (n) page.appendChild(n);
+      if (n) target.appendChild(n);
     });
     if (state.loc === pages.length - 1) {
       var r = evaluate();
