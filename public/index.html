@@ -356,12 +356,14 @@ $("#startPpl").innerHTML=AGENTS.slice(0,4).map(a=>av(a)).join("");
     if(!demo){
       try{
         const r=await fetch("/api/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({history})});
+        // Sample replies only where there is no chat server at all (a static preview). On the live site a problem
+        // is shown as an error, so it is never hidden behind made-up replies.
+        if(r.status===404) throw new Error("offline");
         const data=await r.json().catch(()=>null);
-        if(r.status===404||!data) throw new Error("offline");
-        if(!r.ok) throw Object.assign(new Error(data.error||"Something went wrong."),{shown:true});
+        if(!r.ok||!data) throw Object.assign(new Error((data&&data.error)||"Something went wrong reaching the team. Please try again."),{shown:true});
         replies=data.replies;
       }catch(e){
-        if(e.shown){typing.hidden=true;busy=false;err.textContent=e.message;err.hidden=false;return;}
+        if(e.shown||location.protocol!=="file:"&&e.message!=="offline"){typing.hidden=true;busy=false;err.textContent=e.shown?e.message:"We couldn't reach the team. Check your connection and try again.";err.hidden=false;return;}
         demo=true; $("#chatMode").textContent="#new-course · demo mode (sample replies)";
       }
     }

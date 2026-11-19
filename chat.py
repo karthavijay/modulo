@@ -83,6 +83,9 @@ async def reply(history: list) -> tuple[dict, int]:
     messages = to_messages(history if isinstance(history, list) else [])
     if not messages or messages[-1]["role"] != "user":
         return {"error": "Send at least one client message."}, 400
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        log.error("Website chat can't reply: ANTHROPIC_API_KEY is not set in Render")
+        return {"error": "Our team chat is switched off for the moment. Please try again later."}, 503
     _client = _client or anthropic.AsyncAnthropic()
     try:
         response = await _client.beta.messages.create(
@@ -104,6 +107,9 @@ async def reply(history: list) -> tuple[dict, int]:
         return {"error": "Something went wrong reaching the team. Please try again."}, 502
     except anthropic.APIConnectionError as e:
         log.error("Could not reach the Anthropic API: %s", e)
+        return {"error": "Something went wrong reaching the team. Please try again."}, 502
+    except Exception:
+        log.exception("Website chat failed")
         return {"error": "Something went wrong reaching the team. Please try again."}, 502
 
     if response.stop_reason == "refusal":
