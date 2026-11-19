@@ -114,6 +114,8 @@ def build(course: dict, assets_dir: Path, kind: str) -> bytes:
         "player.css": (PLAYER / "player.css").read_bytes(),
         "course.js": course_js(course, version).encode("utf-8"),
     }
+    for f in sorted((PLAYER / "fonts").glob("*.woff2")):
+        files[f"fonts/{f.name}"] = f.read_bytes()
     for a in used_assets(course, assets_dir):
         files[f"assets/{a.name}"] = a.read_bytes()
     scored = any(b["type"] == "question" and b.get("scored") for s in course["sections"] for p in s["pages"] for b in p["blocks"])
@@ -156,7 +158,7 @@ def validate(data: bytes, kind: str) -> list[str]:
     names = set(z.namelist())
     if z.testzip() is not None:
         problems.append("a file in the zip is damaged")
-    for f in ("index.html", "player.js", "player.css", "course.js"):
+    for f in ("index.html", "player.js", "player.css", "course.js", *(f"fonts/{x.name}" for x in sorted((PLAYER / "fonts").glob("*.woff2")))):
         if f not in names:
             problems.append(f"{f} is missing")
     try:
