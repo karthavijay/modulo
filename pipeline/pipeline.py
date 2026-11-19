@@ -28,7 +28,7 @@ EFFORT = os.environ.get("MODULO_EFFORT", "high")
 # Cheaper model for the simpler planning documents (Lars, Nia, Paige). Set it to
 # claude-haiku-5-5 to save even more, or to the same as MODULO_MODEL to undo the change.
 LIGHT_MODEL = os.environ.get("MODULO_LIGHT_MODEL", "claude-sonnet-5-5")
-LIGHT_AGENTS = {"lms_administrator", "learning_analyst", "project_manager"}
+LIGHT_AGENTS = {"lms_administrator", "learning_analyst", "project_manager", "illustrator"}
 
 
 def model_for(agent: str) -> str:

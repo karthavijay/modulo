@@ -43,8 +43,13 @@ function check(c, m) { console.log((c ? "  PASS " : "  FAIL ") + m); if (!c) fai
   check(q.type === "question" && q.scored && q.options[0].correct && q.options[0].text === "The brakes", "new scored question saved with its right answer");
   check(api.check.scored === 21, `scored questions now 21 (got ${api.check.scored})`);
 
-  // 3. upload a picture into the first placeholder
-  const img = page.locator(".block-card").filter({ hasText: "Upload a picture" }).first();
+  // 3. the free draft comes with drawn pictures; replace the first one with an upload
+  api = await (await page.request.get(`${base}/api/builder/${job}/course${Q}`)).json();
+  const imgs = api.course.sections.flatMap(s => s.pages.flatMap(p => p.blocks.filter(b => b.type === "image")));
+  check(imgs.length > 10 && imgs.every(b => /^assets\/drawn-.+\.svg$/.test(b.src)), `every picture is drawn (${imgs.length})`);
+  const svgRes = await page.request.get(`${base}/builder/${job}/${imgs[0].src}`);
+  check(svgRes.headers()["content-type"].startsWith("image/svg+xml") && /sandbox/.test(svgRes.headers()["content-security-policy"] || ""), "drawn pictures are served as locked-down SVG");
+  const img = page.locator(".block-card").filter({ hasText: "Replace picture" }).first();
   await img.locator("input[type=file]").setInputFiles(path.join(__dirname, "test-image.png"));
   await page.waitForSelector("img.thumb");
   await page.locator(".block-card").filter({ has: page.locator("img.thumb") }).first().locator("input[type=text]").first().fill("A forklift in a warehouse aisle at shift start");
@@ -52,6 +57,17 @@ function check(c, m) { console.log((c ? "  PASS " : "  FAIL ") + m); if (!c) fai
   api = await (await page.request.get(`${base}/api/builder/${job}/course${Q}`)).json();
   const im = api.course.sections[0].pages[0].blocks.find(b => b.type === "image");
   check(/^assets\/.+\.png$/.test(im.src) && im.alt.startsWith("A forklift"), "picture uploaded with alt text");
+
+  // 3b. remove the second picture and have Vera draw it again
+  await page.click("#outline >> text=5:50 a.m., Truck 07");
+  const second = page.locator(".block-card").filter({ hasText: "A drawn illustration" }).first();
+  await second.locator("text=Remove picture").click();
+  await page.locator(".block-card").filter({ hasText: "Have Vera draw it" }).first().locator("text=Have Vera draw it").click();
+  await page.waitForFunction(() => /Vera drew 1 picture/.test(document.getElementById("status").textContent), null, { timeout: 15000 });
+  api = await (await page.request.get(`${base}/api/builder/${job}/course${Q}`)).json();
+  check(api.course.sections.flatMap(s => s.pages.flatMap(p => p.blocks)).filter(b => b.type === "image" && !b.src).length === 0, "Vera redraws a removed picture");
+  await page.screenshot({ path: outDir + "/editor-drawn.png" });
+  await page.click("#outline >> text=Welcome to the floor");
 
   // 4. preview shows the edits and the picture
   const pv = await ctx.newPage();
