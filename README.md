@@ -19,7 +19,7 @@ One always-on Render web service that runs the Modulo website, the agent chat, a
 | `tracking.py` | The client tracking page at `/track/<code>`: a private, parcel-tracker style page per course with 8 friendly stops (Brief received, Course design, Design approved, Storyboard written, Quality check, Course being built, Final check by our team, Ready), worked out from the course's status, history and files. Updates itself every 30 s via `/track/<code>/status`. Uses its own random `track_token` (separate from the email link code and the play code), so it can't approve, spend or reach internal files. The last stop unlocks only after a Designer/Admin presses **Share with client** on the course page; the course then plays at `/track/<code>/course/` and, if allowed when sharing, SCORM 1.2/2004 zips download at `/track/<code>/download/<kind>`. Studio controls on the course page: copy/email the link, share/stop sharing, turn the link off/on, make a new link. The website chat shows the link after a brief is sent, and emails it when `EMAIL_FROM` is on a verified Resend domain. |
 | `emailer.py` | Resend API. Without a key, emails are written to `$DATA_DIR/outbox/`. |
 | `authoring/` | The course builder (own SCORM authoring tool). `course.py`: the course format (sections, pages, blocks), checks, and a free rule-based draft from a storyboard. `build.py`: Dev builds `output/course/course.json` from `storyboard.json`, one Claude call per module, resumable. `player/`: the HTML5 player (vanilla JS, responsive, keyboard and screen reader friendly) with a SCORM 1.2 and 2004 runtime wrapper; without an LMS it saves progress in localStorage. `export.py`: SCORM 1.2, SCORM 2004 3rd edition and plain web zips, with a structural self-check run on every export. `editor/editor.html` + `routes.py`: the editor at `/builder/<id>` (Designers and Admins), the shareable player at `/play/<id>/<token>/`. `tests/`: browser tests (see below). |
-| `pipeline/` | The Agent SDK pipeline: Iris, Theo, Quinn (`make_design()`, `make_storyboard()`), then the optional production pack (`make_pack()`: Sam, Vera, Mila, Dev, Lars, Nia, Paige, one Markdown document each, combined into `production_pack.docx`). Instructions in `pipeline/agents/*.md`. Still runnable by hand: `python pipeline/pipeline.py brief.txt`. |
+| `pipeline/` | The agent pipeline (direct Claude API calls with prompt caching): Iris, Theo, Quinn (`make_design()`, `make_storyboard()`), then the optional production pack (`make_pack()`: Sam, Vera, Mila, Dev, Lars, Nia, Paige, one Markdown document each, combined into `production_pack.docx`). Instructions in `pipeline/agents/*.md`. Still runnable by hand: `python pipeline/pipeline.py brief.txt`. |
 
 Status flow: `designing -> awaiting_approval -> (revising -> awaiting_approval) -> storyboarding -> done -> (packing -> done, after the owner presses Start the production pack) -> (building -> done, after the owner presses Have Dev build the course)`, or `failed` with a retry button. On startup the worker re-queues anything left in a working state; the pipeline reuses saved drafts, so a redeploy mid-run loses at most the step in progress.
 
@@ -40,6 +40,7 @@ Approve and change requests are POST forms on the review page (email links only 
 | `DATA_DIR` | set | `/var/data` (the disk). |
 | `EMAIL_FROM` | no | Defaults to `onboarding@resend.dev`; set after verifying a domain. |
 | `MODULO_MODEL`, `MODULO_EFFORT` | no | Pipeline model and effort (default `claude-opus-5-5`, `high`). `MODULO_CHAT_MODEL` for the chat. |
+| `MODULO_LIGHT_MODEL` | no | Cheaper model for Lars, Nia and Paige (default `claude-sonnet-5-5`; `claude-haiku-5-5` saves more; set it to `claude-opus-5-5` to undo). |
 | `MODULO_MAX_ROUNDS` | no | QA fix rounds, default 2. |
 | `MAX_BRIEFS_PER_DAY` | no | Default 10. |
 | `MODULO_FAKE` | no | `1` = canned forklift answers, no API calls. |
@@ -67,6 +68,7 @@ Both need Node with Playwright (`NODE_PATH=$(npm root -g)`).
 
 ## Notes
 
-- The Agent SDK runs the bundled Claude Code binary as a subprocess per run. The Blueprint uses the Standard plan (2 GB) with 3 courses at once; on Starter (512 MB) keep `MODULO_PARALLEL_JOBS=1`. Memory per run has not been measured on Render yet: if Render's Events page shows out-of-memory, lower `MODULO_PARALLEL_JOBS`.
+- Agents call the Claude API directly (no Claude Code subprocess), so each run needs little memory. The Blueprint uses the Standard plan (2 GB) with 3 courses at once; on Starter (512 MB) keep `MODULO_PARALLEL_JOBS=1`.
+- Cost control: shared course documents are sent first and cached (`run_agent(shared=...)`), Theo's QA fix rounds return only changed screens, Lars, Nia and Paige run on `MODULO_LIGHT_MODEL` and read a storyboard outline (`PACK_INPUTS` in `pipeline/pipeline.py`). Each step's model, tokens and cost are in the course's `run_log.json`.
 - A Render disk attaches to one instance, so the worker runs inside the web service (no separate worker service), and the service can't scale out. That fits a single studio.
 - The disk means zero-downtime deploys are off: a deploy restarts the service for about a minute.

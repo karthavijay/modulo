@@ -85,7 +85,7 @@ async def make_course(out: Path, brief: str, job_id: str, progress=None) -> dict
         course["built_by"] = "Dev (test mode: rule-based draft)"
     else:
         groups = modules(storyboard)
-        context = block("client_brief", brief) + "\n\n" + block("approved_design", design)
+        shared = [block("client_brief", brief) + "\n\n" + block("approved_design", design)]  # cached across modules
         sections, notes = [], []
         for n, (name, screens) in enumerate(groups, 1):
             f = build / f"module_{n:02d}.json"
@@ -96,9 +96,9 @@ async def make_course(out: Path, brief: str, job_id: str, progress=None) -> dict
                     progress(f"Dev is building module {n} of {len(groups)}: {name}")
                 data = await run_agent(
                     "course_builder",
-                    context + "\n\n" + block("storyboard_module", {"module": name, "screens": screens})
+                    block("storyboard_module", {"module": name, "screens": screens})
                     + f"\n\nBuild this module ({n} of {len(groups)}) as one course section. Every screen above must be covered.",
-                    MODULE_SCHEMA, ledger, f"Dev builds module {n} of {len(groups)}",
+                    MODULE_SCHEMA, ledger, f"Dev builds module {n} of {len(groups)}", shared=shared,
                 )
                 pipeline.save(f, data)
             sections.append(_to_section(data))

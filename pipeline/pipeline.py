@@ -14,17 +14,54 @@ import json
 import os
 import re
 import sys
-import tempfile
+import time
 from pathlib import Path
 
+import anthropic
 import anyio
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
 
 from render import render_design_md, render_docx, render_qa_md, render_storyboard_md
 
 HERE = Path(__file__).resolve().parent
 MODEL = os.environ.get("MODULO_MODEL", "claude-opus-5-5")
 EFFORT = os.environ.get("MODULO_EFFORT", "high")
+# Cheaper model for the simpler planning documents (Lars, Nia, Paige). Set it to
+# claude-haiku-5-5 to save even more, or to the same as MODULO_MODEL to undo the change.
+LIGHT_MODEL = os.environ.get("MODULO_LIGHT_MODEL", "claude-sonnet-5-5")
+LIGHT_AGENTS = {"lms_administrator", "learning_analyst", "project_manager"}
+
+
+def model_for(agent: str) -> str:
+    """Which Claude model an agent (instructions file name) runs on."""
+    return LIGHT_MODEL if agent in LIGHT_AGENTS else MODEL
+
+
+# US dollars per million tokens: (input, output, cache read). Cache writes cost
+# 1.25x input (5 minute cache) or 2x input (1 hour cache).
+PRICES = {
+    "claude-opus-5-5": (4.0, 20.0, 0.20),
+    "claude-sonnet-5-5": (2.0, 10.0, 0.10),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01),
+    "claude-opus-5": (5.0, 25.0, 0.50),
+    "claude-opus-4-8": (5.0, 25.0, 0.50),
+    "claude-sonnet-5": (2.0, 10.0, 0.20),
+}
+
+
+def cost_usd(model: str, usage) -> float:
+    """What one reply cost, from the token counts the API returns."""
+    inp, out, read = PRICES.get(model, PRICES["claude-opus-5-5"])
+    if model == "claude-haiku-5-5":  # Haiku has a higher rate card for prompts over 100K tokens
+        prompt = (usage.input_tokens or 0) + (usage.cache_read_input_tokens or 0) + (usage.cache_creation_input_tokens or 0)
+        if prompt > 100_000:
+            inp, out, read = 0.50, 2.50, 0.05
+    created = usage.cache_creation_input_tokens or 0
+    c = getattr(usage, "cache_creation", None)
+    long_writes = (getattr(c, "ephemeral_1h_input_tokens", 0) or 0) if c else 0
+    short_writes = max(created - long_writes, 0)
+    total = ((usage.input_tokens or 0) * inp + short_writes * inp * 1.25 + long_writes * inp * 2
+             + (usage.cache_read_input_tokens or 0) * read + (usage.output_tokens or 0) * out)
+    return total / 1_000_000
 
 # ---------------------------------------------------------------------------
 # Output shapes each agent must return (JSON Schema)
@@ -69,6 +106,27 @@ STORYBOARD_SCHEMA = _obj({
     })},
 })
 
+SCREEN_SCHEMA = STORYBOARD_SCHEMA["properties"]["screens"]["items"]
+
+# Theo's QA fix rounds: only the screens that change, not the whole storyboard again.
+STORYBOARD_FIX_SCHEMA = _obj({
+    "replace_screens": {"type": "array", "items": SCREEN_SCHEMA},
+    "insert_screens": {"type": "array", "items": _obj({"after_screen_id": STR, "screen": SCREEN_SCHEMA})},
+    "delete_screen_ids": STRS,
+})
+
+
+def apply_screen_changes(storyboard: dict, changes: dict) -> dict:
+    """Apply rewritten, new and removed screens to a storyboard. Returns a new storyboard."""
+    gone = set(changes.get("delete_screen_ids") or [])
+    by_id = {sc["id"]: sc for sc in changes.get("replace_screens") or []}
+    screens = [by_id.get(sc["id"], sc) for sc in storyboard["screens"] if sc["id"] not in gone]
+    for ins in changes.get("insert_screens") or []:
+        idx = next((i for i, sc in enumerate(screens) if sc["id"] == ins["after_screen_id"]), len(screens) - 1)
+        screens.insert(idx + 1, ins["screen"])
+    return {**storyboard, "screens": screens}
+
+
 QA_SCHEMA = _obj({
     "pass": {"type": "boolean"},
     "summary": STR,
@@ -93,7 +151,7 @@ class Ledger:
 
     def add(self, step: dict) -> None:
         self.steps.append(step)
-        self.path.write_text(json.dumps({"model": MODEL, "effort": EFFORT, "steps": self.steps,
+        self.path.write_text(json.dumps({"model": MODEL, "light_model": LIGHT_MODEL, "effort": EFFORT, "steps": self.steps,
                                          "total_cost_usd": self.total}, indent=2), encoding="utf-8")
 
     @property
@@ -113,12 +171,28 @@ FAKE_ANSWERS = {  # test mode: canned answers from the forklift sample, no API c
 }
 
 
-async def run_agent(name: str, task: str, schema: dict, ledger: Ledger, label: str) -> dict:
-    """Run one agent with no tools and return its structured JSON answer."""
+_client: anthropic.AsyncAnthropic | None = None
+
+# The shared course documents go first, in exactly the same words for every agent,
+# so Claude can reuse them from its cache instead of charging full price each time.
+SHARED_INTRO = "These are the course materials for the current Modulo job. Your role and task come after them."
+
+
+async def run_agent(name: str, task: str, schema: dict, ledger: Ledger, label: str,
+                    shared: list[str] | None = None, cache: str = "1h") -> dict:
+    """Run one agent and return its structured JSON answer.
+
+    shared: course documents several agents read in turn (brief, design, storyboard).
+    They are cached, so the next agent that sends the same documents pays about a
+    twentieth of the normal price for them. cache: how long they stay cached, "5m" or "1h".
+    """
+    global _client
     print(f"  ... {label}", flush=True)
     if FAKE:
         await anyio.sleep(float(os.environ.get("MODULO_FAKE_SECONDS", "2")))
-        if name in FAKE_ANSWERS:
+        if schema is STORYBOARD_FIX_SCHEMA:
+            data = {"replace_screens": [], "insert_screens": [], "delete_screen_ids": []}
+        elif name in FAKE_ANSWERS:
             data = json.loads((HERE / "samples" / "fake" / FAKE_ANSWERS[name]).read_text(encoding="utf-8"))
         else:
             data = {"title": label, "summary": "Test mode document.",
@@ -126,32 +200,42 @@ async def run_agent(name: str, task: str, schema: dict, ledger: Ledger, label: s
                                 "| Screen | Note |\n|---|---|\n| M1-S01 | **Example** row |\n\n- First point\n- Second point\n"}
         ledger.add({"step": label + " (test mode)", "cost_usd": 0.0, "seconds": 0})
         return data
-    workdir = tempfile.mkdtemp(prefix="modulo-")  # empty folder: agents read nothing local
-    options = ClaudeAgentOptions(
-        model=MODEL,
-        effort=EFFORT,
-        system_prompt=agent_prompt(name),
-        tools=[],                 # pure writing agents, no file or web access
-        setting_sources=[],       # ignore any local Claude settings
-        output_format={"type": "json_schema", "schema": schema},
-        max_turns=6,
-        cwd=workdir,
-    )
-    result: ResultMessage | None = None
-    async for message in query(prompt=task, options=options):
-        if isinstance(message, ResultMessage):
-            result = message
-    if result is None or result.is_error:
-        detail = (result.errors or result.result) if result else "no result"
-        raise RuntimeError(f"{label} failed: {detail}")
-    data = result.structured_output
-    if data is None:  # fall back to parsing the text answer
-        text = (result.result or "").strip()
-        text = re.sub(r"^```(?:json)?|```$", "", text, flags=re.M).strip()
-        data = json.loads(text)
-    cost = float(result.total_cost_usd or 0)
-    ledger.add({"step": label, "cost_usd": round(cost, 4), "seconds": round(result.duration_ms / 1000)})
-    print(f"      done in {result.duration_ms / 1000:.0f}s, ${cost:.2f}", flush=True)
+
+    model = model_for(name)
+    cache_control = {"type": "ephemeral", "ttl": cache} if cache == "1h" else {"type": "ephemeral"}
+    system: list[dict] = []
+    for i, text in enumerate(shared or []):
+        system.append({"type": "text", "text": (SHARED_INTRO + "\n\n" if i == 0 else "") + text,
+                       "cache_control": cache_control})
+    system.append({"type": "text", "text": agent_prompt(name)})
+    extra = {} if model.startswith("claude-haiku") else {  # if the model declines, the API retries on a fallback model
+        "betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"}
+
+    _client = _client or anthropic.AsyncAnthropic(max_retries=4)
+    started = time.monotonic()
+    async with _client.beta.messages.stream(
+        model=model,
+        max_tokens=128000,
+        output_config={"effort": EFFORT, "format": {"type": "json_schema", "schema": schema}},
+        system=system,
+        messages=[{"role": "user", "content": task}],
+        **extra,
+    ) as stream:
+        msg = await stream.get_final_message()
+    seconds = round(time.monotonic() - started)
+    cost = cost_usd(msg.model, msg.usage)
+    u = msg.usage
+    ledger.add({"step": label, "cost_usd": round(cost, 4), "seconds": seconds, "model": msg.model,
+                "tokens": {"input": u.input_tokens, "cache_write": u.cache_creation_input_tokens or 0,
+                           "cache_read": u.cache_read_input_tokens or 0, "output": u.output_tokens}})
+    if msg.stop_reason == "refusal":
+        raise RuntimeError(f"{label} failed: Claude declined this request.")
+    if msg.stop_reason == "max_tokens":
+        raise RuntimeError(f"{label} failed: the answer was too long to finish.")
+    text = "".join(b.text for b in msg.content if b.type == "text").strip()
+    text = re.sub(r"^```(?:json)?|```$", "", text, flags=re.M).strip()
+    data = json.loads(text)
+    print(f"      done in {seconds}s, ${cost:.2f} ({msg.model}, {u.cache_read_input_tokens or 0} tokens from cache)", flush=True)
     return data
 
 
@@ -210,15 +294,16 @@ async def make_storyboard(out: Path, brief: str, max_rounds: int = 2) -> dict:
     design = _load(out / "1_design.json")
     if design is None:
         raise RuntimeError("There is no course design to storyboard yet.")
-    context = block("client_brief", brief) + "\n\n" + block("approved_design", design)
+    # Brief and design are read by every step below, so they are cached for an hour.
+    shared = [block("client_brief", brief) + "\n\n" + block("approved_design", design)]
 
     storyboard = _load(out / "2_storyboard_draft1.json")
     if storyboard is None:
         print("Step 3  Storyboard Writer drafts the storyboard", flush=True)
         storyboard = await run_agent(
             "storyboard_writer",
-            context + "\n\nWrite the complete storyboard for this approved design.",
-            STORYBOARD_SCHEMA, ledger, "Theo writes the storyboard (draft 1)",
+            "Write the complete storyboard for this approved design.",
+            STORYBOARD_SCHEMA, ledger, "Theo writes the storyboard (draft 1)", shared=shared,
         )
         save(out / "2_storyboard_draft1.json", storyboard)
 
@@ -227,8 +312,8 @@ async def make_storyboard(out: Path, brief: str, max_rounds: int = 2) -> dict:
         print(f"Step 4  QA review, round {round_no}", flush=True)
         qa = _load(out / f"3_qa_round{round_no}.json") or await run_agent(
             "qa_reviewer",
-            context + "\n\n" + block("storyboard", storyboard) + "\n\nReview this storyboard.",
-            QA_SCHEMA, ledger, f"Quinn reviews draft {round_no}",
+            block("storyboard", storyboard) + "\n\nReview this storyboard.",
+            QA_SCHEMA, ledger, f"Quinn reviews draft {round_no}", shared=shared,
         )
         qa_rounds.append(qa)
         save(out / f"3_qa_round{round_no}.json", qa)
@@ -236,13 +321,20 @@ async def make_storyboard(out: Path, brief: str, max_rounds: int = 2) -> dict:
         print(f"      QA: {'PASS' if qa['pass'] else 'needs fixes'} | {counts}", flush=True)
         if qa["pass"] or round_no > max_rounds:
             break
-        storyboard = _load(out / f"2_storyboard_draft{round_no + 1}.json") or await run_agent(
-            "storyboard_writer",
-            context + "\n\n" + block("current_storyboard", storyboard)
-            + "\n\n" + block("qa_findings", qa)
-            + "\n\nFix every QA finding and return the complete revised storyboard.",
-            STORYBOARD_SCHEMA, ledger, f"Theo fixes QA findings (draft {round_no + 1})",
-        )
+        revised = _load(out / f"2_storyboard_draft{round_no + 1}.json")
+        if revised is None:
+            changes = await run_agent(
+                "storyboard_writer",
+                block("current_storyboard", storyboard) + "\n\n" + block("qa_findings", qa)
+                + "\n\nFix every QA finding. Return only the screens that change: each rewritten screen, complete and "
+                "with its existing id, in \"replace_screens\"; new screens in \"insert_screens\" with the id of the "
+                "screen they follow; ids to remove in \"delete_screen_ids\". Screens you leave out stay exactly as they are, "
+                "so include every screen a finding touches, including a course-wide finding.",
+                STORYBOARD_FIX_SCHEMA, ledger, f"Theo fixes QA findings (draft {round_no + 1})", shared=shared,
+            )
+            save(out / f"2_storyboard_fixes{round_no + 1}.json", changes)
+            revised = apply_screen_changes(storyboard, changes)
+        storyboard = revised
         save(out / f"2_storyboard_draft{round_no + 1}.json", storyboard)
 
     save(out / "storyboard.json", storyboard)
@@ -278,14 +370,19 @@ PACK_AGENTS = [
 PACK_SCHEMA = _obj({"title": STR, "summary": STR, "document": STR})
 
 
-def pack_docs(out: Path) -> list[tuple[str, str]]:
-    """The finished team documents as (heading, markdown), in team order."""
+def pack_docs_with_ids(out: Path) -> list[tuple[str, str, str]]:
+    """The finished team documents as (id, heading, markdown), in team order."""
     docs = []
     for aid, name, role, _, title in PACK_AGENTS:
         f = out / "pack" / f"{aid}.md"
         if f.exists():
-            docs.append((f"{title} ({name}, {role})", f.read_text(encoding="utf-8")))
+            docs.append((aid, f"{title} ({name}, {role})", f.read_text(encoding="utf-8")))
     return docs
+
+
+def pack_docs(out: Path) -> list[tuple[str, str]]:
+    """The finished team documents as (heading, markdown), in team order."""
+    return [(h, t) for _, h, t in pack_docs_with_ids(out)]
 
 
 def rebuild_pack_docx(out: Path) -> None:
@@ -296,6 +393,40 @@ def rebuild_pack_docx(out: Path) -> None:
         render_pack_docx(design["title"], docs, out / "production_pack.docx")
 
 
+# What each team member reads. "full" = the whole storyboard; "outline" = one line per
+# screen (id, title, type, objectives, questions, items to confirm) without narration
+# or visual notes, which these roles never use. "team" = earlier team documents.
+PACK_INPUTS = {
+    "sam":   {"storyboard": "full",    "qa": True,  "team": []},
+    "vera":  {"storyboard": "full",    "qa": False, "team": []},
+    "mila":  {"storyboard": "full",    "qa": False, "team": ["vera"]},
+    "dev":   {"storyboard": "full",    "qa": True,  "team": ["vera", "mila"]},
+    "lars":  {"storyboard": "outline", "qa": False, "team": ["dev"]},
+    "nia":   {"storyboard": "outline", "qa": False, "team": ["lars"]},
+    "paige": {"storyboard": "outline", "qa": True,  "team": "all"},
+}
+
+_CONFIRM = re.compile(r"\[CLIENT TO CONFIRM:[^\]]*\]")
+_QUESTION_TYPES = ("check", "assessment", "quiz", "question", "interaction", "scenario")
+
+
+def storyboard_outline(storyboard: dict) -> dict:
+    """A short version of the storyboard for roles that plan around it rather than build from it."""
+    screens = []
+    for sc in storyboard.get("screens", []):
+        row = {k: sc.get(k) for k in ("id", "module", "title", "screen_type", "objective_ids")}
+        if any(t in str(sc.get("screen_type", "")).lower() for t in _QUESTION_TYPES):
+            row["interaction"] = sc.get("interaction", "")
+        confirm = sorted(set(_CONFIRM.findall(json.dumps(sc, ensure_ascii=False))))
+        if confirm:
+            row["client_to_confirm"] = confirm
+        words = len(str(sc.get("narration", "")).split())
+        if words:
+            row["narration_words"] = words
+        screens.append(row)
+    return {"course_title": storyboard.get("course_title", ""), "screen_count": len(screens), "screens": screens}
+
+
 async def make_pack(out: Path, brief: str, progress=None) -> dict:
     """Each remaining team member writes their document, one after another. Resumable."""
     ledger = Ledger(out / "run_log.json")
@@ -303,9 +434,12 @@ async def make_pack(out: Path, brief: str, progress=None) -> dict:
     if not design or not storyboard:
         raise RuntimeError("The production pack needs a finished storyboard first.")
     qa = sorted(out.glob("3_qa_round*.json"), key=lambda p: int(p.stem.rsplit("round", 1)[1]))
-    context = (block("client_brief", brief) + "\n\n" + block("approved_design", design)
-               + "\n\n" + block("storyboard", storyboard)
-               + ("\n\n" + block("latest_qa_review", _load(qa[-1])) if qa else ""))
+    latest_qa = _load(qa[-1]) if qa else None
+    base = block("client_brief", brief) + "\n\n" + block("approved_design", design)
+    shared = {  # identical text for every agent in a group, so the group shares one cache entry
+        "full": [base + "\n\n" + block("storyboard", storyboard)],
+        "outline": [base + "\n\n" + block("storyboard_outline", storyboard_outline(storyboard))],
+    }
     (out / "pack").mkdir(exist_ok=True)
     start = ledger.total
     for aid, name, role, prompt, title in PACK_AGENTS:
@@ -314,13 +448,20 @@ async def make_pack(out: Path, brief: str, progress=None) -> dict:
             continue
         if progress:
             progress(f"{name} ({role}) is writing the {title.lower()}")
-        team_so_far = "".join("\n\n" + block("team_document", f"# {h}\n\n{t}") for h, t in pack_docs(out))
+        needs = PACK_INPUTS.get(aid, {"storyboard": "full", "qa": True, "team": "all"})
+        wanted = needs["team"]
+        team = [(h, t) for tid, h, t in pack_docs_with_ids(out) if wanted == "all" or tid in wanted]
+        parts = []
+        if needs["qa"] and latest_qa:
+            parts.append(block("latest_qa_review", latest_qa))
+        parts += [block("team_document", f"# {h}\n\n{t}") for h, t in team]
         data = await run_agent(
             prompt,
-            context + team_so_far + f"\n\nWrite your document: {title}. Put the whole document, in Markdown, in "
+            "".join(x + "\n\n" for x in parts) + f"Write your document: {title}. Put the whole document, in Markdown, in "
             "\"document\". Use ## headings for its sections and Markdown tables where they help. "
             "Put a one or two sentence summary for the studio owner in \"summary\".",
             PACK_SCHEMA, ledger, f"{name} writes the {title.lower()}",
+            shared=shared[needs["storyboard"]], cache="1h" if needs["storyboard"] == "full" else "5m",
         )
         save(out / "pack" / f"{aid}.json", data)
         save(md, data["document"])

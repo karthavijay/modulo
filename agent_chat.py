@@ -20,7 +20,6 @@ import pipeline
 from render import render_design_md, render_docx, render_qa_md, render_storyboard_md
 
 log = logging.getLogger("modulo.agent_chat")
-MODEL = os.environ.get("MODULO_MODEL", "claude-opus-5-5")
 _client: anthropic.AsyncAnthropic | None = None
 
 AGENTS = {
@@ -174,7 +173,7 @@ async def reply(job: dict, agent: str, history: list) -> tuple[dict, int]:
     _client = _client or anthropic.AsyncAnthropic()
     try:
         async with _client.beta.messages.stream(
-            model=MODEL,
+            model=pipeline.model_for(AGENTS[agent]["prompt"]),  # Lars, Nia and Paige use the cheaper model
             max_tokens=48000,
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
@@ -267,13 +266,7 @@ def apply(job: dict, proposal_id: str) -> str:
         job["title"] = design["title"]
     else:
         pipeline.save(out / f"storyboard_before_{stamp}.json", storyboard)
-        screens = storyboard["screens"]
-        by_id = {s["id"]: s for s in p["replace_screens"]}
-        screens = [by_id.get(s["id"], s) for s in screens if s["id"] not in set(p["delete_screen_ids"])]
-        for ins in p["insert_screens"]:
-            idx = next((i for i, s in enumerate(screens) if s["id"] == ins["after_screen_id"]), len(screens) - 1)
-            screens.insert(idx + 1, ins["screen"])
-        storyboard = {**storyboard, "screens": screens}
+        storyboard = pipeline.apply_screen_changes(storyboard, p)
         pipeline.save(out / "storyboard.json", storyboard)
 
     if storyboard:
