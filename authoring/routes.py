@@ -241,7 +241,8 @@ def _asset(job: dict, name: str):
 
 # ---------------------------------------------------------------- the course in a browser
 
-PLAYER_FILES = {"player.js": "application/javascript", "player.css": "text/css"}
+PLAYER_FILES = {"player.js": "application/javascript", "player.css": "text/css",
+                "fonts/inter.woff2": "font/woff2", "fonts/bricolage.woff2": "font/woff2"}
 
 
 async def play(request: Request):
