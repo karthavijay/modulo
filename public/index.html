@@ -59,7 +59,9 @@ header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background
 .nav-links a{text-decoration:none;color:var(--muted)}
 .nav-links a:hover{color:var(--fg)}
 .nav .btn{padding:10px 16px;font-size:14px}
-@media (max-width:640px){.nav-links{display:none}.nav .btn{margin-left:auto}}
+.signin{font-size:14px;font-weight:600;text-decoration:none;color:var(--fg);padding:9px 14px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.signin:hover{border-color:var(--fg)}
+@media (max-width:640px){.nav-links{display:none}.signin{margin-left:auto;padding:9px 12px}.nav .wrap{gap:10px}}
 
 /* hero */
 .hero{text-align:center;padding-block:clamp(56px,9vw,112px) clamp(40px,6vw,72px)}
@@ -177,6 +179,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
       <a href="#team">The team</a>
       <a href="#faq">FAQ</a>
     </nav>
+    <a class="signin" href="/dashboard">Sign in</a>
     <button type="button" class="btn btn-primary" data-chat>Start a course</button>
   </div>
 </header>
