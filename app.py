@@ -8,6 +8,7 @@
   /dashboard        every course and its status (sign-in; see auth.py and accounts.py)
   /builder/<id>     the course builder: edit the course, preview it, download SCORM (see authoring/routes.py)
   /play/<id>/<t>/   the built course, playable in a browser
+  /track/<code>     the client's private tracking page (see tracking.py)
   /health           for Render's health check
 """
 
@@ -40,6 +41,7 @@ import db
 import chat
 import emailer
 import jobs
+import tracking
 from authoring import routes as builder_routes
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -135,7 +137,10 @@ async def api_brief(request: Request):
         return JSONResponse({"error": "We're receiving a lot of briefs today. Please email us instead."}, 429)
     job = jobs.create(name, email, transcript)
     log.info("New brief %s from %s", job["id"], email)
-    return JSONResponse({"ok": True})
+    emailed = emailer.can_email_clients()
+    if emailed:  # in the background, so the website answers straight away
+        asyncio.get_running_loop().run_in_executor(None, tracking.email_link, job)
+    return JSONResponse({"ok": True, "track_url": tracking.url(job), "emailed": emailed})
 
 
 async def health(_: Request):
@@ -255,6 +260,9 @@ async def review(request: Request):
         f"<p class=muted>Client: {html.escape(job['client_name'])} ({html.escape(job['client_email'])})</p>",
         f"<p>{pill(st)} <span class=muted>{html.escape(job.get('step', ''))}</span></p>",
     ]
+    if request.query_params.get("m"):
+        parts.append(f"<p class=ok><b>{html.escape(request.query_params['m'][:300])}</b></p>")
+    track_card = tracking.admin_card(job, t) if work and job.get("source") != "sample" else ""
     if st == "awaiting_approval" and not work:
         parts.append(f"""<div class=card id=changes><h2 style="margin-top:0">Request changes</h2>
 <p class=muted>Write what you'd like Iris to change, in your own words. Approving the design is for Designers and Admins.</p>
@@ -297,6 +305,7 @@ async def review(request: Request):
 <p>The rest of the team writes their documents from this storyboard:</p><ul>{team}</ul>
 <p>It takes about 20 to 30 minutes and costs {html.escape(jobs.PACK_ESTIMATE)} in Claude usage. You'll get an email with one Word file when it's ready. They write documents only: no voice recording, image generation or LMS upload happens.</p>
 <form method=post action="/review/{jid}/pack?t={t}"><button>Start the production pack</button></form></div>""")
+    parts.append(track_card)
     if (out / "1_design.md").exists():
         parts.append(f"<div class='card design'>{jobs.design_html(job)}</div>")
     parts.append("<h2>History</h2><table>" + "".join(
@@ -314,7 +323,14 @@ async def review_action(request: Request):
     need = "reviewer" if action == "changes" else "designer"
     if not request.state.via_link and (blocked := gate(request, need)):
         return blocked
+    if action in tracking.ACTIONS:
+        if not request.state.via_link and (blocked := gate(request, "designer")):
+            return blocked
     by = auth.who(request) or ("email link" if request.state.via_link else None)
+    if action in tracking.ACTIONS:
+        msg = await asyncio.to_thread(tracking.act, job, action, await request.form(), by)
+        back = f"/review/{job['id']}?" + (f"t={job['token']}&" if request.state.via_link else "")
+        return RedirectResponse(back + f"m={quote(msg)}#client", 303)
     if action == "approve":
         jobs.approve(job, by)
     elif action == "changes":
@@ -378,7 +394,9 @@ async def dashboard(request: Request):
         f"<div class=muted>{html.escape(j['client_name'])}</div></td><td>{pill(j['status'])}</td>"
         f"<td class=muted>{time.strftime('%d %b %H:%M', time.gmtime(j['created']))}</td><td>${j.get('cost_usd', 0):.2f}</td>"
         f"<td>{'<a href=/team?course=' + j['id'] + '>Talk to the team</a><br>' if work else ''}<a href='/course-files/{j['id']}'>Course files</a>"
-        f"{'<br><a href=/builder/' + j['id'] + '>Course editor</a>' if j.get('course_built') and work else ''}</td></tr>"
+        f"{'<br><a href=/builder/' + j['id'] + '>Course editor</a>' if j.get('course_built') and work else ''}"
+        f"{'<br><a href=/review/' + j['id'] + '#client>Client tracking</a>' if work and j.get('source') != 'sample' else ''}"
+        f"{' <span class=pill>shared</span>' if j.get('shared_at') else ''}</td></tr>"
         for j in all_jobs) or "<tr><td colspan=5 class=muted>No courses yet. Briefs sent from the website appear here.</td></tr>"
     email_note = "" if os.environ.get("RESEND_API_KEY") and os.environ.get("NOTIFY_EMAIL") else (
         "<div class=card style='border-color:var(--bad)'><b>Emails are switched off.</b> Add RESEND_API_KEY and NOTIFY_EMAIL in Render, "
@@ -699,6 +717,8 @@ async def course_file_view(request: Request):
             pass
         if f.name == "job.json":
             text = text.replace(job["token"], "(private link code hidden)")
+            if job.get("track_token"):
+                text = text.replace(job["track_token"], "(client tracking code hidden)")
             if job.get("play_token"):
                 text = text.replace(job["play_token"], "(course preview code hidden)")
         shown = f"<pre class=card style='white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px'>{html.escape(text)}</pre>"
@@ -718,6 +738,9 @@ async def course_file_download(request: Request):
         return not_found()
     if f.name == "job.json":  # never hand out the private email link codes
         text = f.read_text(encoding="utf-8").replace(job["token"], "(private link code hidden)")
+        for k, label in (("track_token", "client tracking code"), ("play_token", "course preview code")):
+            if job.get(k):
+                text = text.replace(job[k], f"({label} hidden)")
         return Response(text, media_type="application/json", headers={"content-disposition": 'attachment; filename="job.json"'})
     return FileResponse(f, filename=f.name)
 
@@ -801,6 +824,7 @@ app = Starlette(
         Route("/api/team/apply", team_apply, methods=["POST"]),
         *builder_routes.ROUTES,
         *accounts.ROUTES,
+        *tracking.ROUTES,
         Mount("/", StaticFiles(directory=HERE / "public", html=True)),
     ],
     lifespan=lifespan,

@@ -252,7 +252,11 @@ async def play(request: Request):
     given = request.path_params["token"]
     if not (hmac.compare_digest(given, job["token"]) or (job.get("play_token") and hmac.compare_digest(given, job["play_token"]))):
         return Response("Not found", status_code=404)
-    path = request.path_params["path"]
+    return serve_course(job, request.path_params["path"])
+
+
+def serve_course(job: dict, path: str) -> Response:
+    """One file of the playable course. Also used by the client tracking page (tracking.py)."""
     course = C.load(_out(job))
     if not course:
         return Response("This course hasn't been built yet.", status_code=404)

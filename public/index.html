@@ -627,7 +627,7 @@ $("#stack").innerHTML=AGENTS.map(a=>av(a)).join("");
   const byId=Object.fromEntries(AGENTS.map(a=>[a.id,a]));
   const log=$("#chatLog"), input=$("#chatInput"), typing=$("#chatTyping"), err=$("#chatErr");
   const chat=$("#chat"), scrim=$("#chatScrim");
-  const history=[]; let busy=false, opened=false, demo=false, lastFocus=null;
+  const history=[]; let briefSent=false, busy=false, opened=false, demo=false, lastFocus=null;
   $("#chatPpl").innerHTML=AGENTS.slice(0,6).map(a=>av(a)).join("");
 
   const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -639,7 +639,7 @@ $("#stack").innerHTML=AGENTS.map(a=>av(a)).join("");
     else{const a=byId[from]||byId.paige;el.className="msg";
       el.innerHTML=`${av(a)}<div style="min-width:0"><div class="who">${a.name} <span class="tag">agent</span><small>${a.role} · ${time()}</small></div><div class="txt">${esc(text)}</div></div>`;}
     log.appendChild(el); log.scrollTop=log.scrollHeight;
-    if(history.filter(m=>m.from==="client").length>=3) $("#briefBar").hidden=!$("#briefForm").hidden;
+    if(history.filter(m=>m.from==="client").length>=3) $("#briefBar").hidden=briefSent||!$("#briefForm").hidden;
   }
 
   function open(){
@@ -704,11 +704,20 @@ $("#stack").innerHTML=AGENTS.map(a=>av(a)).join("");
     e.preventDefault();
     const transcript=history.map(m=>`${m.from==="client"?"Client":(byId[m.from]||{name:m.from}).name}: ${m.text}`).join("\n\n");
     const body=JSON.stringify({name:$("#briefName").value,email:$("#briefEmail").value,company_site:$("#briefHp").value,transcript});
-    let ok=false;
-    try{const r=await fetch("/api/brief",{method:"POST",headers:{"content-type":"application/json"},body});ok=r.ok;}catch{}
-    $("#briefForm").hidden=true;
+    let ok=false, data={};
+    try{const r=await fetch("/api/brief",{method:"POST",headers:{"content-type":"application/json"},body});ok=r.ok;data=await r.json().catch(()=>({}));}catch{}
+    $("#briefForm").hidden=true; briefSent=ok; if(ok) $("#briefBar").hidden=true;
     add("paige", ok ? `Thanks, ${$("#briefName").value.split(" ")[0]}. Your brief is with the Modulo team and we'll email you a proposal within one business day.`
                     : "This preview can't send briefs yet. Once the site is live, your brief will go straight to the Modulo team.");
+    // The client's private tracking page: shown here, and emailed too when the studio can email clients.
+    if(ok && typeof data.track_url==="string" && /^https?:\/\//.test(data.track_url)){
+      add("paige", "You can follow your course from brief to finished course, like a parcel, on your own private tracking page. "
+        + (data.emailed ? "We've also emailed you the link. " : "Bookmark it or save the link somewhere safe. ")
+        + "Please keep it to yourself.");
+      const last=log.lastElementChild.querySelector(".txt"), p=document.createElement("p"), a=document.createElement("a");
+      a.href=data.track_url; a.target="_blank"; a.rel="noopener"; a.className="btn btn-primary"; a.textContent="Open my tracking page";
+      a.style.marginTop="8px"; a.style.display="inline-block"; p.append(a); last.append(p); log.scrollTop=log.scrollHeight;
+    }
   });
 })();
 </script>
