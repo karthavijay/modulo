@@ -108,7 +108,6 @@ main{margin-left:var(--menu);min-width:0;padding:0 28px calc(var(--foot) + 28px)
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .page>*{max-width:var(--read);margin-left:auto;margin-right:auto}
 .page>figure,.page>.cover,.page>.split{max-width:var(--wide)}
-@media (min-width:1180px){.page.has-split>.page-head,.page.has-split>.endcard{max-width:var(--wide)}}
 .notice{display:flex;align-items:center;flex:none;gap:6px;font-size:12px;color:var(--muted);margin:0;padding:3px 10px;border-radius:999px;background:var(--surface);white-space:nowrap}
 .notice .dot{width:6px;height:6px;border-radius:50%;background:var(--warn)}
 .notice button{background:none;border:0;padding:0;font-size:12px;font-weight:600;color:var(--accent-text);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
@@ -133,14 +132,24 @@ main{margin-left:var(--menu);min-width:0;padding:0 28px calc(var(--foot) + 28px)
 .page h1:focus{outline:none}
 .head-rule{display:none}
 
-/* picture beside the words on wide screens, so a page fits without scrolling */
+/* words on the left, pictures on the right, so a page fits without scrolling */
 .split{display:block}
-@media (min-width:1180px){
-  .split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:28px;align-items:start;margin-top:14px}
+@media (min-width:760px){
+  .split{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);gap:28px;align-items:start;margin-top:14px}
   .split>.split-media{position:sticky;top:calc(var(--top) + 14px)}
   .split>.split-media figure.block{margin-top:0}
+  .split>.split-media figure.block+figure.block{margin-top:14px}
   .split>.split-media .frame img{max-height:calc(100vh - var(--top) - var(--foot) - 80px)}
   .split>.split-body>.block:first-child{margin-top:0}
+  .page.has-split>.page-head,.page.has-split>.endcard{max-width:var(--wide)}
+}
+
+/* the lesson menu folds away on a computer */
+@media (min-width:901px){
+  .menu-btn{display:inline-flex}
+  body.menu-collapsed nav.menu{display:none}
+  body.menu-collapsed main{margin-left:0}
+  body.menu-collapsed .foot{left:0}
 }
 
 /* ---------------------------------------------------------------- blocks */
@@ -323,6 +332,7 @@ details .inner{padding:0 14px 10px 46px;font-size:15px;animation:rise .3s ease b
   .page-head{padding-top:14px}
 }
 @media (max-width:600px){
+  .split-media .frame img{max-height:34vh}
   body{font-size:15.5px}
   .cover{margin-top:12px;padding:14px 16px}
   .cover .desc{display:none}
