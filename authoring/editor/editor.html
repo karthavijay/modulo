@@ -112,7 +112,7 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
   }
   function drawPictures(msgEl) {
     var say = function (text, bad) { if (msgEl) { msgEl.textContent = text; msgEl.className = bad ? "err" : "hint"; } setStatus(text, bad); };
-    say("Vera is drawing the missing pictures. This takes up to a minute...");
+    say("Vera is drawing the missing pictures. This takes a minute or two, please keep this page open...");
     return save().then(function () { return api("/illustrate", { method: "POST" }); })
       .then(function (d) {
         course = d.course; check = d.check; versions = d.versions; dirty = false;
@@ -120,6 +120,19 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
         setStatus(d.drawn ? "Vera drew " + d.drawn + " picture" + (d.drawn === 1 ? "" : "s") : "No placeholders left to draw");
       })
       .catch(function (e) { say(e.error || "Vera couldn't draw the pictures. Please try again.", true); });
+  }
+  function missingPictures() {
+    var n = 0;
+    course.sections.forEach(function (s) { s.pages.forEach(function (p) { p.blocks.forEach(function (b) { if (b.type === "image" && !b.src) n++; }); }); });
+    return n;
+  }
+  function picturesCard() {
+    var missing = missingPictures();
+    if (!missing) return null;
+    var pm = h("span", { "class": "hint", role: "status" });
+    return h("div", { "class": "card", id: "picturesCard" }, h("h2", { style: "margin-top:0" }, "Pictures"),
+      h("p", null, missing + " picture" + (missing === 1 ? " is" : "s are") + " still “Image to come”. Vera can draw " + (missing === 1 ? "it" : "them") + " now in the course colors, from each placeholder's note. It costs a few cents and you can replace any drawing with a photo later."),
+      h("div", { "class": "row" }, h("button", { "class": "btn small", type: "button", onclick: function (e) { e.target.disabled = true; drawPictures(pm).then(function () { e.target.disabled = false; }); } }, "Draw the missing pictures"), pm));
   }
   function save() {
     if (saving) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 500); return Promise.resolve(); }
@@ -233,6 +246,7 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
     if (view.kind === "download") return renderDownload(panel);
     var sec = course.sections[view.s], page = pageAt(view.s, view.p);
     if (!page) { panel.appendChild(h("p", { text: "This course has no pages yet. Add a section in the outline." })); return; }
+    var pcard = picturesCard(); if (pcard) panel.appendChild(pcard);
 
     // page header
     var head = h("div", { "class": "card" });
@@ -449,14 +463,7 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
     else c.appendChild(h("div", { "class": "good" }, h("b", { text: "Ready to download. " }), check.pages + " pages, " + check.scored + " scored questions."));
     if (check.note.length) c.appendChild(h("div", { "class": "note" }, h("b", { text: "Before it goes to learners:" }), h("ul", { "class": "checks" }, check.note.map(function (t) { return h("li", { text: t }); }))));
     panel.appendChild(c);
-    var missing = 0;
-    course.sections.forEach(function (s) { s.pages.forEach(function (p) { p.blocks.forEach(function (b) { if (b.type === "image" && !b.src) missing++; }); }); });
-    if (missing) {
-      var pm = h("span", { "class": "hint", role: "status" });
-      panel.appendChild(h("div", { "class": "card" }, h("h2", null, "Pictures"),
-        h("p", null, missing + " picture" + (missing === 1 ? " is" : "s are") + " still “Image to come”. Vera can draw " + (missing === 1 ? "it" : "them") + " now in the course colors, from each placeholder's note. It costs a few cents and you can replace any drawing with a photo later."),
-        h("div", { "class": "row" }, h("button", { "class": "btn small", type: "button", onclick: function () { drawPictures(pm); } }, "Draw the missing pictures"), pm)));
-    }
+    var pc = picturesCard(); if (pc) panel.appendChild(pc);
 
     var d = h("div", { "class": "card" }, h("h2", null, "Download"));
     [["scorm12", "SCORM 1.2", "Works in almost every LMS (Cornerstone, Moodle, TalentLMS, Docebo and others). Choose this if you're not sure."],

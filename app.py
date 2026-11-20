@@ -475,8 +475,15 @@ async def review(request: Request):
             if work and job.get("source") != "sample" and not tracking.is_shared(job):
                 parts.append(note("warn", "<p><b>Next step:</b> try the course and fix anything in the editor. "
                                   "When you're happy, press <a href='#client'>Share with client</a> below.</p>"))
+            from authoring import course as C
+            from authoring import pictures
+            built = C.load(out) or {}
+            missing = len(pictures.placeholders(built))
+            pics = (f"<p><b>{missing} picture{'s are' if missing != 1 else ' is'} still “Image to come”.</b> "
+                    f"Open the course editor and press <b>Draw the missing pictures</b>, and Vera draws them in a minute or two.</p>"
+                    if missing and work else "")
             parts.append(f"""<div class=card id=course><h2>The course</h2>
-<p>Built and ready to edit. Try it like a learner, change anything without code, and download it for your LMS (SCORM 1.2 or 2004).</p>
+<p>Built and ready to edit. Try it like a learner, change anything without code, and download it for your LMS (SCORM 1.2 or 2004).</p>{pics}
 <p class=row>{f'<a class=btn href="/builder/{jid}">Open the course editor</a>' if work else ''}
 <a class="btn ghost" href="{html.escape(jobs.preview_url(job))}" target=_blank rel=noopener>Try the course</a></p></div>""")
         qa = "passed" if s.get("passed") else "has open points (see the QA report)"

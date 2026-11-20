@@ -31,6 +31,10 @@ LIGHT_MODEL = os.environ.get("MODULO_LIGHT_MODEL", "claude-sonnet-5-5")
 LIGHT_AGENTS = {"lms_administrator", "learning_analyst", "project_manager", "illustrator"}
 
 
+# Agents whose task is simple picking from lists: low effort is faster and cheaper.
+AGENT_EFFORT = {"illustrator": os.environ.get("MODULO_ILLUSTRATOR_EFFORT", "low")}
+
+
 def model_for(agent: str) -> str:
     """Which Claude model an agent (instructions file name) runs on."""
     return LIGHT_MODEL if agent in LIGHT_AGENTS else MODEL
@@ -216,7 +220,7 @@ async def run_agent(name: str, task: str, schema: dict, ledger: Ledger, label: s
     async with _client.beta.messages.stream(
         model=model,
         max_tokens=128000,
-        output_config={"effort": EFFORT, "format": {"type": "json_schema", "schema": schema}},
+        output_config={"effort": AGENT_EFFORT.get(name, EFFORT), "format": {"type": "json_schema", "schema": schema}},
         system=system,
         messages=[{"role": "user", "content": task}],
         **extra,
