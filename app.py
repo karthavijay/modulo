@@ -10,6 +10,7 @@
   /play/<id>/<t>/   the built course, playable in a browser
   /track/<code>     the client's private tracking page (see tracking.py)
   /marketing        Cleo's social posts for LinkedIn and X: drafts, approve, schedule (see marketing.py)
+  /sample, /security, /privacy, /terms, /admin/website   public trust pages and the studio details (see site_info.py)
   /health           for Render's health check
 """
 
@@ -43,6 +44,7 @@ import chat
 import emailer
 import jobs
 import marketing
+import site_info
 import tracking
 from authoring import routes as builder_routes
 
@@ -276,7 +278,8 @@ def nav(request: Request | None) -> str:
         items.append(("/team", "Talk to the team", ("/team",)))
         items.append(("/marketing", "Marketing", ("/marketing",)))
     if auth.can(u, "admin"):
-        items += [("/admin/team", "Team members", ("/admin/team",)), ("/admin/system", "System", ("/admin/system",))]
+        items += [("/admin/team", "Team members", ("/admin/team",)), ("/admin/website", "Website", ("/admin/website",)),
+                  ("/admin/system", "System", ("/admin/system",))]
     links = "".join(f"<a href='{href}'{' class=on aria-current=page' if path.startswith(pre) else ''}>{label}</a>"
                     for href, label, pre in items)
     initial = html.escape((u["name"] or "?").strip()[:1].upper())
@@ -1061,6 +1064,7 @@ app = Starlette(
         Route("/api/team/chat", team_chat, methods=["POST"]),
         Route("/api/team/apply", team_apply, methods=["POST"]),
         *builder_routes.ROUTES,
+        *site_info.ROUTES,
         *accounts.ROUTES,
         *tracking.ROUTES,
         *marketing.ROUTES,

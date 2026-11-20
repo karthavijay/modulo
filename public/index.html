@@ -126,6 +126,32 @@ details p{margin-top:8px;color:var(--muted)}
 footer{padding-block:40px;color:var(--muted);font-size:14px}
 footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;align-items:center}
 
+/* sample course, pricing, about */
+.hero-alt{margin-top:18px;font-size:14.5px;color:var(--muted)}
+.hero-alt a{color:var(--fg);font-weight:600}
+.showcase{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:32px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,40px)}
+.showcase h2{font-size:clamp(26px,3.2vw,36px);font-weight:800;margin-top:10px}
+.showcase .sc-text>p:not(.eyebrow){color:var(--muted);margin-top:12px}
+.facts{list-style:none;padding:0;margin:16px 0 22px;display:flex;flex-wrap:wrap;gap:8px}
+.facts li{font-size:13px;font-weight:500;padding:6px 11px;border-radius:999px;background:var(--surface-2)}
+.sc-pic{display:block;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.sc-pic img{display:block;width:100%;height:auto}
+@media (max-width:760px){.showcase{grid-template-columns:1fr}.sc-pic{order:-1}}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:36px}
+.price{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px}
+.price h3{font-size:19px}.price .amt{font:800 26px/1.2 var(--display);margin-top:10px}.price p{color:var(--muted);font-size:14.5px;margin-top:6px}
+.sub.small{font-size:14px;margin-top:20px}
+.about{display:flex;gap:28px;align-items:flex-start;max-width:760px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:clamp(20px,4vw,36px)}
+.about img{flex:none;width:120px;height:120px;border-radius:20px;object-fit:cover;background:var(--surface-2)}
+.about h2{font-size:clamp(26px,3vw,34px);font-weight:800;margin-top:8px}
+.about .role{color:var(--muted);font-weight:500;margin-top:4px}
+.about #aboutBio{margin-top:14px;white-space:pre-line}
+.about .links{margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-weight:600;font-size:15px}
+.about .links a{color:var(--accent)}
+@media (max-width:560px){.about{flex-direction:column}}
+.faq details a{color:var(--accent)}
+.foot-links a{color:var(--muted)}
+
 /* chat panel (shared with the chat in the dialog below) */
 .msg{display:flex;gap:12px;align-items:flex-start}
 .msg .who{font-size:13px;font-weight:600;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
@@ -176,7 +202,8 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
     <nav class="nav-links" aria-label="Main">
       <a href="#why">Why AI agents</a>
       <a href="#how">How it works</a>
-      <a href="#team">The team</a>
+      <a href="#sample">Sample course</a>
+      <a href="#pricing" id="navPricing" hidden>Pricing</a>
       <a href="#faq">FAQ</a>
     </nav>
     <a class="signin" href="/dashboard">Sign in</a>
@@ -185,10 +212,10 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
 </header>
 
 <main id="top">
-  <section class="wrap hero">
+  <section class="wrap hero" id="start">
     <p class="eyebrow">An eLearning company run by AI agents</p>
     <h1>Better courses, <span class="mark">built faster.</span></h1>
-    <p class="lede">Modulo is a team of ten AI agents. They design, write and check your course in days, not months, and you approve each step.</p>
+    <p class="lede">Modulo is a team of ten AI agents. They design, write and check your course in days, not months, and a person on our team signs off every step.</p>
 
     <form class="start" id="startForm">
       <span class="ppl" id="startPpl" aria-hidden="true"></span>
@@ -201,6 +228,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
       <button type="button">Turn our slides into an online course</button>
       <button type="button">Software onboarding</button>
     </div>
+    <p class="hero-alt">Not ready yet? <a href="/sample/" target="_blank" rel="noopener">Try a finished sample course</a></p>
   </section>
 
   <section class="band" id="why" style="padding-top:24px">
@@ -209,7 +237,7 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
       <div class="why">
         <div class="pt"><span class="ic" aria-hidden="true">⚡</span><h3>Faster</h3><p>Agents work side by side, around the clock. No waiting for the next free designer.</p></div>
         <div class="pt"><span class="ic" aria-hidden="true">✓</span><h3>Better</h3><p>A quality agent reviews every draft against your goals, and it is fixed before you see it.</p></div>
-        <div class="pt"><span class="ic" aria-hidden="true">●</span><h3>In your control</h3><p>You approve each step, and people oversee every project.</p></div>
+        <div class="pt"><span class="ic" aria-hidden="true">●</span><h3>Checked by people</h3><p>A person on our team signs off the design and the finished course. You follow every step on your own tracking page.</p></div>
       </div>
     </div>
   </section>
@@ -219,9 +247,33 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
       <h2 class="sec-title">How it works</h2>
       <div class="steps">
         <div class="step"><h3>Chat</h3><p>Tell the team your topic, audience and deadline. It takes a few minutes.</p></div>
-        <div class="step"><h3>Approve</h3><p>We send you a course design. Nothing moves on until you say yes.</p></div>
-        <div class="step"><h3>Receive</h3><p>Get a finished, quality-checked storyboard. Follow progress on your own tracking page.</p></div>
+        <div class="step"><h3>Design</h3><p>The team plans your course. A person on our team checks and approves the plan before any writing starts.</p></div>
+        <div class="step"><h3>Receive</h3><p>Try your finished course in the browser, then download it for your LMS. Follow every step on your own tracking page.</p></div>
       </div>
+    </div>
+  </section>
+
+  <section class="band" id="sample" style="padding-top:0">
+    <div class="wrap">
+      <div class="showcase">
+        <div class="sc-text">
+          <p class="eyebrow">See the work</p>
+          <h2>Try a course our team built</h2>
+          <p>A 24-minute forklift safety refresher for warehouse operators, made for a fictional client. Real workplace scenarios, choices with feedback, and a final check, in the same player your learners would use.</p>
+          <ul class="facts"><li>5 parts, 49 pages</li><li>Scenario questions</li><li>Scored final check</li><li>SCORM 1.2 and 2004</li></ul>
+          <a class="btn btn-primary" href="/sample/" target="_blank" rel="noopener">Open the sample course</a>
+        </div>
+        <a class="sc-pic" href="/sample/" target="_blank" rel="noopener" aria-label="Open the sample course"><img src="/sample/assets/drawn-b1.svg" alt="Two forklift operators at a loading dock, from the sample course" loading="lazy" width="640" height="400"></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="pricing" style="padding-top:0" hidden>
+    <div class="wrap">
+      <h2 class="sec-title">Pricing guide</h2>
+      <p class="sub">Every course is quoted on its brief. These give you a starting point.</p>
+      <div class="prices" id="priceGrid"></div>
+      <p class="sub small" id="priceNote" hidden></p>
     </div>
   </section>
 
@@ -233,13 +285,30 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
     </div>
   </section>
 
+  <section class="band" id="about" style="padding-top:0" hidden>
+    <div class="wrap">
+      <div class="about">
+        <img id="aboutPhoto" alt="" width="120" height="120" hidden>
+        <div>
+          <p class="eyebrow">Who is behind Modulo</p>
+          <h2 id="aboutName"></h2>
+          <p class="role" id="aboutRole"></p>
+          <p id="aboutBio"></p>
+          <p class="links" id="aboutLinks"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="band" id="faq" style="padding-top:0">
     <div class="wrap">
       <h2 class="sec-title">Questions</h2>
       <div class="faq">
-        <details><summary>Do people review the work?</summary><p>Yes. You approve the design before anything is written, and our instructional designers oversee every project.</p></details>
-        <details><summary>Will it work in our LMS?</summary><p>Yes. Courses are delivered as SCORM 1.2 or SCORM 2004 packages.</p></details>
-        <details><summary>Who can see our content?</summary><p>Only your project team. It is never used to train AI models.</p></details>
+        <details><summary>Do people review the work?</summary><p>Yes. A person on our team checks and approves the course design before any writing starts, and checks the finished course before it is shared with you. Your own experts should still check the facts, such as policies and procedures, before launch.</p></details>
+        <details><summary>Will it work in our LMS?</summary><p>Courses are delivered as SCORM 1.2 or SCORM 2004 packages, the formats almost every LMS accepts. Tell us your LMS and we test the package with you before launch.</p></details>
+        <details><summary>Can we get Storyline or Rise files?</summary><p>Not at the moment. We build courses in our own modern player, which works on phones and computers and is delivered as SCORM. We make any changes you need after launch.</p></details>
+        <details><summary>Who can see our content?</summary><p>Only our studio team, and Claude, the AI that helps write your course, which does not train on your content. We're happy to sign your NDA. Read more on our <a href="/security">Security and privacy</a> page.</p></details>
+        <details><summary>What does it cost?</summary><p id="faqPrice">It depends on length and how interactive the course is. Send a brief and we reply with a proposal and a fixed price. A brief is free and commits you to nothing.</p></details>
       </div>
     </div>
   </section>
@@ -255,7 +324,8 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
 <footer>
   <div class="wrap">
     <a class="logo" href="#top" style="color:var(--fg)"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Modulo</a>
-    <p>© 2026 Modulo Learning Studio. An eLearning company run by AI agents.</p>
+    <p class="foot-links"><a href="/security">Security and privacy</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a><span id="footContact"></span></p>
+    <p id="footLegal">© 2026 Modulo Learning Studio. An eLearning company run by AI agents.</p>
   </div>
 </footer>
 
@@ -271,8 +341,8 @@ footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
   <div class="chat-err" id="chatErr" hidden></div>
   <div class="starters" id="chatStarters">
     <button type="button">Compliance course for 500 employees</button>
-    <button type="button">Turn our PowerPoint deck into a Rise course</button>
-    <button type="button">Software onboarding with simulations</button>
+    <button type="button">Turn our slides into an online course</button>
+    <button type="button">Software onboarding for new hires</button>
   </div>
   <div class="brief-bar" id="briefBar" hidden><span>Ready to hand this to the Modulo team?</span><button type="button" class="btn btn-primary" id="briefOpen">Send brief to Modulo</button></div>
   <form class="brief-form" id="briefForm" hidden>
@@ -342,8 +412,8 @@ $("#startPpl").innerHTML=AGENTS.slice(0,4).map(a=>av(a)).join("");
   // Offline demo replies, used when /api/chat is not available (for example in a static preview).
   const DEMO=[
     [["iris","That sounds like a great fit for a scenario-based course. Roughly how many learners, and what roles are they in?"]],
-    [["sam","Helpful. Do you already have source material, like slides, SOPs or a policy document, and someone who can act as subject matter expert?"],["dev","Depending on that, Rise works well for fast, mobile-friendly courses and Storyline for richer simulations."]],
-    [["lars","Which LMS will this run in, and do you need SCORM 1.2, SCORM 2004 or xAPI tracking?"],["mila","Also, do you want narration, and in which languages?"]],
+    [["sam","Helpful. Do you already have source material, like slides, SOPs or a policy document, and someone who can act as subject matter expert?"],["dev","Depending on that, short scenario pages with quick questions work well on phones and in shift huddles."]],
+    [["lars","Which LMS will this run in, and does it take SCORM 1.2 or SCORM 2004?"],["mila","Also, do you want narration, and in which languages?"]],
     [["paige","Thanks, that gives us a solid start. When do you need it live, and is there a budget range we should plan around? Once you're ready, press Send brief to Modulo below and we'll follow up with a proposal."]]
   ];
   let demoStep=0;
@@ -412,6 +482,39 @@ $("#startPpl").innerHTML=AGENTS.slice(0,4).map(a=>av(a)).join("");
   startIn.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#startForm").requestSubmit();}});
   startIn.addEventListener("input",()=>{startIn.style.height="auto";startIn.style.height=Math.min(startIn.scrollHeight,140)+"px";});
   $("#ideas").addEventListener("click",e=>{const b=e.target.closest("button");if(b)startWith(b.textContent);});
+})();
+
+/* Studio details (About, pricing, contact) come from /api/site. Empty sections stay hidden. */
+(function(){
+  const esc=v=>String(v||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const safeUrl=v=>/^https:\/\/[^\s"'<>]+$/.test(v||"")?v:"";
+  fetch("/api/site",{headers:{accept:"application/json"}}).then(r=>r.ok?r.json():null).then(d=>{
+    if(!d)return;
+    const legal=d.legal_name||"Modulo Learning Studio";
+    document.getElementById("footLegal").textContent="© 2026 "+legal+(d.location?", "+d.location:"")+". An eLearning company run by AI agents.";
+    if(d.contact_email)document.getElementById("footContact").innerHTML=' · <a href="mailto:'+esc(d.contact_email)+'">'+esc(d.contact_email)+"</a>";
+    if(d.has_pricing){
+      const tiers=[["Short course","Up to about 15 minutes",d.price_short],["Standard course","About 15 to 45 minutes",d.price_standard],["Programs","Several courses or a curriculum",d.price_program]].filter(t=>t[2]);
+      document.getElementById("priceGrid").innerHTML=tiers.map(t=>'<div class="price"><h3>'+esc(t[0])+'</h3><p>'+esc(t[1])+'</p><div class="amt">'+esc(t[2])+"</div></div>").join("");
+      if(d.price_note){const n=document.getElementById("priceNote");n.textContent=d.price_note;n.hidden=false;}
+      document.getElementById("pricing").hidden=false;document.getElementById("navPricing").hidden=false;
+      document.getElementById("faqPrice").innerHTML='See our <a href="#pricing">pricing guide</a> for a starting point. Send a brief and we reply with a proposal and a fixed price. A brief is free and commits you to nothing.';
+    }
+    if(d.has_about){
+      document.getElementById("aboutName").textContent=d.founder_name;
+      document.getElementById("aboutRole").textContent=d.founder_role||"";
+      document.getElementById("aboutBio").textContent=d.founder_bio||"";
+      const photo=safeUrl(d.founder_photo_url);
+      if(photo){const i=document.getElementById("aboutPhoto");i.src=photo;i.alt="Photo of "+d.founder_name;i.hidden=false;}
+      const links=[];
+      if(d.contact_email)links.push('<a href="mailto:'+esc(d.contact_email)+'">'+esc(d.contact_email)+"</a>");
+      if(d.phone)links.push('<a href="tel:'+esc(d.phone.replace(/[^+\d]/g,""))+'">'+esc(d.phone)+"</a>");
+      if(safeUrl(d.linkedin_url))links.push('<a href="'+esc(d.linkedin_url)+'" target="_blank" rel="noopener">LinkedIn</a>');
+      if(d.location)links.push('<span style="color:var(--muted);font-weight:500">'+esc(d.location)+"</span>");
+      document.getElementById("aboutLinks").innerHTML=links.join("");
+      document.getElementById("about").hidden=false;
+    }
+  }).catch(()=>{});
 })();
 </script>
 </body>
