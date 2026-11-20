@@ -231,7 +231,7 @@ def check(course: dict) -> dict:
     if has_results and not scored:
         note.append("There's a results block but no scored questions, so there's no score to report.")
     if placeholders:
-        note.append(f"{placeholders} image{'s are' if placeholders != 1 else ' is'} still a placeholder (“Image to come”). Upload pictures in the editor before the course goes to learners.")
+        note.append(f"{placeholders} image{'s are' if placeholders != 1 else ' is'} still a placeholder (“Image to come”). Have Vera draw them, or upload pictures, in the editor before the course goes to learners.")
     if confirm_pages:
         sample = ", ".join(f"“{t}”" for t in confirm_pages[:5]) + (" and more" if len(confirm_pages) > 5 else "")
         note.append(f"{len(confirm_pages)} page{'s' if len(confirm_pages) != 1 else ''} still contain “CLIENT TO CONFIRM” notes, for example {sample}.")

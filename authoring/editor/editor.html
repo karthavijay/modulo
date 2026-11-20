@@ -110,6 +110,17 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
       return r.json().catch(function () { return { error: "The server sent an unexpected answer (" + r.status + ")." }; }).then(function (d) { if (!r.ok) throw d; return d; });
     });
   }
+  function drawPictures(msgEl) {
+    var say = function (text, bad) { if (msgEl) { msgEl.textContent = text; msgEl.className = bad ? "err" : "hint"; } setStatus(text, bad); };
+    say("Vera is drawing the missing pictures. This takes up to a minute...");
+    return save().then(function () { return api("/illustrate", { method: "POST" }); })
+      .then(function (d) {
+        course = d.course; check = d.check; versions = d.versions; dirty = false;
+        renderAll();
+        setStatus(d.drawn ? "Vera drew " + d.drawn + " picture" + (d.drawn === 1 ? "" : "s") : "No placeholders left to draw");
+      })
+      .catch(function (e) { say(e.error || "Vera couldn't draw the pictures. Please try again.", true); });
+  }
   function save() {
     if (saving) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 500); return Promise.resolve(); }
     if (!dirty) return Promise.resolve();
@@ -289,9 +300,14 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
         if (b.src) {
           var src = b.src.indexOf("assets/") === 0 ? "/builder/" + CFG.job + "/" + b.src + Q : b.src;
           box.appendChild(h("img", { "class": "thumb", src: src, alt: "" }));
+          if (b.src.indexOf("assets/drawn-") === 0) {
+            box.appendChild(h("p", { "class": "hint", style: "margin:4px 0" }, "A drawn illustration. Upload a photo to replace it, or remove it, change the note below and have Vera draw it again."));
+            box.appendChild(field("What the picture should show", "(the note Vera drew from)", textIn(b, "description", { multi: true, rows: 2 })));
+          }
         } else {
-          box.appendChild(h("p", { "class": "note", style: "margin:4px 0" }, h("b", { text: "Placeholder. " }), "Learners see “Image to come” and this note until you upload a picture."));
-          box.appendChild(field("What the picture should show", "(for Vera or whoever makes it)", textIn(b, "description", { multi: true, rows: 3 })));
+          box.appendChild(h("p", { "class": "note", style: "margin:4px 0" }, h("b", { text: "Placeholder. " }), "Learners see “Image to come” and this note until there is a picture."));
+          box.appendChild(field("What the picture should show", "(Vera draws from this note)", textIn(b, "description", { multi: true, rows: 3 })));
+          box.appendChild(h("div", { "class": "row", style: "margin-top:6px" }, h("button", { "class": "btn small", type: "button", onclick: function () { drawPictures(msg); } }, "Have Vera draw it")));
         }
         var fileId = "f" + (fid++);
         var input = h("input", { type: "file", id: fileId, accept: "image/png,image/jpeg,image/gif,image/webp", style: "position:absolute;left:-9999px", onchange: function () { upload(input.files[0]); } });
@@ -433,6 +449,14 @@ img.thumb{max-width:260px;max-height:160px;border-radius:8px;display:block;margi
     else c.appendChild(h("div", { "class": "good" }, h("b", { text: "Ready to download. " }), check.pages + " pages, " + check.scored + " scored questions."));
     if (check.note.length) c.appendChild(h("div", { "class": "note" }, h("b", { text: "Before it goes to learners:" }), h("ul", { "class": "checks" }, check.note.map(function (t) { return h("li", { text: t }); }))));
     panel.appendChild(c);
+    var missing = 0;
+    course.sections.forEach(function (s) { s.pages.forEach(function (p) { p.blocks.forEach(function (b) { if (b.type === "image" && !b.src) missing++; }); }); });
+    if (missing) {
+      var pm = h("span", { "class": "hint", role: "status" });
+      panel.appendChild(h("div", { "class": "card" }, h("h2", null, "Pictures"),
+        h("p", null, missing + " picture" + (missing === 1 ? " is" : "s are") + " still “Image to come”. Vera can draw " + (missing === 1 ? "it" : "them") + " now in the course colors, from each placeholder's note. It costs a few cents and you can replace any drawing with a photo later."),
+        h("div", { "class": "row" }, h("button", { "class": "btn small", type: "button", onclick: function () { drawPictures(pm); } }, "Draw the missing pictures"), pm)));
+    }
 
     var d = h("div", { "class": "card" }, h("h2", null, "Download"));
     [["scorm12", "SCORM 1.2", "Works in almost every LMS (Cornerstone, Moodle, TalentLMS, Docebo and others). Choose this if you're not sure."],

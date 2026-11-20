@@ -66,6 +66,15 @@ node authoring/tests/editor_test.js http://localhost:8800 <job id> you@example.c
 
 Both need Node with Playwright (`NODE_PATH=$(npm root -g)`).
 
+## Drawn pictures
+
+Picture placeholders in a built course are filled with flat illustrations drawn in code (`authoring/illustrate.py`): settings, people, props, icons, flows, checklists, charts and side-by-side comparisons, in the course colors, saved as SVG in the course's `assets/` folder. No image service or extra install is needed, and SVG plays in every browser and LMS.
+
+- Dev's build: Vera (`pipeline/agents/illustrator.md`, on `MODULO_LIGHT_MODEL`) picks a scene for each placeholder from its storyboard note, about a cent per few pictures (`authoring/pictures.py`).
+- Free quick draft, test mode, or if Vera can't be reached: a keyword guess draws them instead, at no cost.
+- Editor: "Have Vera draw it" on a placeholder, or "Draw the missing pictures" on Check and download. Any drawing can be replaced by an uploaded photo.
+- Tests: `python authoring/tests/pictures_test.py`.
+
 ## Notes
 
 - Agents call the Claude API directly (no Claude Code subprocess), so each run needs little memory. The Blueprint uses the Standard plan (2 GB) with 3 courses at once; on Starter (512 MB) keep `MODULO_PARALLEL_JOBS=1`.

@@ -252,7 +252,10 @@ def quick_build(job: dict, who: str | None = None) -> dict:
     design, storyboard = pipeline._load(out / "1_design.json"), pipeline._load(out / "storyboard.json")
     if job["status"] in WORKING or not storyboard:
         raise RuntimeError("There is no finished storyboard to build from yet.")
-    saved = C.save(out, C.from_storyboard(storyboard, design, job["id"]))
+    from authoring import pictures
+    course = C.from_storyboard(storyboard, design, job["id"])
+    pictures.draw_free(course, C.course_dir(out) / "assets")  # free keyword-based drawings, no AI
+    saved = C.save(out, course)
     job["course_built"] = True
     note(job, "Quick course draft made (free)", who)
     return C.check(saved)
@@ -518,7 +521,7 @@ async def run(job_id: str) -> None:
             job["build_cost_usd"] = round(job.get("build_cost_usd", 0) + summary["cost_usd"], 4)
             job["cost_usd"] = summary["total_cost_usd"]
             job["status"], job["step"] = "done", "Course built"
-            note(job, f"Dev built the course ({summary['pages']} pages)")
+            note(job, f"Dev built the course ({summary['pages']} pages, {summary.get('pictures', 0)} drawn pictures)")
             await anyio.to_thread.run_sync(email_course_built, job)
     except Exception as e:
         log.error("Job %s failed:\n%s", job_id, traceback.format_exc())
@@ -629,7 +632,9 @@ def email_course_built(job: dict) -> None:
     body = (
         f"<p>Dev has built <b>{html.escape(job.get('title', ''))}</b> as a real course: {s.get('pages', '?')} pages"
         + (f", with {s.get('scored')} scored questions and a results page" if s.get("scored") else "") + ".</p>"
-        f"<p><a href=\"{preview_url(job)}\" style=\"{BTN}background:#2f3e9e;color:#fff\">Try the course</a>"
+        + (f"<p>Vera drew {s['pictures']} illustration{'s' if s['pictures'] != 1 else ''} for it in the course colors. "
+           "You can swap any of them for a photo in the editor.</p>" if s.get("pictures") else "")
+        + f"<p><a href=\"{preview_url(job)}\" style=\"{BTN}background:#2f3e9e;color:#fff\">Try the course</a>"
         f"<a href=\"{builder_url(job)}\" style=\"{BTN}background:#eef0fb;color:#2f3e9e\">Edit and download SCORM</a></p>"
         + (f"<p><b>Please fix before export:</b></p><ul>{fixes}</ul>" if fixes else "")
         + (f"<p><b>Before it goes to learners:</b></p><ul>{notes}</ul>" if notes else "")

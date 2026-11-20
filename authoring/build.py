@@ -15,6 +15,7 @@ import pipeline  # pipeline/pipeline.py (jobs.py puts it on the path)
 from pipeline import STR, STRS, Ledger, _obj, block, run_agent
 
 from authoring import course as C
+from authoring import pictures
 
 BUILD_ESTIMATE = os.environ.get("MODULO_BUILD_ESTIMATE", "about $2 to $4")
 BOOL = {"type": "boolean"}
@@ -114,7 +115,10 @@ async def make_course(out: Path, brief: str, job_id: str, progress=None) -> dict
         }
         course = C.ensure_results_page(course)
         pipeline.save(build / "build_notes.md", "# Dev's build notes\n\n" + "".join(f"- {x}\n" for x in notes or ["No substitutions needed."]))
+    # Vera turns each picture placeholder into a drawn illustration (a few cents; free in test mode)
+    course = C.normalize(course)
+    drawn = await pictures.draw_with_vera(course, C.course_dir(out) / "assets", ledger, design, progress)
     saved = C.save(out, course)
     report = C.check(saved)
-    return {"pages": report["pages"], "scored": report["scored"], "fix": report["fix"], "note": report["note"],
+    return {"pages": report["pages"], "scored": report["scored"], "pictures": drawn, "fix": report["fix"], "note": report["note"],
             "cost_usd": round(ledger.total - start, 4), "total_cost_usd": ledger.total}

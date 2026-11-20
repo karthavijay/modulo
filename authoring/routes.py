@@ -5,6 +5,7 @@
   /builder/<id>/export/<kind>            download SCORM 1.2, SCORM 2004 or a website zip (any team member)
   /api/builder/<id>/course               GET or POST the course (JSON)
   /api/builder/<id>/upload               POST an image
+  /api/builder/<id>/illustrate           POST: Vera draws every picture that is still a placeholder
   /api/builder/<id>/restore              POST: go back to the previous save
   /play/<id>/<code>/index.html           the course, playable in any browser (shareable; see jobs.play_token)
 """
@@ -102,7 +103,7 @@ def build_card(job: dict, k: str, rebuild: bool = False) -> str:
     warn = ("<p class=muted>Building again replaces the current course. Your current version is kept as a backup, "
             "and you can go back to it from the editor.</p>") if rebuild else ""
     return f"""<div class=card id=build><h2 style="margin-top:0">Turn the storyboard into a real course</h2>
-<p>You get a course that plays in any browser, with pages, pictures (placeholders until you upload your own), knowledge checks,
+<p>You get a course that plays in any browser, with pages, pictures (drawn by Vera in the course colors, or your own uploads), knowledge checks,
 a scored assessment with results and retake, progress tracking, and downloads for your LMS as SCORM 1.2 or SCORM 2004.</p>
 <p><b>Dev builds it</b>: Dev reads the storyboard module by module and writes clear learner-facing pages, turning narration into text
 and interactions into working questions and click-to-reveal panels. It takes about 10 to 20 minutes and costs {html.escape(BUILD_ESTIMATE)}
@@ -236,7 +237,10 @@ def _asset(job: dict, name: str):
     if not re.fullmatch(r"[A-Za-z0-9._-]+", name):
         return Response(status_code=404)
     f = C.course_dir(_out(job)) / "assets" / name
-    return FileResponse(f, headers={"cache-control": "private, max-age=3600", "x-content-type-options": "nosniff"}) if f.is_file() else Response(status_code=404)
+    headers = {"cache-control": "private, max-age=3600", "x-content-type-options": "nosniff"}
+    if name.endswith(".svg"):  # drawn pictures: never let an SVG run anything if opened on its own
+        headers["content-security-policy"] = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    return FileResponse(f, headers=headers) if f.is_file() else Response(status_code=404)
 
 
 # ---------------------------------------------------------------- the course in a browser
@@ -273,6 +277,37 @@ def serve_course(job: dict, path: str) -> Response:
     return Response("Not found", status_code=404)
 
 
+_drawing: set[str] = set()
+
+
+async def api_illustrate(request: Request):
+    """Vera draws the pictures that are still placeholders (a few cents per course)."""
+    if blocked := _app().gate(request, "designer", api=True):
+        return blocked
+    job = _job(request)
+    if not job or _busy(job) or job["id"] in _drawing:
+        return JSONResponse({"error": "Not available right now. If Vera is already drawing, wait a minute and reload."}, 409)
+    import pipeline
+    from authoring import pictures
+    out = _out(job)
+    course = C.load(out)
+    if not course:
+        return JSONResponse({"error": "No course yet."}, 404)
+    _drawing.add(job["id"])
+    try:
+        ledger = pipeline.Ledger(out / "run_log.json")
+        design = pipeline._load(out / "1_design.json")
+        drawn = await pictures.draw_with_vera(course, C.course_dir(out) / "assets", ledger, design)
+        saved = await asyncio.to_thread(C.save, out, course) if drawn else course
+        if drawn:
+            fresh = jobs.load(job["id"])
+            fresh["cost_usd"] = ledger.total
+            jobs.note(fresh, f"Vera drew {drawn} picture{'s' if drawn != 1 else ''}")
+    finally:
+        _drawing.discard(job["id"])
+    return JSONResponse({"course": saved, "check": C.check(saved), "versions": len(C.versions(out)), "drawn": drawn})
+
+
 ROUTES = [
     Route("/builder/{job_id}", builder_page),
     Route("/builder/{job_id}/build", builder_build, methods=["POST"]),
@@ -281,5 +316,6 @@ ROUTES = [
     Route("/api/builder/{job_id}/course", api_course, methods=["GET", "POST"]),
     Route("/api/builder/{job_id}/restore", api_restore, methods=["POST"]),
     Route("/api/builder/{job_id}/upload", api_upload, methods=["POST"]),
+    Route("/api/builder/{job_id}/illustrate", api_illustrate, methods=["POST"]),
     Route("/play/{job_id}/{token}/{path:path}", play),
 ]
