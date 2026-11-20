@@ -344,12 +344,32 @@
   root.appendChild(foot);
   root.appendChild(el("div", { id: "announcer", "class": "sr-only", "aria-live": "polite" }));
 
+  // On a computer the Menu button folds the lesson menu away (remembered in this browser);
+  // on a phone it slides the menu in over the page.
+  var wideQuery = window.matchMedia ? window.matchMedia("(min-width: 901px)") : null;
+  function isWide() { return wideQuery ? wideQuery.matches : window.innerWidth > 900; }
+  var collapsed = false;
+  try { collapsed = localStorage.getItem("modulo:menu") === "hidden"; } catch (e) { /* private mode */ }
+  function syncMenuBtn() {
+    menuBtn.setAttribute("aria-expanded", String(isWide() ? !collapsed : document.body.classList.contains("menu-open")));
+    menuBtn.title = isWide() ? (collapsed ? "Show the lesson menu" : "Hide the lesson menu") : "";
+  }
+  function setCollapsed(v) {
+    collapsed = v;
+    document.body.classList.toggle("menu-collapsed", collapsed);
+    try { localStorage.setItem("modulo:menu", collapsed ? "hidden" : "shown"); } catch (e) { /* private mode */ }
+    syncMenuBtn();
+  }
+  document.body.classList.toggle("menu-collapsed", collapsed);
+  if (wideQuery && wideQuery.addEventListener) wideQuery.addEventListener("change", syncMenuBtn);
   function toggleMenu(open) {
+    if (isWide()) { if (open == null) setCollapsed(!collapsed); return; }
     var isOpen = open == null ? !document.body.classList.contains("menu-open") : open;
     document.body.classList.toggle("menu-open", isOpen);
-    menuBtn.setAttribute("aria-expanded", String(isOpen));
+    syncMenuBtn();
     if (isOpen) { var cur = menu.querySelector("[aria-current=page]"); if (cur) cur.focus(); }
   }
+  syncMenuBtn();
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && document.body.classList.contains("menu-open")) { toggleMenu(false); menuBtn.focus(); }
   });
@@ -636,14 +656,15 @@
     head.appendChild(h1);
     head.appendChild(el("hr", { "class": "head-rule", "aria-hidden": "true" }));
     page.appendChild(head);
-    // A page that opens with a picture shows it beside the words on wide screens (see .split in the CSS).
+    // Pictures sit to the right of the words on wider screens, never full width above them (see .split in the CSS).
     var blocks = p.blocks || [], target = page;
-    if (blocks.length > 1 && blocks[0].type === "image" && blocks.slice(1).every(function (b) { return b.type !== "results"; })) {
-      var media = el("div", { "class": "split-media" }), body = el("div", { "class": "split-body" });
-      page.appendChild(el("div", { "class": "split" }, [media, body]));
+    var pics = blocks.filter(function (b) { return b.type === "image"; });
+    if (pics.length && pics.length < blocks.length && !blocks.some(function (b) { return b.type === "results"; })) {
+      var body = el("div", { "class": "split-body" }), media = el("div", { "class": "split-media" });
+      page.appendChild(el("div", { "class": "split" }, [body, media]));
       page.classList.add("has-split");
-      var pic = renderBlock(blocks[0]); if (pic) media.appendChild(pic);
-      blocks = blocks.slice(1); target = body;
+      pics.forEach(function (b) { var n = renderBlock(b); if (n) media.appendChild(n); });
+      blocks = blocks.filter(function (b) { return b.type !== "image"; }); target = body;
     }
     var firstText = true;
     blocks.forEach(function (b) {
