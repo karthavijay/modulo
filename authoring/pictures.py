@@ -11,6 +11,7 @@ be replaced in the editor with an uploaded photo at any time.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from pathlib import Path
@@ -90,22 +91,28 @@ async def draw_with_vera(course: dict, assets: Path, ledger, design: dict | None
     if not pipeline.FAKE and os.environ.get("ANTHROPIC_API_KEY"):
         about = {"course_title": course.get("title", ""), "summary": (design or {}).get("summary", "") or course.get("description", ""),
                  "audience": (design or {}).get("audience", "")}
-        for start in range(0, len(todo), BATCH):
-            chunk = todo[start:start + BATCH]
-            if progress:
-                progress(f"Vera is drawing pictures {start + 1} to {start + len(chunk)} of {len(todo)}")
+        chunks = [todo[s:s + BATCH] for s in range(0, len(todo), BATCH)]
+        if progress:
+            progress(f"Vera is drawing {len(todo)} pictures")
+
+        async def plan(n: int, chunk: list) -> dict:
             items = [{"block_id": b["id"], "page_title": p.get("title", ""), "what_to_show": b.get("description", ""), "alt": b.get("alt", "")}
                      for p, b in chunk]
+            first = n * BATCH + 1
             try:
-                data = await pipeline.run_agent(
+                return await pipeline.run_agent(
                     "illustrator", pipeline.block("course", about) + "\n\n" + pipeline.block("pictures_needed", items)
                     + f"\n\nWrite one scene for each of these {len(items)} pictures, using each block_id exactly once.",
-                    SCHEMA, ledger, f"Vera plans pictures {start + 1} to {start + len(chunk)}")
-                for sp in data.get("pictures", []):
-                    if isinstance(sp, dict) and sp.get("block_id"):
-                        specs[sp["block_id"]] = sp
+                    SCHEMA, ledger, f"Vera plans pictures {first} to {first + len(chunk) - 1}")
             except Exception:  # noqa: BLE001  a picture problem must never stop the course build
                 log.warning("Vera could not plan pictures; using the free drawings instead", exc_info=True)
+                return {}
+
+        # all batches at once, so a long course takes about as long as a short one
+        for data in await asyncio.gather(*(plan(n, c) for n, c in enumerate(chunks))):
+            for sp in (data or {}).get("pictures", []):
+                if isinstance(sp, dict) and sp.get("block_id"):
+                    specs[sp["block_id"]] = sp
     for _, b in todo:
         sp = specs.get(b["id"])
         if sp:
