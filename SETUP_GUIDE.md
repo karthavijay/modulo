@@ -32,6 +32,7 @@ Nothing expensive happens until you approve. The storyboard step is the part tha
 | Lars, LMS and SCORM Administrator | Production pack | Publishing settings, tracking tests and LMS launch checklist |
 | Nia, Learning Analyst | Production pack | How to measure whether the course worked, with a survey and 90-day plan |
 | Paige, Project Manager | Production pack, last | Project plan, schedule, open items and risks, ready for the client |
+| Cleo, Marketing Manager | Marketing page, any time | Posts about Modulo for your LinkedIn (and X, if you switch it on), waiting for your OK |
 
 The production pack is documents only. No voice is recorded, no images are generated and nothing is uploaded to an LMS. Those could be connected later (for example ElevenLabs for voice, an image service for Vera's prompts, SCORM Cloud for Lars) once you decide you want them.
 
@@ -132,6 +133,18 @@ The **Approve** and **Request changes** buttons in your emails keep working with
 ## Several courses at once, and alerts
 
 The team works on up to three courses at the same time (one at a time on the cheaper Starter plan). If Render restarts the service, the work carries on from the last finished step by itself. You get an email if a step fails, if a step runs for more than three hours, or if the service is interrupted three times on the same step (it then stops, so you never pay for the same work over and over; press **Try again** when ready).
+
+## Marketing: Cleo posts on LinkedIn for you
+
+Cleo writes short posts about Modulo for your LinkedIn profile. Open **Marketing** at the top of the dashboard.
+
+- **Ask Cleo for posts**: optionally say what they should be about, then press **Write drafts**. Every Monday morning Cleo also writes the week's posts automatically and emails you (you can switch this off in Settings).
+- Each draft has **Approve and post** (goes out now), **Schedule** (pick a date and time), **Edit** and **Discard**. Nothing goes out until an Admin presses one of these.
+- **Auto-post** (in Settings, off to start with): Cleo's Monday posts are scheduled by themselves without your review. You still get an email and can edit or cancel each one until it goes out. Only switch it on once you're happy with Cleo's drafts, since posts appear publicly under your name.
+
+**Connecting LinkedIn (once, about 10 minutes, free).** The Marketing page shows the steps with the exact link to paste. In short: create a free app at linkedin.com/developers, add the products **Share on LinkedIn** and **Sign In with LinkedIn using OpenID Connect**, paste the redirect link from the Marketing page, copy the app's two keys into Render as `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`, then press **Connect LinkedIn**. LinkedIn asks you to sign in again every 60 days; Modulo emails you a week before.
+
+Posts go on your personal profile. Posting as a Company Page needs a separate LinkedIn review and can be added later. **X (Twitter)** is built in but switched off: X charges per post (about 1.5 cents, 20 cents with a link) from credit you add on X. Adding `X_CLIENT_ID` and `X_CLIENT_SECRET` in Render switches it on.
 
 ## Backups
 

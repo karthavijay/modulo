@@ -9,6 +9,7 @@
   /builder/<id>     the course builder: edit the course, preview it, download SCORM (see authoring/routes.py)
   /play/<id>/<t>/   the built course, playable in a browser
   /track/<code>     the client's private tracking page (see tracking.py)
+  /marketing        Cleo's social posts for LinkedIn and X: drafts, approve, schedule (see marketing.py)
   /health           for Render's health check
 """
 
@@ -41,6 +42,7 @@ import db
 import chat
 import emailer
 import jobs
+import marketing
 import tracking
 from authoring import routes as builder_routes
 
@@ -272,6 +274,7 @@ def nav(request: Request | None) -> str:
     items = [("/dashboard", "Courses", ("/dashboard", "/review", "/course-files", "/builder"))]
     if auth.can(u, "designer"):
         items.append(("/team", "Talk to the team", ("/team",)))
+        items.append(("/marketing", "Marketing", ("/marketing",)))
     if auth.can(u, "admin"):
         items += [("/admin/team", "Team members", ("/admin/team",)), ("/admin/system", "System", ("/admin/system",))]
     links = "".join(f"<a href='{href}'{' class=on aria-current=page' if path.startswith(pre) else ''}>{label}</a>"
@@ -996,6 +999,7 @@ async def lifespan(_app):
     # and add any course folders on the disk that the database doesn't know yet. Nothing is deleted.
     await asyncio.to_thread(db.init)
     await asyncio.to_thread(db.copy_sqlite_into_postgres)
+    await asyncio.to_thread(marketing.init)
     added = await asyncio.to_thread(jobs.import_from_disk)
     log.info("Database: %s. %d courses in it (%d just brought over from the disk).", db.kind(),
              len(await asyncio.to_thread(jobs.all_jobs)), added)
@@ -1031,7 +1035,8 @@ async def lifespan(_app):
             f"<p>Your courses are safe; this only means there is no fresh backup copy. It tries again in a few hours. "
             f"See <a href='{jobs.public_url()}/admin/system'>the System page</a>.</p>"))
 
-    tasks = [asyncio.create_task(jobs.worker()), asyncio.create_task(backup.nightly(backup_failed))]
+    tasks = [asyncio.create_task(jobs.worker()), asyncio.create_task(backup.nightly(backup_failed)),
+             asyncio.create_task(marketing.scheduler())]
     yield
     for t in tasks:
         t.cancel()
@@ -1058,6 +1063,7 @@ app = Starlette(
         *builder_routes.ROUTES,
         *accounts.ROUTES,
         *tracking.ROUTES,
+        *marketing.ROUTES,
         Mount("/", StaticFiles(directory=HERE / "public", html=True)),
     ],
     lifespan=lifespan,

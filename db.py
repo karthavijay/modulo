@@ -245,8 +245,13 @@ def copy_sqlite_into_postgres() -> int:
 def export_all() -> dict:
     """Everything in the database except sign-in sessions, for the nightly backup."""
     out = {}
-    for table in ("jobs", "users", "meta"):
-        rows = query(f"SELECT * FROM {table}")
+    for table in ("jobs", "users", "meta", "posts"):
+        try:
+            rows = query(f"SELECT * FROM {table}")
+        except Exception:  # noqa: BLE001  posts table not made yet
+            continue
+        if table == "meta":  # sign-in tokens for LinkedIn and X stay out of backup files
+            rows = [r for r in rows if not r["key"].startswith(("social_token_", "oauth_state_"))]
         if table == "jobs":
             for r in rows:
                 r["data"] = json.loads(r["data"])

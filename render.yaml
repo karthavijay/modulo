@@ -45,5 +45,9 @@ services:
         value: /var/data
       - key: CLAUDE_CONFIG_DIR
         value: /var/data/claude-config
+      - key: LINKEDIN_CLIENT_ID    # optional, for Cleo (Marketing): from your LinkedIn developer app, see the Marketing page
+        sync: false
+      - key: LINKEDIN_CLIENT_SECRET
+        sync: false
       - key: MAX_BRIEFS_PER_DAY    # safety limit on new briefs per 24 hours
         value: "10"
